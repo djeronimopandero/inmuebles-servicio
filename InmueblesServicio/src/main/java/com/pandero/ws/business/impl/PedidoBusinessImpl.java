@@ -95,6 +95,12 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 		
 		return resultado;
 	}
+	
+	public ResultadoBean eliminarPedido(String nroPedido, String usuarioSAFId) throws Exception{
+		ResultadoBean resultado = new ResultadoBean();
+		
+		return resultado;
+	}
 
 	@Override
 	public void generarOrdenIrrevocablePedido(String pedidoId) throws Exception {
