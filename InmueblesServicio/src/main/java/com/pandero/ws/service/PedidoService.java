@@ -8,9 +8,10 @@ import com.pandero.ws.bean.Inversion;
 
 public interface PedidoService {
 
-	public String crearPedidoCaspio(String asociadoId);
-	public String agregarContratoPedidoCaspio(String pedidoId, String contratoId);
+	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception;
+	public String agregarContratoPedidoCaspio(String pedidoId, String contratoId) throws Exception;
+	public String actualizarEstadoPedidoCaspio(String nroPedido, String estadoPedido) throws Exception;
 	
-	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId);
-	public List<Inversion> obtenerInversionesxPedidoCaspio(String pedidoId);
+	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId) throws Exception;
+	public List<Inversion> obtenerInversionesxPedidoCaspio(String pedidoId) throws Exception;
 }

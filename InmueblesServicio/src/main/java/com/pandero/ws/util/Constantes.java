@@ -4,10 +4,12 @@ public class Constantes {
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
+		public final static String REQUEST_VACIO = "{}";
 	}
 	
 	public class Pedido {
 		public final static String ESTADO_EMITIDO = "EMITIDO";
+		public final static String ESTADO_ANULADO = "ANULADO";
 	}
 	
 	public class Producto {

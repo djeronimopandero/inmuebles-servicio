@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class ServiceRestTemplate {
 	
-	private static String caspioKey = "8fWbewLcTQwM0C_Tne114dHSDpQD2loD9pvfPDEDtA3fxU_qOvvSuhk6Jrkhp9CUG7q5mnwdNvN6T_ddIfLL50Ji7PJbr_XIv3i2cXFtYaqb_MH24iUMa9_Jk3EecwN3gM4UFvScbRGUQgdNjNvhtwgArQ7mvkx4mVQ31CQPm6-sLWPZTMrI4Cv5i0OQzO6u4BK0hBYHrkA5tlxiyfF4NlLch2Gy1VjF9EEBHAX7DW1OmKiqqYo6Wm6YC7rYsDhTId_gi-i-1leHMLWXRR7lmBRRH-G3_JMUVAA0SvHpDIhsfdp-xp12xfFOswXbCQdA3fu68_tl2Hz_ih7BUehcKUFE0GUcS-y5g6sZL91x_WRBam3v";
+	private static String caspioKey = "CFMbWgWKJowsdY84rfKAJlvU7If97SeQx74a7mzyhkOSPmF9uoQB1CfwqnfF4387PPtxSW3lx3hLscVcfyuIZRjKaqkGMwQP71X_CfhL-vA_NcwHRfQfXV2JSQ7_tdLI1lhWE1-qzQSNbL54XT6d1XxDmFfJ2e8kFB8Owe6ATj40Bu8ByDjGMABqklTl1HqSojzmiClDiyQekzJLMh5v2S4_P5D1MZ4MSRH4lc3XKc5I6SHZUl8HzBkj6HBJULRcYRGmxcpyJV_qNKt_yOosoYJtKG7-2uwQPpIXuwn79LWol_GuQ0T_Zdd7cj9meqvZog13jHolSvN_2aKnvGlRPgy3L57CCFDdjfABx2lRbq4dM8d4";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceRestTemplate.class);
 	
@@ -39,34 +39,53 @@ public class ServiceRestTemplate {
 	    return requestHeaders;
 	}
 		
-	public static <T, E> T executeMethod(RestTemplate restTemplate, String url, Class<T> responseType, HttpMethod method, E value){
+	public static <T, E> T executeMethod(RestTemplate restTemplate, String url, Class<T> responseType, HttpMethod method, 
+			E value, E parameters){
 		LOG.info("SERVICE URL ==> "+url);
-		String request = JsonUtil.toJson(value);		
-		LOG.info("JSON Resquest:: "+request);	
+		String request = JsonUtil.toJson(value);
+		LOG.info("JSON Params:: "+parameters);
+		LOG.info("JSON Resquest:: "+request);
 		
-		HttpEntity<E> requestEntity = new HttpEntity(value, getHeaders());
+		HttpEntity<E> requestEntity = null;
+		if(value==null){
+			Map<String, String> valueEmpty = new HashMap<String, String>();
+			requestEntity = new HttpEntity(valueEmpty, getHeaders());
+		}else{
+			requestEntity = new HttpEntity(value, getHeaders());
+		}
+		
 		MappingJackson2HttpMessageConverter jsonConverter=new MappingJackson2HttpMessageConverter();
 		restTemplate.getMessageConverters().add(jsonConverter);
 		
-		ResponseEntity<T> response = null;
-		if(value instanceof String){
-			response = restTemplate.exchange(url, method, requestEntity, responseType, value);
-		}else{
+		ResponseEntity<T> response = null;	
+		if(parameters==null){
 			response = restTemplate.exchange(url, method, requestEntity, responseType, new Object[0]);
+		}else{
+			response = restTemplate.exchange(url, method, requestEntity, responseType, parameters);
 		}
-		LOG.info("JSON Response:: " + response == null ? "null" : JsonUtil.toJson(response.getBody()));
+		LOG.info("JSON Response:: " + response == null ? "JSON Response:: null" : JsonUtil.toJson(response.getBody()));
 		
 	    return response.getBody();
 	}
 		
-	public static <T, E> T postForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value)
+	public static <T, E> T postForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
 	    throws JsonParseException, JsonMappingException, IOException {
-	    return executeMethod(restTemplate, url, responseType, HttpMethod.POST, value);
+	    return executeMethod(restTemplate, url, responseType, HttpMethod.POST, value, parameters);
 	}
 	
-	public static <T, E> T getForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value)
+	public static <T, E> T getForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
 		    throws JsonParseException, JsonMappingException, IOException {
-		    return executeMethod(restTemplate, url, responseType, HttpMethod.GET, value);
+		    return executeMethod(restTemplate, url, responseType, HttpMethod.GET, value, parameters);
+	}
+	
+	public static <T, E> T putForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+		    throws JsonParseException, JsonMappingException, IOException {
+		    return executeMethod(restTemplate, url, responseType, HttpMethod.PUT, value, parameters);
+	}
+	
+	public static <T, E> T deleteForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+		    throws JsonParseException, JsonMappingException, IOException {
+		    return executeMethod(restTemplate, url, responseType, HttpMethod.DELETE, value, parameters);
 	}
 		
 }

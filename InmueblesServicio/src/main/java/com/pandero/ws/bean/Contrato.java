@@ -7,6 +7,9 @@ public class Contrato{
 	private String NroContrato;
 	private Double MontoCertificado;
 	private String FechaAdjudicacion;
+	private Integer AsociadoId;
+	private String SituacionContrato;
+	
 	public String getNroContrato() {
 		return NroContrato;
 	}
@@ -30,6 +33,18 @@ public class Contrato{
 	}
 	public void setPedidoId(Integer pedidoId) {
 		PedidoId = pedidoId;
+	}
+	public Integer getAsociadoId() {
+		return AsociadoId;
+	}
+	public void setAsociadoId(Integer asociadoId) {
+		AsociadoId = asociadoId;
+	}
+	public String getSituacionContrato() {
+		return SituacionContrato;
+	}
+	public void setSituacionContrato(String situacionContrato) {
+		SituacionContrato = situacionContrato;
 	}	
 	
 }

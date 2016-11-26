@@ -16,12 +16,13 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
+import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.MailService;
-import com.pandero.ws.service.PedidoInversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
@@ -42,7 +43,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	@Autowired
 	PedidoDao pedidoDao;
 	@Autowired
-	PedidoInversionService pedidoInversionService;
+	ContratoDao contratoDao;
 	@Autowired
 	PedidoService pedidoService;
 	@Autowired
@@ -52,32 +53,36 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 
 	@Override
 	public ResultadoBean registrarNuevoPedido(String nroContrato,
-			String usuarioId) {
-		// Crear pedido y contrato-pedido en SAF
-		ResultadoBean pedidoSAF = null;
-		try {
-			pedidoSAF = pedidoDao.crearPedidoSAF(nroContrato, usuarioId);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+			String usuarioId) throws Exception{
+		ResultadoBean resultado = new ResultadoBean();
+		// Obtener la situacion del contrato
+		Contrato contrato = contratoDao.obtenerContrato(nroContrato);
 		
-		// Si se creo correctamente el pedido en SAF
-		if(pedidoSAF!=null && !pedidoSAF.getResultado().equals("")){
-			// Crear pedido en Caspio
+		// Si no esta adjudicado
+		if(!MetodoUtil.esSituacionAdjudicado(contrato.getSituacionContrato())){
+			// Actualizar estado del contrato a no adjudicado en Caspio
 			
-			
-			// Crear contrato-pedido en Caspio
-			
-		}else{
-			pedidoSAF = new ResultadoBean();
-			return pedidoSAF;
+			// Enviar mensaje contrato no adjudicado
+			resultado.setMensajeError("El contrato no se encuentra adjudicado");
+		}else{		
+			// Crear pedido y contrato-pedido en SAF
+			ResultadoBean pedidoSAF = pedidoDao.crearPedidoSAF(nroContrato, usuarioId);
+
+			if(!pedidoSAF.getMensajeError().equals("")){
+				resultado = pedidoSAF;
+			}else{
+				// Crear pedido en Caspio
+				
+				
+				// Crear contrato-pedido en Caspio
+			}
 		}
 		
 		return null;
 	}
 
 	@Override
-	public void generarOrdenIrrevocablePedido(String pedidoId) {
+	public void generarOrdenIrrevocablePedido(String pedidoId) throws Exception {
 		LOG.info("generarOrdenIrrevocablePedido");
 		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado.docx";
 		try{
@@ -97,7 +102,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 System.out.println("nroContrato: "+nroContrato);
 				 				 
 				 // Obtener datos del o los asociados
-				 List<Asociado> listaAsociados=pedidoDao.obtenerAsociadosxContrato(nroContrato);
+				 List<Asociado> listaAsociados=pedidoDao.obtenerAsociadosxContratoSAF(nroContrato);
 				 
 				 // Obtener inversiones del pedido
 				 List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);

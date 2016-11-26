@@ -29,23 +29,17 @@ public class PedidoInversionServiceImpl implements PedidoInversionService {
 	@Value("${url.service.table.pedidoInversion}")
 	private String tablePedidoInversionURL;
 
-	public Inversion obtenerDatosInversion(String inversionId) {
+	public Inversion obtenerInversion(String inversionId) throws Exception {
 		Inversion pedidoInversion = null;
-		try {
-			String serviceWhere = "{\"where\":\"InversionId=" + inversionId
-					+ "\"}";
-			String obtenerDatosInversionURL = tablePedidoInversionURL
-					+ Constantes.Service.URL_WHERE;
-			System.out.println("obtenerDatosInversionURL:: "
-					+ obtenerDatosInversionURL);
+		String serviceWhere = "{\"where\":\"InversionId=" + inversionId
+				+ "\"}";
+		String obtenerDatosInversionURL = tablePedidoInversionURL
+				+ Constantes.Service.URL_WHERE;
+		System.out.println("obtenerDatosInversionURL:: "
+				+ obtenerDatosInversionURL);
 
-			Object response = ServiceRestTemplate.getForObject(restTemplate,
-					obtenerDatosInversionURL, Object.class, serviceWhere);
-
-		} catch (Exception e) {
-			LOG.error("ERROR obtenerDatosInversion::", e);
-			e.printStackTrace();
-		}
+		Object response = ServiceRestTemplate.getForObject(restTemplate,
+				obtenerDatosInversionURL, Object.class, null, serviceWhere);
 
 		return pedidoInversion;
 	}

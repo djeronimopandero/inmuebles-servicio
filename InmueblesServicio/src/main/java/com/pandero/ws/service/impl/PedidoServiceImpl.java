@@ -18,6 +18,7 @@ import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
+import com.pandero.ws.util.MetodoUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 
 @Service
@@ -37,39 +38,50 @@ public class PedidoServiceImpl implements PedidoService{
 	private String viewTablaDetalleInversionURL;
 		
 	@Override
-	public String crearPedidoCaspio(String asociadoId) {
-		try{
-			Map<String, String> request = new HashMap<String, String>();
-			request.put("AsociadoId", asociadoId);
-			request.put("Fecha", "2016-11-21");
-			request.put("Estado", "Prueba");
-			request.put("Producto", "C5 - INMUEBLES");			
-	        Object response=ServiceRestTemplate.postForObject(restTemplate,tablePedidoURL,Object.class,request);	
-	        
-		}catch(Exception e){
-			LOG.error("ERROR crearPedidoCaspio::",e);
-			e.printStackTrace();
-		}
+	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception{
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("AsociadoId", asociadoId);
+		request.put("Fecha", MetodoUtil.getFechaActualYYYYMMDD());
+		request.put("Estado", Constantes.Pedido.ESTADO_EMITIDO);
+		request.put("Producto", Constantes.Producto.PRODUCTO_INMUEBLES);			
+        ServiceRestTemplate.postForObject(restTemplate,tablePedidoURL,Object.class,request,null);	
 		return null;
 	}
 
 	@Override
-	public String agregarContratoPedidoCaspio(String pedidoId, String contratoId) {
-		// TODO Auto-generated method stub
+	public String agregarContratoPedidoCaspio(String pedidoId, String contratoId) throws Exception{
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("PedidoId", pedidoId);
+		request.put("ContratoId", contratoId);
+		request.put("Estado", "1");			
+        ServiceRestTemplate.postForObject(restTemplate,viewTablaPedidoContratoURL,Object.class,request,null);	
+		return null;
+	}
+	
+	@Override
+	public String actualizarEstadoPedidoCaspio(String nroPedido,
+			String estadoPedido) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("Estado", estadoPedido);		
+		
+		String serviceWhere = "{\"where\":\"NroPedido='" + nroPedido + "'\"}";	
+		String actualizarPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 
 	@Override
-	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId) {
+	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId) throws Exception{
 		List<Contrato> listaContratos = null;		
-		try{
-			String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
-			String obtenerContratosxPedidoURL = viewTablaPedidoContratoURL+Constantes.Service.URL_WHERE;
-			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerContratosxPedidoURL,Object.class,serviceWhere);
-	     	String response = JsonUtil.toJson(jsonResult);	     	
-	        if(response!=null && !response.isEmpty()){
-	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
+		String obtenerContratosxPedidoURL = viewTablaPedidoContratoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
 	        if(responseMap!=null){
 	        	Object jsonResponse = responseMap.get("Result");
 	        	if(jsonResponse!=null){        		
@@ -86,48 +98,38 @@ public class PedidoServiceImpl implements PedidoService{
 	        	}
 	        }
         }
-	        
-		}catch(Exception e){
-			LOG.error("ERROR obtenerDatosInversion::",e);
-			e.printStackTrace();
-		}
         
 		return listaContratos;
 	}
 
 	@Override
-	public List<Inversion> obtenerInversionesxPedidoCaspio(String pedidoId) {
+	public List<Inversion> obtenerInversionesxPedidoCaspio(String pedidoId) throws Exception{
 		List<Inversion> listaInversiones = null;
-		try{
-			String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";		
-			String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
-			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerInversionesxPedidoURL,Object.class,serviceWhere);
-	     	String response = JsonUtil.toJson(jsonResult);	     	
-	        if(response!=null && !response.isEmpty()){
-		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
-		        if(responseMap!=null){
-		        	Object jsonResponse = responseMap.get("Result");
-		        	if(jsonResponse!=null){        		
-		        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-		        		if(mapInversiones!=null && mapInversiones.size()>0){
-		        			listaInversiones = new ArrayList<Inversion>();
-		        			for(Object bean : mapInversiones){
-		        				String beanString = JsonUtil.toJson(bean);
-		        				Inversion inversion =  JsonUtil.fromJson(beanString, Inversion.class);
-		        				listaInversiones.add(inversion);			
-		        			}
-		        			System.out.println("listaInversiones:: "+listaInversiones.size());
-		        		}        		
-		        	}
-		        }
-		    }	        
-		}catch(Exception e){
-			LOG.error("ERROR obtenerDatosInversion::",e);
-			e.printStackTrace();
-		}
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";		
+		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapInversiones!=null && mapInversiones.size()>0){
+	        			listaInversiones = new ArrayList<Inversion>();
+	        			for(Object bean : mapInversiones){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				Inversion inversion =  JsonUtil.fromJson(beanString, Inversion.class);
+	        				listaInversiones.add(inversion);			
+	        			}
+	        			System.out.println("listaInversiones:: "+listaInversiones.size());
+	        		}        		
+	        	}
+	        }
+	    }
 	    
 		return listaInversiones;
 	}
-
+	
 }

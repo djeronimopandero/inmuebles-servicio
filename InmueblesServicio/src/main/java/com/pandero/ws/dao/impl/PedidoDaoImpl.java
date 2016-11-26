@@ -44,13 +44,12 @@ public class PedidoDaoImpl implements PedidoDao {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_Inmb_RegistrarNuevoPedido");
 		call.withoutProcedureColumnMetaDataAccess();	
-		
-		
+				
 		call.addDeclaredParameter(new SqlParameter("@ContratoNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));		
-		call.addDeclaredParameter(new SqlOutParameter("@PedidoID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlOutParameter("@NumeroPedido", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
-		
+				
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
         parameters.addValue("@ContratoNumero", nroContrato);
 		parameters.addValue("@PedidoFecha", null);
@@ -58,12 +57,12 @@ public class PedidoDaoImpl implements PedidoDao {
 				
 		Map resultadoSP = call.execute(parameters);
 		String mensajeError = resultadoSP.get("@MensajeError")!=null?(String)resultadoSP.get("@MensajeError"):"";
-		Integer pedidoId = resultadoSP.get("@PedidoID")!=null?(Integer)resultadoSP.get("@PedidoID"):null;
-		System.out.println("RESULTADOS:: "+pedidoId+" - "+mensajeError);
+		String NumeroPedido = resultadoSP.get("@NumeroPedido")!=null?(String)resultadoSP.get("@NumeroPedido"):"";
+		System.out.println("RESULTADOS:: "+NumeroPedido+" - "+mensajeError);
 		
 		resultado = new ResultadoBean();		
 		resultado.setMensajeError(mensajeError);
-		resultado.setResultado(pedidoId);
+		resultado.setResultado(NumeroPedido);
 		
 		return resultado;
 	}
@@ -91,12 +90,6 @@ public class PedidoDaoImpl implements PedidoDao {
 		resultado.setMensajeError(mensajeError);
 		
 		return resultado;
-	}
-
-	@Override
-	public String actualizarEstadoPedidoSAF(String nroContrato, String usuarioId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -140,7 +133,7 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.execute(parameters);
 	}
 	
-	public List<Asociado> obtenerAsociadosxContrato(String nroContrato){
+	public List<Asociado> obtenerAsociadosxContratoSAF(String nroContrato){
 		String query = 	"select PersonaNombreCompleto,ListaNombreCorto as TipoDocumento,PersonaCodigoDocumento, "+
 				"(select DireccionDetalle+' - '+y.UbigeoNombre "+
 				"from PER_Direccion x inner join GEN_Ubigeo y "+

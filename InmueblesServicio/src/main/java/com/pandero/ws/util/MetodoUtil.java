@@ -18,7 +18,7 @@ public class MetodoUtil {
 	public static String getFechaActualYYYYMMDD(){
 		String fecha = null;
 		Date today = new Date();
-		fecha = new SimpleDateFormat("yyyy-MM-DD").format(today);
+		fecha = new SimpleDateFormat("yyyy-MM-dd").format(today);
 		return fecha;
 	}
 	
@@ -95,4 +95,12 @@ public class MetodoUtil {
 		return sumaInversiones;
 	}
 	
+	public static boolean esSituacionAdjudicado(String situacionContrato){
+		boolean resultado = false;
+		int situacionContratoId = Integer.parseInt(situacionContrato);
+		if(situacionContratoId>9 && situacionContratoId<100){
+			resultado = true;
+		}
+		return resultado;
+	}
 }

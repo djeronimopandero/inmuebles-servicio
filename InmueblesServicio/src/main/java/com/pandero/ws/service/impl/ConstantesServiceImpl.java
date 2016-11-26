@@ -36,7 +36,7 @@ public class ConstantesServiceImpl implements ConstanteService {
 		try{
 			Map<String, String> request = new HashMap<String, String>();
 			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,viewListaTiposDocumentoURL,Object.class,request);
+	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,viewListaTiposDocumentoURL,Object.class,request,null);
 	     	String response = JsonUtil.toJson(jsonResult);	     	
 	        if(response!=null && !response.isEmpty()){
 		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
