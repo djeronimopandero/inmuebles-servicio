@@ -15,6 +15,14 @@ public class MetodoUtil {
 		return today;
 	}
 	
+	public static String formatearFechaYYYYMMDD(Date fecha){
+		String fechaText = null;
+		if(fecha!=null){
+			fechaText = new SimpleDateFormat("yyyy-MM-dd").format(fecha);
+		}
+		return fechaText;
+	}
+
 	public static String getFechaActualYYYYMMDD(){
 		String fecha = null;
 		Date today = new Date();

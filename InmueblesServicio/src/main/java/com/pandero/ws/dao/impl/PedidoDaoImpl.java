@@ -56,12 +56,12 @@ public class PedidoDaoImpl implements PedidoDao {
 				
 		Map resultadoSP = call.execute(parameters);
 		String mensajeError = resultadoSP.get("@MensajeError")!=null?(String)resultadoSP.get("@MensajeError"):"";
-		String NumeroPedido = resultadoSP.get("@NumeroPedido")!=null?(String)resultadoSP.get("@NumeroPedido"):"";
-		System.out.println("RESULTADOS:: "+NumeroPedido+" - "+mensajeError);
+		String numeroPedido = resultadoSP.get("@NumeroPedido")!=null?(String)resultadoSP.get("@NumeroPedido"):"";
+		System.out.println("RESULTADOS:: "+numeroPedido+" - "+mensajeError);
 		
 		resultado = new ResultadoBean();		
 		resultado.setMensajeError(mensajeError);
-		resultado.setResultado(NumeroPedido);
+		resultado.setResultado(numeroPedido);
 		
 		return resultado;
 	}

@@ -40,6 +40,11 @@ public class Constantes {
 		public final static String CONSTRUCCION_NOM="CONSTRUCCIÓN, AMPLIACIÓN Y/O REFACCIÓN DE UN BIEN INMUEBLE (1)";
 	}
 	
+	public class Contrato{
+		public final static String SITUACION_ADJUDICADO="ADJUDICADO";
+		public final static String SITUACION_NO_ADJUDICADO="NO ADJUDICADO";
+	}
+	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	

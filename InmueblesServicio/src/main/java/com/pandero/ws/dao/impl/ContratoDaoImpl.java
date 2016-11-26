@@ -30,7 +30,7 @@ public class ContratoDaoImpl implements ContratoDao {
 	}
 
 	@Override
-	public Contrato obtenerContrato(String nroContrato) throws Exception {
+	public Contrato obtenerContratoSAF(String nroContrato) throws Exception {
 			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID "+
 					"from FOC_Contrato where ContratoNumero='"+nroContrato+"'";
 							

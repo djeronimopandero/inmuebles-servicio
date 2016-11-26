@@ -4,5 +4,5 @@ import com.pandero.ws.bean.Contrato;
 
 public interface ContratoDao {
 
-	public Contrato obtenerContrato(String nroContrato) throws Exception;
+	public Contrato obtenerContratoSAF(String nroContrato) throws Exception;
 }

@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -130,6 +131,33 @@ public class PedidoServiceImpl implements PedidoService{
 	    }
 	    
 		return listaInversiones;
+	}
+
+	@Override
+	public Pedido obtenerPedidoCaspio(String nroPedido) throws Exception {
+		Pedido pedido = null;
+		String serviceWhere = "{\"where\":\"NroPedido=" + nroPedido + "\"}";	
+		String obtenerPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapPedidos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapPedidos!=null && mapPedidos.size()>0){
+	        			for(Object bean : mapPedidos){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				pedido =  JsonUtil.fromJson(beanString, Pedido.class);
+	        			}
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return pedido;
 	}
 	
 }

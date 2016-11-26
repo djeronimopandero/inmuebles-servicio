@@ -1,8 +1,7 @@
 package com.pandero.ws.bean;
 
-import java.util.Date;
-
 public class Contrato{
+	private Integer ContratoId;
 	private Integer PedidoId;
 	private String NroContrato;
 	private Double MontoCertificado;
@@ -45,6 +44,12 @@ public class Contrato{
 	}
 	public void setSituacionContrato(String situacionContrato) {
 		SituacionContrato = situacionContrato;
+	}
+	public Integer getContratoId() {
+		return ContratoId;
+	}
+	public void setContratoId(Integer contratoId) {
+		ContratoId = contratoId;
 	}	
 	
 }

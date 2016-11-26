@@ -16,11 +16,13 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
+import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
@@ -46,34 +48,46 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	@Autowired
 	PedidoService pedidoService;
 	@Autowired
+	ContratoService contratoService;
+	@Autowired
 	ConstanteService constanteService;
 	@Autowired
 	MailService mailService;
 
 	@Override
-	public ResultadoBean registrarNuevoPedido(String nroContrato,
-			String usuarioId) throws Exception{
+	public ResultadoBean registrarNuevoPedido(String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
-		Contrato contrato = contratoDao.obtenerContrato(nroContrato);
+		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
 		
 		// Si no esta adjudicado
 		if(!MetodoUtil.esSituacionAdjudicado(contrato.getSituacionContrato())){
 			// Actualizar estado del contrato a no adjudicado en Caspio
+			contratoService.actualizarEstadoContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
 			
 			// Enviar mensaje contrato no adjudicado
 			resultado.setMensajeError("El contrato no se encuentra adjudicado");
 		}else{		
 			// Crear pedido y contrato-pedido en SAF
-			ResultadoBean pedidoSAF = pedidoDao.crearPedidoSAF(nroContrato, usuarioId);
+			ResultadoBean pedidoSAF = pedidoDao.crearPedidoSAF(nroContrato, usuarioSAFId);
 
 			if(!pedidoSAF.getMensajeError().equals("")){
 				resultado = pedidoSAF;
 			}else{
+				String nroPedido = String.valueOf(pedidoSAF.getResultado());
+				// Obtener ContratoCaspio
+				Contrato contratoCaspio = contratoService.obtenerContratoCaspio(nroContrato);
+				String contratoId = String.valueOf(contratoCaspio.getAsociadoId().intValue());
+				String asociadoId = String.valueOf(contratoCaspio.getContratoId().intValue());
 				// Crear pedido en Caspio
+				pedidoService.crearPedidoCaspio(nroPedido, asociadoId);
 				
+				// Obtener PedidoCaspio
+				Pedido pedidoCaspio = pedidoService.obtenerPedidoCaspio(nroPedido);
+				String pedidoId = String.valueOf(pedidoCaspio.getPedidoId().intValue());
 				
 				// Crear contrato-pedido en Caspio
+				pedidoService.agregarContratoPedidoCaspio(pedidoId, contratoId);
 			}
 		}
 		
