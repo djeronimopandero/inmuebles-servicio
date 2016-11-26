@@ -67,23 +67,23 @@ public class PedidoDaoImpl implements PedidoDao {
 	}
 
 	@Override
-	public ResultadoBean eliminarPedidoSAF(String pedidoId, String usuarioId) throws Exception {
+	public ResultadoBean eliminarPedidoSAF(String nroPedido, String usuarioId) throws Exception {
 		ResultadoBean resultado = null;
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarPedido");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@PedidoID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@NumeroPedido", Types.INTEGER));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));			
 		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
-        parameters.addValue("@PedidoID", pedidoId);
+        parameters.addValue("@NumeroPedido", nroPedido);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		Map resultadoSP = call.execute(parameters);
 		String mensajeError = resultadoSP.get("@MensajeError")!=null?(String)resultadoSP.get("@MensajeError"):"";
-		System.out.println("RESULTADOS:: "+pedidoId+" - "+mensajeError);
+		System.out.println("RESULTADOS:: "+nroPedido+" - "+mensajeError);
 		
 		resultado = new ResultadoBean();		
 		resultado.setMensajeError(mensajeError);

@@ -16,6 +16,7 @@ import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.MailService;
+import com.pandero.ws.util.Constantes;
 
 @Controller
 @RequestMapping("/pedido")
@@ -28,10 +29,10 @@ public class PedidoController {
 	@Autowired
 	PedidoBusiness pedidoBusiness;
 	
-	@RequestMapping(value = "/crearPedidoSAF", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/crearPedido", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> crearPedidoSAF(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO crearPedidoSAF");
+	public Map<String, Object> crearPedido(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO crearPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", error="";
@@ -39,16 +40,15 @@ public class PedidoController {
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			ResultadoBean resultado = pedidoDao.crearPedidoSAF(nroContrato, usuarioId);
+			ResultadoBean resultado = pedidoBusiness.registrarNuevoPedido(nroContrato, usuarioId);
 			error = resultado.getMensajeError();
-			result = resultado.getResultado()==null?"":String.valueOf((Integer)resultado.getResultado());
+			result = resultado.getResultado()==null?"":String.valueOf(resultado.getResultado());
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/crearPedidoSAF:: ",e);
-			error = "Se produjo un error en la base de datos";
+			LOG.error("Error pedido/crearPedido:: ",e);
+			error = Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			e.printStackTrace();
-		}
-			
+		}			
 		response.put("result",result);
 		response.put("error",error);
 		System.out.println("RESPONSE: " +  response);	
@@ -57,10 +57,10 @@ public class PedidoController {
 	}
 	
 	
-	@RequestMapping(value = "/eliminarPedidoSAF", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/eliminarPedido", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> eliminarPedidoSAF(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO eliminarPedidoSAF");
+	public Map<String, Object> eliminarPedido(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO eliminarPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", error="";

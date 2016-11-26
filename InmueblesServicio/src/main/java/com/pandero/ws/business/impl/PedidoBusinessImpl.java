@@ -30,7 +30,7 @@ import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.MetodoUtil;
 
 @Component
-public class PedidoBusinessImpl implements PedidoBusiness{
+public abstract class PedidoBusinessImpl implements PedidoBusiness{
 
 	private static final Logger LOG = LoggerFactory.getLogger(PedidoBusinessImpl.class);
 	
@@ -88,10 +88,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				
 				// Crear contrato-pedido en Caspio
 				pedidoService.agregarContratoPedidoCaspio(pedidoId, contratoId);
+				
+				resultado.setResultado(pedidoId);
 			}
 		}
 		
-		return null;
+		return resultado;
 	}
 
 	@Override

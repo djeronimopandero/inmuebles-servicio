@@ -4,7 +4,8 @@ public class Constantes {
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
-		public final static String REQUEST_VACIO = "{}";
+		public final static String RESULTADO_EXITOSO = "1";
+		public final static String RESULTADO_ERROR_INESPERADO = "Se produjo un error inesperado";
 	}
 	
 	public class Pedido {
