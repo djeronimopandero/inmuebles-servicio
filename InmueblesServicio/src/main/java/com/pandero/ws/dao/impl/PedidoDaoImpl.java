@@ -3,7 +3,6 @@ package com.pandero.ws.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -143,7 +142,7 @@ public class PedidoDaoImpl implements PedidoDao {
 				"on d.ContratoID=c.ContratoID inner join PER_Persona a "+
 				"on d.PersonaID=a.PersonaID inner join GEN_Lista b "+
 				"on a.TipoDocumentoID=b.ListaID and ListaTipo='DOCUMENTO_IDENTIDAD' "+
-				"where c.ContratoNumero="+nroContrato;
+				"where c.ContratoNumero='"+nroContrato+"'";
 							
 		List<Asociado> listAsociados = this.jdbcTemplate.query(query, new AsociadoMapper());
 		

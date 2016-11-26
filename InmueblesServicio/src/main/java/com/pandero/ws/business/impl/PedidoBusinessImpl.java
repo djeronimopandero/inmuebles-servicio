@@ -16,7 +16,6 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
-import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
