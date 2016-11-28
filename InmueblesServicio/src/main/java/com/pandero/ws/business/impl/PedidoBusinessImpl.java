@@ -61,7 +61,8 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 	public ResultadoBean registrarNuevoPedido(String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
-		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
+//		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
+		Contrato contrato = null;
 		
 		// Si no esta adjudicado
 		if(!MetodoUtil.esSituacionAdjudicado(contrato.getSituacionContrato())){
@@ -132,7 +133,7 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 				// Anular las inversiones
 				if(listaInversiones!=null && listaInversiones.size()>0){
 					for(Inversion inversion : listaInversiones){
-						inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
+//						inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
 					}
 				}
 			}
@@ -141,6 +142,19 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 
+	public ResultadoBean agregarContratoPedido(String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+		ResultadoBean resultado = new ResultadoBean();
+		
+		return resultado;
+	}
+	
+	public ResultadoBean eliminarContratoPedido(String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+		ResultadoBean resultado = new ResultadoBean();
+		
+		return resultado;
+	}
+	
+	
 	@Override
 	public void generarOrdenIrrevocablePedido(String pedidoId) throws Exception {
 		LOG.info("generarOrdenIrrevocablePedido");

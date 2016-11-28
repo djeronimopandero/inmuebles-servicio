@@ -6,22 +6,20 @@
 	<bean id="runMeTask" class="com.pandero.ws.job.RunMeTask" />
 
 	<!-- Spring Quartz -->
-	<bean name="runMeJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.pandero.ws.job.RunMeJob" />
-		<property name="jobDataAsMap">
-		  <map>
-			<entry key="runMeTask" value-ref="runMeTask" />
-		  </map>
-		</property>
-	</bean>
-
-	<!--
+<!-- 	<bean name="runMeJob" class="org.springframework.scheduling.quartz.JobDetailBean"> -->
+<!-- 		<property name="jobClass" value="com.pandero.ws.job.RunMeJob" /> -->
+<!-- 		<property name="jobDataAsMap"> -->
+<!-- 		  <map> -->
+<!-- 			<entry key="runMeTask" value-ref="runMeTask" /> -->
+<!-- 		  </map> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
+	
 	<bean id="runMeJob"
             class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="runMeTask" />
-		<property name="targetMethod" value="printMe" />
+		<property name="targetMethod" value="sincronizarContratos" />
 	</bean>
-	-->
 
 	<!-- Simple Trigger, run every 5 seconds -->
 <!-- 	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean"> -->

@@ -7,28 +7,21 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.stereotype.Component;
 
 import com.pandero.ws.bean.Contrato;
-import com.pandero.ws.business.ContratoBusiness;
 
-@Controller
-@RequestMapping("runMeTask")
+//@Component
 public class RunMeTask {
 	
 	private static Logger LOGGER = LoggerFactory.getLogger(RunMeTask.class);
-	
-	@Autowired
-	private ContratoBusiness constroBusiness;
-	
+		
 	public void sincronizarContratos() {
 		LOGGER.info("###sincronizarPedidos execute "+new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()) );
 		
 		//1.-Obtener contratos con movimientos a la fecha actual del SAF
 		List<Contrato> listContratosSAF = null;
-	    listContratosSAF = constroBusiness.getListContratoAlDia();
+//	    listContratosSAF = constroBusiness.getListContratoAlDia();
 		
 		
 		if(null!=listContratosSAF){
