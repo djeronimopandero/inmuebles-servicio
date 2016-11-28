@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.pandero.ws.service.PedidoInversionService;
+import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 
 @Controller
@@ -22,7 +22,7 @@ public class InversionPedidoController {
 	private static final Logger LOG = LoggerFactory.getLogger(InversionPedidoController.class);
 
 	@Autowired
-	PedidoInversionService pedidoInversionService;
+	InversionService pedidoInversionService;
 	@Autowired
 	PedidoService pedidoService;
 	
@@ -35,7 +35,7 @@ public class InversionPedidoController {
 		String result="1", detail="";
 		try{
 			String inversionId = String.valueOf(params.get("inversionId"));
-			pedidoInversionService.obtenerInversion(inversionId);			
+			pedidoInversionService.obtenerInversionCaspio(inversionId);			
 		}catch(Exception e){
 			LOG.error("Error pedidoInversion/obtenerInversion:: ",e);
 			e.printStackTrace();

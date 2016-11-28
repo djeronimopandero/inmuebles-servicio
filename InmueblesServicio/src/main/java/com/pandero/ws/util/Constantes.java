@@ -6,6 +6,7 @@ public class Constantes {
 		public final static String URL_WHERE = "?q={serviceWhere}";
 		public final static String RESULTADO_EXITOSO = "1";
 		public final static String RESULTADO_ERROR_INESPERADO = "Se produjo un error inesperado";
+		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 	}
 	
 	public class Pedido {
@@ -44,6 +45,14 @@ public class Constantes {
 	public class Contrato{
 		public final static String SITUACION_ADJUDICADO="ADJUDICADO";
 		public final static String SITUACION_NO_ADJUDICADO="NO ADJUDICADO";
+		public final static String ESTADO_ASOCIADO="ASOCIADO";
+		public final static String ESTADO_NO_ASOCIADO="";
+	}
+	
+	public class Inversion{
+		public final static String SITUACION_CONFIRMADO="SI";
+		public final static String SITUACION_NO_CONFIRMADO="NO";
+		public final static String ESTADO_ANULADO="ANULADO";
 	}
 	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";

@@ -25,7 +25,7 @@ import com.pandero.ws.util.ServiceRestTemplate;
 @Service
 public class PedidoServiceImpl implements PedidoService{
 
-	private static final Logger LOG = LoggerFactory.getLogger(PedidoInversionServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(InversionServiceImpl.class);
 	
 	@Autowired
 	@Qualifier("restTemplate")

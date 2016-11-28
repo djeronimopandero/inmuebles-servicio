@@ -23,6 +23,7 @@ import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.ContratoService;
+import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
@@ -52,6 +53,8 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 	@Autowired
 	ConstanteService constanteService;
 	@Autowired
+	InversionService inversionService;
+	@Autowired
 	MailService mailService;
 
 	@Override
@@ -69,12 +72,10 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 			resultado.setMensajeError("El contrato no se encuentra adjudicado");
 		}else{		
 			// Crear pedido y contrato-pedido en SAF
-			ResultadoBean pedidoSAF = pedidoDao.crearPedidoSAF(nroContrato, usuarioSAFId);
+			resultado = pedidoDao.crearPedidoSAF(nroContrato, usuarioSAFId);
 
-			if(!pedidoSAF.getMensajeError().equals("")){
-				resultado = pedidoSAF;
-			}else{
-				String nroPedido = String.valueOf(pedidoSAF.getResultado());
+			if(resultado.getMensajeError().equals("")){
+				String nroPedido = String.valueOf(resultado.getResultado());
 				// Obtener ContratoCaspio
 				Contrato contratoCaspio = contratoService.obtenerContratoCaspio(nroContrato);
 				String contratoId = String.valueOf(contratoCaspio.getAsociadoId().intValue());
@@ -96,9 +97,47 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 	
-	public ResultadoBean eliminarPedido(String nroPedido, String usuarioSAFId) throws Exception{
+	public ResultadoBean eliminarPedido(String pedidoCaspioId, String nroPedido, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
+		// Caspio - buscar inversiones del pedido
+		boolean inversionesConfirmadas = false;
+		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoCaspioId);
+		if(listaInversiones!=null && listaInversiones.size()>0){
+			for(Inversion inversion : listaInversiones){
+				if(inversion.getConfirmado()!=null && inversion.getConfirmado().equals(Constantes.Inversion.SITUACION_CONFIRMADO)){
+					inversionesConfirmadas = true;
+					break;
+				}
+			}
+		}
 		
+		if(inversionesConfirmadas==true){
+			resultado.setMensajeError(Constantes.Service.RESULTADO_INVERSIONES_CONFIRMADAS);
+		}else{
+			// SAF - eliminar el pedido y desasociarlo
+			resultado = pedidoDao.eliminarPedidoSAF(nroPedido, usuarioSAFId);
+			
+			if(resultado.getMensajeError().equals("")){
+				// Caspio - cambiar estado pedido a anulado
+				pedidoService.actualizarEstadoPedidoCaspio(nroPedido, Constantes.Pedido.ESTADO_ANULADO);
+							
+				// Caspio - desasociar los contratos del pedido
+				List<Contrato> listaContratos = pedidoService.obtenerContratosxPedidoCaspio(pedidoCaspioId);
+				if(listaContratos!=null && listaContratos.size()>0){
+					for(Contrato contrato : listaContratos){
+						contratoService.actualizarAsociacionContrato(contrato.getNroContrato(), Constantes.Contrato.ESTADO_NO_ASOCIADO);
+					}
+				}
+				
+				// Anular las inversiones
+				if(listaInversiones!=null && listaInversiones.size()>0){
+					for(Inversion inversion : listaInversiones){
+						inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
+					}
+				}
+			}
+		}
+				
 		return resultado;
 	}
 

@@ -45,13 +45,12 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.withoutProcedureColumnMetaDataAccess();	
 				
 		call.addDeclaredParameter(new SqlParameter("@ContratoNumero", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));		
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));		
 		call.addDeclaredParameter(new SqlOutParameter("@NumeroPedido", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
 				
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
         parameters.addValue("@ContratoNumero", nroContrato);
-		parameters.addValue("@PedidoFecha", null);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		Map resultadoSP = call.execute(parameters);
@@ -73,8 +72,8 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarPedido");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@NumeroPedido", Types.INTEGER));
-		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));			
+		call.addDeclaredParameter(new SqlParameter("@NumeroPedido", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));			
 		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
@@ -92,41 +91,40 @@ public class PedidoDaoImpl implements PedidoDao {
 	}
 
 	@Override
-	public void agregarContratoPedidoSAF(String pedidoId, String nroContrato,
+	public void agregarContratoPedidoSAF(String nroPedido, String nroContrato,
 			String usuarioId) {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_AgregarPedidoContrato");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@PedidoID", Types.INTEGER));
-		call.addDeclaredParameter(new SqlOutParameter("@ContratoID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlOutParameter("@ContratoNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@ContratoNumero", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));				
-		call.addDeclaredParameter(new SqlParameter("@EvaluacionCrediticia", Types.BOOLEAN));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));				
+		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
-		parameters.addValue("@PedidoID", pedidoId);
+		parameters.addValue("@PedidoNumero", nroPedido);
         parameters.addValue("@ContratoNumero", nroContrato);		
 		parameters.addValue("@UsuarioID", usuarioId);
-		parameters.addValue("@EvaluacionCrediticia", 0);
 				
 		call.execute(parameters);		
 	}
 
 	@Override
-	public void eliminarContratoPedidoSAF(String pedidoId, String contratoId,
+	public void eliminarContratoPedidoSAF(String nroPedido, String nroContrato,
 			String usuarioId) {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_EliminarPedidoContrato");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@PedidoID", Types.INTEGER));
-		call.addDeclaredParameter(new SqlParameter("@ContratoID", Types.INTEGER));
-		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@ContratoNumero", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
-		parameters.addValue("@PedidoID", pedidoId);
-        parameters.addValue("@ContratoID", contratoId);		
+		parameters.addValue("@PedidoNumero", nroPedido);
+        parameters.addValue("@ContratoNumero", nroContrato);		
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);
@@ -145,15 +143,7 @@ public class PedidoDaoImpl implements PedidoDao {
 				"where c.ContratoNumero='"+nroContrato+"'";
 							
 		List<Asociado> listAsociados = this.jdbcTemplate.query(query, new AsociadoMapper());
-		
-//		List<Asociado> listAsociados = new ArrayList<Asociado>();
-//		Asociado asociado = new Asociado();
-//		asociado.setNombreCompleto("LUIS ANGEL PEREZ VALDIVIEZO");
-//		asociado.setTipoDocumentoIdentidad("DNI");
-//		asociado.setNroDocumentoIdentidad("45776580");
-//		asociado.setDireccion("AV TOMAS VALLE 1530 - LOS OLIVOS");
-//		listAsociados.add(asociado);
-		
+				
 		if(listAsociados!=null ){			
 			System.out.println("listAsociados:: "+listAsociados.size());
 		}

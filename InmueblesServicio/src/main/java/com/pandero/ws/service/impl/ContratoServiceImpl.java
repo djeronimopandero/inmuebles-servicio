@@ -25,7 +25,7 @@ import com.pandero.ws.util.ServiceRestTemplate;
 public class ContratoServiceImpl implements ContratoService{
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(PedidoInversionServiceImpl.class);
+			.getLogger(InversionServiceImpl.class);
 
 	@Autowired
 	@Qualifier("restTemplate")
@@ -81,6 +81,20 @@ public class ContratoServiceImpl implements ContratoService{
         }
         
 		return contrato;
+	}
+
+	@Override
+	public String actualizarAsociacionContrato(String nroContrato,
+			String estadoAsociacion) throws Exception{
+		Map<String, String> request = new HashMap<String, String>();	
+		request.put("Estado", estadoAsociacion);
+		
+		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
+		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);
+		return null;
+		
 	}
 	
 }
