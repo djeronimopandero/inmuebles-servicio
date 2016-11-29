@@ -55,6 +55,12 @@ public class Constantes {
 		public final static String ESTADO_ANULADO="ANULADO";
 	}
 	
+	public class Persona{
+		public final static String PERSONA_NATURAL_COD="N";
+		public final static String PERSONA_JURIDICA_COD="J";
+		public final static String TIPO_DOCUMENTO_RUC_ID="60";
+	}
+	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	

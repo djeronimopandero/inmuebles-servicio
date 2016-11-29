@@ -29,6 +29,7 @@ public class ServiceRestTemplate {
     	Map<String, String> headers = new HashMap<String, String>();
     	headers.put("Content-Type", "application/json");
 		headers.put("Accept", "application/json");		
+		headers.put("Access-Control-Allow-Origin", "*");
 	    requestHeaders.setAll(headers);
 	   
        byte[] encodedAuthorization = Base64.encodeBase64(caspioKey.getBytes());

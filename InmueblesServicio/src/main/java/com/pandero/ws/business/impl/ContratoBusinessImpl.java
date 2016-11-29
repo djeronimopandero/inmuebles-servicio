@@ -17,7 +17,7 @@ import com.pandero.ws.dao.ContratoDao;
   * @time	: 1:08:39 p. m.
   * @author	: Arly Fernandez.
  */
-@Service("ContratoBusiness")
+@Service
 public class ContratoBusinessImpl implements ContratoBusiness{
 	
 	private static Logger LOGGER = LoggerFactory.getLogger(ContratoBusinessImpl.class);

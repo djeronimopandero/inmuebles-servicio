@@ -35,7 +35,7 @@ public class ContratoServiceImpl implements ContratoService{
 	private String tableContratoURL;
 
 	@Override
-	public Contrato actualizarEstadoContratoCaspio(String nroContrato,
+	public Contrato actualizarSituacionContratoCaspio(String nroContrato,
 			String situacionId, String situacionNom, Date fechaSituacion) throws Exception {		
 		Map<String, String> request = new HashMap<String, String>();
 		String situacion="";

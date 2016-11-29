@@ -7,6 +7,7 @@ import java.util.List;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.util.Constantes.Persona;
 
 public class MetodoUtil {
 
@@ -111,4 +112,13 @@ public class MetodoUtil {
 		}
 		return resultado;
 	}
+	
+	public static String getTipoPersonaPorDocIden(String docuIdent){
+		String tipoPersona=Constantes.Persona.PERSONA_NATURAL_COD;
+		if(Persona.TIPO_DOCUMENTO_RUC_ID.equals(docuIdent)){
+			tipoPersona=Constantes.Persona.PERSONA_JURIDICA_COD;
+		}
+		return tipoPersona;
+	}
+	
 }

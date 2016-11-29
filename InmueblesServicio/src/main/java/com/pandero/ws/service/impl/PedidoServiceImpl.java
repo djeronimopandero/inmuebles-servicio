@@ -159,5 +159,17 @@ public class PedidoServiceImpl implements PedidoService{
         
 		return pedido;
 	}
+
+	@Override
+	public String eliminarContratoPedidoCaspio(String pedidoId,
+			String contratoId) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		
+		String serviceWhere = "{\"where\":\"PedidoId="+pedidoId+" and ContratoId="+contratoId+"\"}";	
+		String actualizarPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.deleteForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
 	
 }

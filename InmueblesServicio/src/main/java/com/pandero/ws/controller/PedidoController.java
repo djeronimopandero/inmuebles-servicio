@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.PedidoDao;
-import com.pandero.ws.service.MailService;
 import com.pandero.ws.util.Constantes;
 
 @Controller
@@ -86,22 +85,23 @@ public class PedidoController {
 	}
 	
 	
-	@RequestMapping(value = "/agregarContratoPedidoSAF", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/agregarContratoPedido", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> agregarContratoPedidoSAF(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO agregarContratoPedidoSAF");
+	public Map<String, Object> agregarContratoPedido(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO agregarContratoPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", error="";
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
+			String nroPedido = String.valueOf(params.get("nroPedido"));
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoDao.agregarContratoPedidoSAF(pedidoId,nroContrato,usuarioId);
+			pedidoBusiness.agregarContratoPedido(pedidoId, nroPedido, nroContrato, usuarioId);
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/agregarContratoPedidoSAF:: ",e);
+			LOG.error("Error pedido/agregarContratoPedido:: ",e);
 			error = "Se produjo un error en la base de datos";
 			e.printStackTrace();
 		}
@@ -114,17 +114,18 @@ public class PedidoController {
 	}
 	
 	
-	public Map<String, Object> eliminarContratoPedidoSAF(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO eliminarContratoPedidoSAF");
+	public Map<String, Object> eliminarContratoPedido(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO eliminarContratoPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", error="";
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
-			String contratoId = String.valueOf(params.get("contratoId"));
+			String nroPedido = String.valueOf(params.get("nroPedido"));
+			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoDao.agregarContratoPedidoSAF(pedidoId,contratoId,usuarioId);
+			pedidoBusiness.eliminarContratoPedido(pedidoId, nroPedido, nroContrato, usuarioId);
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/eliminarContratoPedidoSAF:: ",e);

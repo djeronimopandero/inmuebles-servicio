@@ -31,7 +31,7 @@ import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.MetodoUtil;
 
 @Component
-public abstract class PedidoBusinessImpl implements PedidoBusiness{
+public class PedidoBusinessImpl implements PedidoBusiness{
 
 	private static final Logger LOG = LoggerFactory.getLogger(PedidoBusinessImpl.class);
 	
@@ -61,13 +61,12 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 	public ResultadoBean registrarNuevoPedido(String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
-//		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
-		Contrato contrato = null;
+		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
 		
 		// Si no esta adjudicado
 		if(!MetodoUtil.esSituacionAdjudicado(contrato.getSituacionContrato())){
 			// Actualizar estado del contrato a no adjudicado en Caspio
-			contratoService.actualizarEstadoContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
+			contratoService.actualizarSituacionContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
 			
 			// Enviar mensaje contrato no adjudicado
 			resultado.setMensajeError("El contrato no se encuentra adjudicado");
@@ -133,7 +132,7 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 				// Anular las inversiones
 				if(listaInversiones!=null && listaInversiones.size()>0){
 					for(Inversion inversion : listaInversiones){
-//						inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
+						inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
 					}
 				}
 			}
@@ -142,14 +141,38 @@ public abstract class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 
-	public ResultadoBean agregarContratoPedido(String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
+		// SAF - agregar contrato pedido
+		pedidoDao.agregarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
+		
+		// Caspio: Obtener contratoID
+		Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
+		
+		// Caspio - agregar contrato pedido
+		String contratoCaspioId = String.valueOf(contrato.getContratoId().intValue());
+		pedidoService.agregarContratoPedidoCaspio(pedidoCaspioId, contratoCaspioId);
+		
+		// Caspio: Asociar contrato a pedido
+		contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_ASOCIADO);
 		
 		return resultado;
 	}
 	
-	public ResultadoBean eliminarContratoPedido(String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
+		// SAF - eliminar contrato pedido
+		pedidoDao.eliminarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
+		
+		// Caspio: Obtener contratoID
+		Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
+				
+		// Caspio - eliminar contrato pedido
+		String contratoCaspioId = String.valueOf(contrato.getContratoId().intValue());
+		pedidoService.eliminarContratoPedidoCaspio(pedidoCaspioId, contratoCaspioId);
+		
+		// Caspio: Desasociar contrato a pedido
+		contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_NO_ASOCIADO);
 		
 		return resultado;
 	}
