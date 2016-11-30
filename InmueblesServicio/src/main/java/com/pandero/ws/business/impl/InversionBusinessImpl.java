@@ -7,11 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
+import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.Util;
 
@@ -24,6 +26,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	InversionService inversionService;
 	@Autowired
 	ConstanteService constanteService;
+	@Autowired
+	PedidoService pedidoService;
 	
 	@Override
 	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception {
@@ -46,6 +50,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 							
 		return resultado;
+	}
+	
+	public void validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId){
+		// Obtener inversiones del pedido
+		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
+		
+		// Obtener contratos del pedido
+		List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(pedidoId);
+		
 	}
 	
 	private String validarConfirmarInversion(Inversion inversion){
