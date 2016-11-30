@@ -3,6 +3,7 @@ package com.pandero.ws.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -12,9 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.dao.ContratoDao;
 
 @Repository
@@ -54,18 +59,44 @@ public class ContratoDaoImpl implements ContratoDao {
 		}
 	
 	
+	private static final class ContratoAlDiaMapper implements RowMapper<ContratoSAF>{
+		public ContratoSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			ContratoSAF e = new ContratoSAF();
+			e.setContratoId(rs.getInt("ContratoID"));
+			e.setNroContrato(rs.getString("ContratoNumero"));
+			e.setFechaVenta(rs.getString("ContratoFechaVenta"));
+			e.setMontoCertificado(rs.getDouble("CertificadoValor"));
+			e.setPedidoId(rs.getInt("PersonaID"));
+			e.setSituacionContrato(rs.getString("SituacionContratoNombre"));
+			e.setFechaAdjudicacion(rs.getString("FechaAdjudicacion"));
+			e.setSituacionContratoID(rs.getInt("SituacionContratoID"));
+			e.setPersonaId(rs.getInt("PersonaID"));
+			return e;		    
+		}
+	}
+	
 	@Override
-	public List<Contrato> getListContratoAlDia() throws Exception {
+	public List<ContratoSAF> getListContratoAlDia() throws Exception {
 		LOG.info("###ContratoDaoImpl.getListContratoAlDia");
 		
-//		jdbcCall = new SimpleJdbcCall(jdbcTemplate);
-//		jdbcCall.withCatalogName(ConstantesDAO.SCHEMA_NAME);
-//		jdbcCall.withProcedureName(ConstantesDAO.USP_LOG_INMB_OBTENER_CONTRATOS_AL_DIA)
-//		.withoutProcedureColumnMetaDataAccess();
-	//	jdbcCall.returningResultSet("contratos", contratoDaoDefinition);
-//		List<Contrato> list = jdbcCall.executeObject(List.class);
-//		return list;
-		return null;
+		LOG.info("###ContratoDaoImpl.getListContratoAlDia");
+		
+		List<ContratoSAF> listContratos = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_INMB_OBTENER_CONTRATOS_AL_DIA");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.returningResultSet("contratos", new ContratoAlDiaMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		List resultado = (List) mapResultado.get("contratos");
+		if (resultado != null && resultado.size() > 0) {
+			listContratos = (List<ContratoSAF>) resultado;
+		}
+
+		return listContratos;
 	}
 
 }

@@ -1,7 +1,6 @@
 package com.pandero.ws.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
-import com.pandero.ws.util.Util;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.Util;
 
 @Service
 public class ContratoServiceImpl implements ContratoService{
@@ -36,7 +36,7 @@ public class ContratoServiceImpl implements ContratoService{
 
 	@Override
 	public Contrato actualizarSituacionContratoCaspio(String nroContrato,
-			String situacionId, String situacionNom, Date fechaSituacion) throws Exception {		
+			String situacionId, String situacionNom, String fechaSituacion) throws Exception {		
 		Map<String, String> request = new HashMap<String, String>();
 		String situacion="";
 		if(Util.esSituacionAdjudicado(situacionId)){
@@ -47,7 +47,7 @@ public class ContratoServiceImpl implements ContratoService{
 		}		
 		request.put("Situacion", situacion);
 		request.put("SituacionSAF", situacionNom);
-		request.put("FechaAdjudicacion", Util.formatearFechaYYYYMMDD(fechaSituacion));
+		request.put("FechaAdjudicacion", fechaSituacion);
 		
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
@@ -95,6 +95,27 @@ public class ContratoServiceImpl implements ContratoService{
         ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);
 		return null;
 		
+	}
+	
+	@Override
+	public String crearContratoCaspio(ContratoSAF contrato) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("NroContrato", contrato.getNroContrato());
+		request.put("FechaContrato", contrato.getFechaVenta());
+		request.put("MontoCertificado", String.valueOf(contrato.getMontoCertificado()));
+		request.put("MontoDisponible",  String.valueOf(contrato.getMontoDisponible())  );			
+		request.put("AsociadoId", String.valueOf(contrato.getAsociadoId()) );			
+		request.put("Situacion",  contrato.getSituacionContratoCASPIO() );			
+		request.put("DiferenciaPrecio", String.valueOf(contrato.getDiferenciaPrecio()));			
+		request.put("DiferenciaPrecioDisponible", String.valueOf(contrato.getDiferenciaPrecioDisponible()));			
+		request.put("OtrosIngresos", String.valueOf(contrato.getOtrosIngresos()));			
+		request.put("OtrosDisponibles", String.valueOf(contrato.getOtrosDisponibles()));			
+		request.put("TotalDisponible", String.valueOf(contrato.getTotalDisponible()));			
+		request.put("Estado", contrato.getEstado());			
+		request.put("FechaAdjudicacion", contrato.getFechaAdjudicacion());			
+		request.put("SituacionSAF", contrato.getSituacionContrato());			
+        ServiceRestTemplate.postForObject(restTemplate,tableContratoURL,Object.class,request,null);	
+		return "SUCCESS";
 	}
 	
 }

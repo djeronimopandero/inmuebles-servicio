@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" 
+xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<bean id="jobProcesoAutomatico" class="com.pandero.ws.job.RunMeTask"/>
+	<bean name="contratoDao" class="com.pandero.ws.dao.impl.ContratoDaoImpl" />
+	
+	<bean name="jobSincronizarContratosEnCaspio" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean" >
+		 	<property name="targetObject" ref="jobProcesoAutomatico"/>
+	    	<property name="targetMethod" value="sincronizarContratos"/>
+	    	<property name="concurrent" value="false"/>
+	</bean>
+	
+	<!-- Cada minuto : 0 0/1 * 1/1 * ? * -->
+	<!-- Cada hora   : 0 0 0/1 1/1 * ? * -->
+	<bean id="triggerSincronizarContratosEnCaspio"   class="org.springframework.scheduling.quartz.CronTriggerBean">
+	    <property name="jobDetail" ref="jobSincronizarContratosEnCaspio"/>
+	    
+		<property name="cronExpression" value="0 0 0/1 1/1 * ? *" />
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+            <list>
+                <ref bean="triggerSincronizarContratosEnCaspio" />
+            </list>
+        </property>
+	</bean>
+
+</beans>
+
