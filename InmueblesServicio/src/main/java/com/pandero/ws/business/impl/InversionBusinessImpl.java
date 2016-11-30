@@ -52,7 +52,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultado;
 	}
 	
-	public void validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId){
+	public void validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
 		// Obtener inversiones del pedido
 		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
 		

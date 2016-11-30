@@ -36,7 +36,7 @@ public class PersonaDaoImpl implements PersonaDAO {
 	}
 	
 	@Override
-	public PersonaSAF obtenerAsociadosxContratoSAF(String personaID) throws Exception {
+	public PersonaSAF obtenerPersonaSAF(String personaID) throws Exception {
 		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF");
 		
 		List<PersonaSAF> listPersonas = null;
@@ -72,6 +72,7 @@ public class PersonaDaoImpl implements PersonaDAO {
 			p.setRazonSocial(rs.getString("PersonaRazonSocial"));
 			p.setTipoPersona(rs.getString("PersonaTipoID"));
 			p.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
+			p.setPersonaID(rs.getString("PersonaID"));
 			
 			return p;		    
 		}

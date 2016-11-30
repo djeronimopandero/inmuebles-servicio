@@ -2,6 +2,7 @@ package com.pandero.ws.bean;
 
 public class PersonaSAF {
 
+	private String personaID;
 	private String tipoDocumentoID;
 	private String personaCodigoDocumento;
 	private String nombre;
@@ -15,6 +16,20 @@ public class PersonaSAF {
 		// TODO Auto-generated constructor stub
 	}
 	
+	
+	
+	public String getPersonaID() {
+		return personaID;
+	}
+
+
+
+	public void setPersonaID(String personaID) {
+		this.personaID = personaID;
+	}
+
+
+
 	public String getTipoDocumentoID() {
 		return tipoDocumentoID;
 	}

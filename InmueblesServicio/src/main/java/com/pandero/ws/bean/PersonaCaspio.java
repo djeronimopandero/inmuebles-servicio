@@ -2,7 +2,7 @@ package com.pandero.ws.bean;
 
 public class PersonaCaspio {
 	
-	private String PersonalId;
+	private String PersonaId;
 	private String TipoDocumento;
 	private String NroDocumento;
 	private String Nombres;
@@ -11,11 +11,13 @@ public class PersonaCaspio {
 	private String RazonSocial;
 	private String TipoPersona;
 	private String NombreCompleto;
-	public String getPersonalId() {
-		return PersonalId;
+
+	
+	public String getPersonaId() {
+		return PersonaId;
 	}
-	public void setPersonalId(String personalId) {
-		PersonalId = personalId;
+	public void setPersonaId(String personaId) {
+		PersonaId = personaId;
 	}
 	public String getTipoDocumento() {
 		return TipoDocumento;

@@ -70,7 +70,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						// La llave con el saf es el tipo de documento y el numero
 						// de documento
 
-						PersonaSAF personaSAF = personaDao.obtenerAsociadosxContratoSAF(String.valueOf(contratoSAF.getPersonaId()));
+						PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
 
 						UtilEnum.TIPO_DOCUMENTO tipoDoc;
 
@@ -87,7 +87,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
 							// if not exists --> insert todos los campos
 							PersonaSAF personaNuevaCaspio = new PersonaSAF();
-							personaNuevaCaspio.setTipoDocumentoID(personaSAF.getTipoDocumentoID());
+							personaNuevaCaspio.setPersonaID(personaSAF.getPersonaID());
+							personaNuevaCaspio.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio().intValue()));
 							personaNuevaCaspio.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
 							personaNuevaCaspio.setNombre(personaSAF.getNombre());
 							personaNuevaCaspio.setApellidoPaterno(personaSAF.getApellidoPaterno());
@@ -98,7 +99,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 							personaService.crearPersonaCaspio(personaNuevaCaspio);
 						}
 						
-						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
+//						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
 						
 						// else --> insert todos los datos
 						ContratoSAF contratoCaspioReg = new ContratoSAF();
@@ -106,7 +107,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
 						contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);
 						contratoCaspioReg.setMontoDisponible(null!=contratoSAF.getMontoDisponible()?contratoSAF.getMontoDisponible():0);
-						contratoCaspioReg.setAsociadoId(Integer.parseInt(personaCaspio.getPersonalId()));
+						contratoCaspioReg.setAsociadoId(Integer.parseInt(personaSAF.getPersonaID()));
 						contratoCaspioReg.setSituacionContratoCASPIO(contratoSAF.getSituacionContratoCASPIO());
 						contratoCaspioReg.setDiferenciaPrecio(null!=contratoSAF.getDiferenciaPrecio()?contratoSAF.getDiferenciaPrecio():0);
 						contratoCaspioReg.setDiferenciaPrecioDisponible(null!=contratoSAF.getDiferenciaPrecioDisponible()?contratoSAF.getDiferenciaPrecioDisponible():0);

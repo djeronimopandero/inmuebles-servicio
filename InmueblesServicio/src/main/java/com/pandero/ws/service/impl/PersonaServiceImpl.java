@@ -36,7 +36,7 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 	@Override
 	public PersonaCaspio obtenerPersonaCaspio(PersonaSAF personaParam) throws Exception {
 		PersonaCaspio personaCaspio = null;
-		String serviceWhere = "{\"where\":\"TipoDocumento=" + personaParam.getTipoDocumentoID() + " and NroDocumento="+personaParam.getPersonaCodigoDocumento()+" \"}";	
+		String serviceWhere = "{\"where\":\"TipoDocumento='" + personaParam.getTipoDocumentoID() + "' and NroDocumento='"+personaParam.getPersonaCodigoDocumento()+"'\"}";	
 		String obtenerPedidoURL = tablePersonaURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
@@ -69,8 +69,7 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 		request.put("ApellidoPaterno",  persona.getApellidoPaterno()  );			
 		request.put("ApellidoMaterno", persona.getApellidoMaterno() );			
 		request.put("RazonSocial",  persona.getRazonSocial() );			
-		request.put("TipoPersona", persona.getTipoPersona());			
-		request.put("NombreCompleto", persona.getNombreCompleto());			
+		request.put("TipoPersona", persona.getTipoPersona());		
         ServiceRestTemplate.postForObject(restTemplate,tablePersonaURL,Object.class,request,null);	
 		return "SUCCESS";
 	}
