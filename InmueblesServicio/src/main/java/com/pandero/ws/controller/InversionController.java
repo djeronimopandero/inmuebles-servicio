@@ -82,4 +82,28 @@ public class InversionController {
 		return response;
 	}
 
+	@RequestMapping(value = "/eliminarInversion", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> eliminarInversion(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO eliminarInversion");
+		System.out.println("REQUEST: " +  params);		
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			inversionService.actualizarEstadoInversionCaspio(inversionId, Constantes.Inversion.ESTADO_ANULADO);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+		}catch(Exception e){
+			LOG.error("Error inversion/eliminarInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
 }

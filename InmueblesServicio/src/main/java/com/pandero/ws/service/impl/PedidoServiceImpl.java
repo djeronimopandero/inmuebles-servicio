@@ -44,6 +44,7 @@ public class PedidoServiceImpl implements PedidoService{
 	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception{
 		Map<String, String> request = new HashMap<String, String>();
 		request.put("AsociadoId", asociadoId);
+		request.put("NroPedido", nroPedido);
 		request.put("Fecha", Util.getFechaActualYYYYMMDD());
 		request.put("Estado", Constantes.Pedido.ESTADO_EMITIDO);
 		request.put("Producto", Constantes.Producto.PRODUCTO_INMUEBLES);			
@@ -138,7 +139,7 @@ public class PedidoServiceImpl implements PedidoService{
 	@Override
 	public Pedido obtenerPedidoCaspio(String nroPedido) throws Exception {
 		Pedido pedido = null;
-		String serviceWhere = "{\"where\":\"NroPedido=" + nroPedido + "\"}";	
+		String serviceWhere = "{\"where\":\"NroPedido='" + nroPedido + "'\"}";	
 		String obtenerPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
