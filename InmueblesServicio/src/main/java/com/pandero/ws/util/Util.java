@@ -9,7 +9,7 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.util.Constantes.Persona;
 
-public class MetodoUtil {
+public class Util {
 
 	public static Date getFechaActual(){
 		Date today = new Date();
@@ -119,6 +119,14 @@ public class MetodoUtil {
 			tipoPersona=Constantes.Persona.PERSONA_JURIDICA_COD;
 		}
 		return tipoPersona;
+	}
+	
+	public static boolean esVacio(String cadena){
+		boolean resultado = true;
+		if(cadena!=null && !cadena.trim().equals("")){
+			resultado = false;
+		}
+		return resultado;
 	}
 	
 }

@@ -73,4 +73,14 @@ public class InversionServiceImpl implements InversionService {
 		return null;
 	}
 
+	public String actualizarSituacionConfirmadoInversionCaspio(String inversionId, String situacionConfirmado) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("Confirmado", situacionConfirmado);		
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
+		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
 }

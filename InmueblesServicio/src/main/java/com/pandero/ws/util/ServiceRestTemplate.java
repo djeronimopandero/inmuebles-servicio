@@ -16,14 +16,55 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import com.pandero.ws.bean.CaspioToken;
+
 public class ServiceRestTemplate {
 	
-	private static String caspioKey = "eExLQiezI6-wKpAtV7haqkmTEHmFfkMLpLvp-uSBqy9ndRP4WCD1YCTnKWX-_9I2uSEihSJb5TyzAAXNy-v1psheGWJfC9ngpOH6GyKirE1PRbPh3Rja-Kw6phq2y6Yk2L4a8M8qwfhhxiy7xmcwXyyL6DY8_ZEeInvM50bZl3f0ekqsYogVENiOKNpiaXjCPOSH26j6LZ7YOd-q8aFgWIl3VhVY7nLquPz_Q4fDTXIMFtz7a7l71OQqpPfwWMytpKySsGpnOeoqapWZ0wHF_IfHnRRGlp2ztIIv5ic2wnh9Zw_IvzUTBT9m5sbRxKAU_aTmpAp5ss5DTadEWg_AJbyu4GYUgIlBgdNS-Oqf2F8epZCJ";
+	private static String urlCaspioToken = "https://c3cqk716.caspio.com/oauth/token";
+	private static String caspioClientId="ae419b3a60614e25f93150df39ac6c79cfd3d4d8c8b5cc5ad0";
+	private static String caspioClientSecret="f0d283be73764ddab9ef845cf834aa01648ce438593f0d7f2d";
+	private static String caspioRefreshToken="759c3354ec81429ba9e709e9f9cfdb5becb24e79f3694a6892005f98b859fcbd";
+//	private static String caspioKey = "QM9UsQWmUIFHb6V2w5mjfvqWb_bRQphhbKdIIVy1sTT9K-_Y7m3cW2h70wczV5ljo2KKDHrHCd4b77AvmPUyCkbEM1dObtY1nuShph_Z6qtEPIbL0hBiD-l27CILIFcbJUv77faiFTFiBLIfz63ZQBVqtaLWO5N8oyqE7VGQwdFXEPZlU43tsOalM0DTjjj1xUpvEEysYgqExvnSXyhS3sKxkqcib-U8dzDz_rG9_LQgrgUTJ_7jXzdCdpBzPdXsKUC65Y_c6VUsmG-AK_Q55c67oI6Cfe6c0BaTMq7wkeJAj5vBxjNhPgRrWEx4AiQ6Zu0qahZCuEvkt8eAU_JShfexwlgVSg2S1ih9RvhDTNNnQpnh";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceRestTemplate.class);
 	
-	public static HttpHeaders getHeaders(){
-		   
+	public static HttpHeaders getTokenHeaders(){		   
+		HttpHeaders requestHeaders = new HttpHeaders();
+	    requestHeaders.clear();
+    	Map<String, String> headers = new HashMap<String, String>();
+    	headers.put("Content-Type", "application/x-www-form-urlencoded");
+		headers.put("Accept", "*/*");		
+	    requestHeaders.setAll(headers);
+	    
+	    String authorisation = caspioClientId + ":" + caspioClientSecret;
+	    byte[] encodedAuthorisation = Base64.encodeBase64(authorisation.getBytes());
+	    requestHeaders.add("Authorization", "Basic " + new String(encodedAuthorisation));
+	    
+	    return requestHeaders;
+	}
+	
+	private static String obtenerTokenCaspio() throws Exception{
+		String caspioKey = "";
+		String request = "grant_type=refresh_token&refresh_token="+caspioRefreshToken;
+		HttpEntity<String> requestEntity = new HttpEntity<String>(request,getTokenHeaders());
+		RestTemplate newRestTemplate = new RestTemplate();
+		
+		Object response = newRestTemplate.exchange(urlCaspioToken, HttpMethod.POST, requestEntity, Object.class, new Object[0]);
+		String jsonResult = JsonUtil.toJson(response);	
+		Map<String, Object> responseMap = JsonUtil.jsonToMap(jsonResult);
+		if(responseMap!=null){
+	        Object jsonResponse = responseMap.get("body");
+	        if(jsonResponse!=null){        		
+        		CaspioToken caspioToken = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), CaspioToken.class);
+        		caspioKey = caspioToken.getAccess_token();
+	        }
+		}
+//		System.out.println("RESPONSE: "+jsonResult);
+		
+		return caspioKey;
+	}
+	
+	public static HttpHeaders getHeaders(String caspioKey){		   
 		HttpHeaders requestHeaders = new HttpHeaders();
 	    requestHeaders.clear();
     	Map<String, String> headers = new HashMap<String, String>();
@@ -32,11 +73,9 @@ public class ServiceRestTemplate {
 		headers.put("Access-Control-Allow-Origin", "*");
 	    requestHeaders.setAll(headers);
 	   
-       byte[] encodedAuthorization = Base64.encodeBase64(caspioKey.getBytes());
-       requestHeaders.add("Authorization", "Bearer " + caspioKey);
-       System.out.println("caspio key: "+caspioKey);
+        requestHeaders.add("Authorization", "Bearer " + caspioKey);
+        System.out.println("caspio key: "+caspioKey);
 	    
-
 	    return requestHeaders;
 	}
 		
@@ -47,12 +86,19 @@ public class ServiceRestTemplate {
 		LOG.info("JSON Params:: "+parameters);
 		LOG.info("JSON Resquest:: "+request);
 		
+		String caspioKey="";
+		try {
+			caspioKey = obtenerTokenCaspio();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		HttpEntity<E> requestEntity = null;
 		if(value==null){
 			Map<String, String> valueEmpty = new HashMap<String, String>();
-			requestEntity = new HttpEntity(valueEmpty, getHeaders());
+			requestEntity = new HttpEntity(valueEmpty, getHeaders(caspioKey));
 		}else{
-			requestEntity = new HttpEntity(value, getHeaders());
+			requestEntity = new HttpEntity(value, getHeaders(caspioKey));
 		}
 		
 		MappingJackson2HttpMessageConverter jsonConverter=new MappingJackson2HttpMessageConverter();

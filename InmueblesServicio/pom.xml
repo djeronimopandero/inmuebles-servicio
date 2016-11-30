@@ -16,7 +16,7 @@
   </properties>
 	
 	<build>
-		<finalName>ImmueblesServicio</finalName>
+		<finalName>InmueblesServicio</finalName>
 		<plugins>
 			<plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

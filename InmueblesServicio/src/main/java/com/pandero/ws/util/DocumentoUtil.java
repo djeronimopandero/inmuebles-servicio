@@ -180,7 +180,7 @@ public class DocumentoUtil {
 											XWPFTableRow row = null;				
 											row=t1.createRow();
 											row.getCell(0).setText("___________________________");
-											if(MetodoUtil.esPersonaJuridica(asociado.getTipoDocumentoIdentidad())){
+											if(Util.esPersonaJuridica(asociado.getTipoDocumentoIdentidad())){
 												row=t1.createRow();
 												row.getCell(0).setText("RAZON SOCIAL: "+asociado.getNombreCompleto());
 											}else{
@@ -255,7 +255,7 @@ public class DocumentoUtil {
 							String text = r.getText(0);
 
 //							LOG.info("### XWPFParagraph : " + text);
-System.out.println("HEADER>>"+text+"<<");
+//System.out.println("HEADER>>"+text+"<<");
 							if (text != null) {
 								if (null != params) {
 									for (Parametro param : params) {
@@ -313,7 +313,7 @@ System.out.println("HEADER>>"+text+"<<");
 	public static XWPFTableRow completarInversionConstruccion(XWPFTable t1, XWPFTableRow row, Inversion inversion, List<Constante> listaDocuIdentidad){
 		row = t1.createRow();
 		row.getCell(0).setText("TIPO INVERSION:");
-		row.getCell(1).setText(MetodoUtil.getTipoInversionNombre(inversion.getTipoInversion()));
+		row.getCell(1).setText(Util.getTipoInversionNombre(inversion.getTipoInversion()));
 		row = t1.createRow();
 		row.getCell(0).setText("SITUACION:");
 		if(inversion.getServicioConstructora()){
@@ -321,7 +321,7 @@ System.out.println("HEADER>>"+text+"<<");
 			row = t1.createRow();
 			row.getCell(0).setText("DATOS DE LA CONSTRUCTORA");
 //				row.getCell(1).setText("");	
-			if(MetodoUtil.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
+			if(Util.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
 				row = t1.createRow();
 				row.getCell(0).setText("RAZON SOCIAL:");
 				row.getCell(1).setText(inversion.getConstructoraRazonSocial());														
@@ -331,9 +331,9 @@ System.out.println("HEADER>>"+text+"<<");
 				row.getCell(1).setText(inversion.getConstructoraNombres()+" "+inversion.getConstructoraApePaterno()+" "+inversion.getConstructoraApeMaterno());
 			}
 			row = t1.createRow();
-			row.getCell(0).setText(MetodoUtil.getDocuIdentidadNombre(listaDocuIdentidad, inversion.getConstructoraTipoDoc())+":");
+			row.getCell(0).setText(Util.getDocuIdentidadNombre(listaDocuIdentidad, inversion.getConstructoraTipoDoc())+":");
 			row.getCell(1).setText(inversion.getConstructoraNroDoc());
-			if(MetodoUtil.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
+			if(Util.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
 				row = t1.createRow();
 				row.getCell(0).setText("CONTACTO:");
 				row.getCell(1).setText(inversion.getConstructoraContacto());
@@ -358,10 +358,10 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(inversion.getDireccion());
 		row = t1.createRow();
 		row.getCell(0).setText("DEPARTAMENTO:");
-		row.getCell(1).setText(MetodoUtil.getDepartamentoNombre(inversion.getDepartamentoId()));
+		row.getCell(1).setText(Util.getDepartamentoNombre(inversion.getDepartamentoId()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROVINCIA:");
-		row.getCell(1).setText(MetodoUtil.getProvinciaNombre(inversion.getProvinciaId()));
+		row.getCell(1).setText(Util.getProvinciaNombre(inversion.getProvinciaId()));
 		row = t1.createRow();
 		row.getCell(0).setText("DISTRITO:");
 		row.getCell(1).setText(inversion.getDistritoNom());
@@ -370,7 +370,7 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(String.valueOf(inversion.getAreaTotal()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROPIETARIO:");
-		if(MetodoUtil.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
+		if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
 			row.getCell(1).setText(inversion.getPropietarioRazonSocial());
 		}else{
 			row.getCell(1).setText(inversion.getPropietarioNombres()+" "+inversion.getPropietarioApePaterno()+" "+inversion.getPropietarioApeMaterno());
@@ -388,7 +388,7 @@ System.out.println("HEADER>>"+text+"<<");
 	public static XWPFTableRow completarInversionCancelacion(XWPFTable t1, XWPFTableRow row, Inversion inversion, List<Constante> listaDocuIdentidad){
 		row = t1.createRow();
 		row.getCell(0).setText("TIPO INVERSION:");
-		row.getCell(1).setText(MetodoUtil.getTipoInversionNombre(inversion.getTipoInversion()));
+		row.getCell(1).setText(Util.getTipoInversionNombre(inversion.getTipoInversion()));
 		row = t1.createRow();
 		row.getCell(0).setText("ENTIDAD FINANCIERA:");
 		row.getCell(1).setText(inversion.getEntidadFinancieraNom());
@@ -415,10 +415,10 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(inversion.getDireccion());
 		row = t1.createRow();
 		row.getCell(0).setText("DEPARTAMENTO:");
-		row.getCell(1).setText(MetodoUtil.getDepartamentoNombre(inversion.getDepartamentoId()));
+		row.getCell(1).setText(Util.getDepartamentoNombre(inversion.getDepartamentoId()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROVINCIA:");
-		row.getCell(1).setText(MetodoUtil.getProvinciaNombre(inversion.getProvinciaId()));
+		row.getCell(1).setText(Util.getProvinciaNombre(inversion.getProvinciaId()));
 		row = t1.createRow();
 		row.getCell(0).setText("DISTRITO:");
 		row.getCell(1).setText(inversion.getDistritoNom());
@@ -427,7 +427,7 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(String.valueOf(inversion.getAreaTotal()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROPIETARIO:");
-		if(MetodoUtil.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
+		if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
 			row.getCell(1).setText(inversion.getPropietarioRazonSocial());
 		}else{
 			row.getCell(1).setText(inversion.getPropietarioNombres()+" "+inversion.getPropietarioApePaterno()+" "+inversion.getPropietarioApeMaterno());
@@ -446,7 +446,7 @@ System.out.println("HEADER>>"+text+"<<");
 	public static XWPFTableRow completarInversionAdquisicion(XWPFTable t1, XWPFTableRow row, Inversion inversion, List<Constante> listaDocuIdentidad){
 		row = t1.createRow();
 		row.getCell(0).setText("TIPO INVERSION:");
-		row.getCell(1).setText(MetodoUtil.getTipoInversionNombre(inversion.getTipoInversion()));			
+		row.getCell(1).setText(Util.getTipoInversionNombre(inversion.getTipoInversion()));			
 		row = t1.createRow();
 		row.getCell(0).setText("DATOS DEL INMUEBLE");
 //			row.getCell(1).setText(inversion.getConstructoraTelefono());
@@ -461,10 +461,10 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(inversion.getDireccion());
 		row = t1.createRow();
 		row.getCell(0).setText("DEPARTAMENTO:");
-		row.getCell(1).setText(MetodoUtil.getDepartamentoNombre(inversion.getDepartamentoId()));
+		row.getCell(1).setText(Util.getDepartamentoNombre(inversion.getDepartamentoId()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROVINCIA:");
-		row.getCell(1).setText(MetodoUtil.getProvinciaNombre(inversion.getProvinciaId()));
+		row.getCell(1).setText(Util.getProvinciaNombre(inversion.getProvinciaId()));
 		row = t1.createRow();
 		row.getCell(0).setText("DISTRITO:");
 		row.getCell(1).setText(inversion.getDistritoNom());
@@ -473,7 +473,7 @@ System.out.println("HEADER>>"+text+"<<");
 		row.getCell(1).setText(String.valueOf(inversion.getAreaTotal()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROPIETARIO:");
-		if(MetodoUtil.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
+		if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
 			row.getCell(1).setText(inversion.getPropietarioRazonSocial());
 			row = t1.createRow();
 			row.getCell(0).setText("REPRESENTANTE LEGAL:");

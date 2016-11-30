@@ -10,7 +10,8 @@ import com.pandero.ws.bean.Pedido;
 public interface PedidoService {
 
 	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception;
-	public Pedido obtenerPedidoCaspio(String nroPedido) throws Exception;	
+	public Pedido obtenerPedidoCaspio(String nroPedido) throws Exception;
+	public Pedido obtenerPedidoCaspioPorId(String pedidoId) throws Exception;
 	public String actualizarEstadoPedidoCaspio(String nroPedido, String estadoPedido) throws Exception;
 	
 	public String agregarContratoPedidoCaspio(String pedidoId, String contratoId) throws Exception;

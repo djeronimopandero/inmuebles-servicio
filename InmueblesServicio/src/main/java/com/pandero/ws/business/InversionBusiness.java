@@ -2,6 +2,6 @@ package com.pandero.ws.business;
 
 public interface InversionBusiness {
 
-	public String confirmarInversion(String inversionId) throws Exception;
+	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception;
 	
 }

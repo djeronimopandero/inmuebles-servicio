@@ -4,9 +4,11 @@ public class Constantes {
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
-		public final static String RESULTADO_EXITOSO = "1";
-		public final static String RESULTADO_ERROR_INESPERADO = "Se produjo un error inesperado";
+		public final static String RESULTADO_EXITOSO = "OPERACION_EXITOSA";
+		public final static String RESULTADO_ERROR_INESPERADO = "Ocurrio un error inesperado";
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
+		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
+		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
 	}
 	
 	public class Pedido {
@@ -59,6 +61,10 @@ public class Constantes {
 		public final static String PERSONA_NATURAL_COD="N";
 		public final static String PERSONA_JURIDICA_COD="J";
 		public final static String TIPO_DOCUMENTO_RUC_ID="60";
+	}
+	
+	public class Celula{
+		public final static String SECTORIZACION_CELULA_COD="00004";
 	}
 	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";

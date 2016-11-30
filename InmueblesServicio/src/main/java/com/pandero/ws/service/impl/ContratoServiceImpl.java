@@ -18,7 +18,7 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
-import com.pandero.ws.util.MetodoUtil;
+import com.pandero.ws.util.Util;
 import com.pandero.ws.util.ServiceRestTemplate;
 
 @Service
@@ -39,7 +39,7 @@ public class ContratoServiceImpl implements ContratoService{
 			String situacionId, String situacionNom, Date fechaSituacion) throws Exception {		
 		Map<String, String> request = new HashMap<String, String>();
 		String situacion="";
-		if(MetodoUtil.esSituacionAdjudicado(situacionId)){
+		if(Util.esSituacionAdjudicado(situacionId)){
 			situacion=Constantes.Contrato.SITUACION_ADJUDICADO;
 		}else{
 			situacion=Constantes.Contrato.SITUACION_NO_ADJUDICADO;
@@ -47,7 +47,7 @@ public class ContratoServiceImpl implements ContratoService{
 		}		
 		request.put("Situacion", situacion);
 		request.put("SituacionSAF", situacionNom);
-		request.put("FechaAdjudicacion", MetodoUtil.formatearFechaYYYYMMDD(fechaSituacion));
+		request.put("FechaAdjudicacion", Util.formatearFechaYYYYMMDD(fechaSituacion));
 		
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;

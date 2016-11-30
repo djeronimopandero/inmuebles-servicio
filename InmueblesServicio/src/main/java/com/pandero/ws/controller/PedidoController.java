@@ -16,6 +16,7 @@ import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.Util;
 
 @Controller
 @RequestMapping("/pedido")
@@ -34,22 +35,25 @@ public class PedidoController {
 		System.out.println("EN METODO crearPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", error="";
+		String result="", detail="";
 		try{
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			ResultadoBean resultado = pedidoBusiness.registrarNuevoPedido(nroContrato, usuarioId);
-			error = resultado.getMensajeError();
-			result = resultado.getResultado()==null?"":String.valueOf(resultado.getResultado());
-			
+			ResultadoBean resultado = pedidoBusiness.registrarNuevoPedido(nroContrato, usuarioId);			
+			detail = resultado.getResultado()==null?"":String.valueOf(resultado.getResultado());
+			result = resultado.getMensajeError();
+			if(Util.esVacio(result)){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}			
 		}catch(Exception e){
 			LOG.error("Error pedido/crearPedido:: ",e);
-			error = Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}			
 		response.put("result",result);
-		response.put("error",error);
+		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
 		
 		return response;
@@ -62,23 +66,26 @@ public class PedidoController {
 		System.out.println("EN METODO eliminarPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", error="";
+		String result="", detail="";
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
+			String nroPedido = String.valueOf(params.get("nroPedido"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			ResultadoBean resultado = pedidoDao.eliminarPedidoSAF(pedidoId, usuarioId);
-			error = resultado.getMensajeError();
-//			result = resultado.getResultado()==null?"":String.valueOf((Integer)resultado.getResultado());
-			
+			ResultadoBean resultado = pedidoBusiness.eliminarPedido(pedidoId, nroPedido, usuarioId);
+			result = resultado.getMensajeError();
+			if(Util.esVacio(result)){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}	
 		}catch(Exception e){
-			LOG.error("Error pedido/eliminarPedidoSAF:: ",e);
-			error = "Se produjo un error en la base de datos";
+			LOG.error("Error pedido/eliminarPedido:: ",e);
 			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
-		response.put("error",error);
+		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
 		
 		return response;
@@ -91,23 +98,24 @@ public class PedidoController {
 		System.out.println("EN METODO agregarContratoPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", error="";
+		String result="", detail="";
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
-			String nroPedido = String.valueOf(params.get("nroPedido"));
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoBusiness.agregarContratoPedido(pedidoId, nroPedido, nroContrato, usuarioId);
+			pedidoBusiness.agregarContratoPedido(pedidoId, nroContrato, usuarioId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/agregarContratoPedido:: ",e);
-			error = "Se produjo un error en la base de datos";
 			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
-		response.put("error",error);
+		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
 		
 		return response;
@@ -118,23 +126,24 @@ public class PedidoController {
 		System.out.println("EN METODO eliminarContratoPedido");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", error="";
+		String result="", detail="";
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
-			String nroPedido = String.valueOf(params.get("nroPedido"));
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoBusiness.eliminarContratoPedido(pedidoId, nroPedido, nroContrato, usuarioId);
+			pedidoBusiness.eliminarContratoPedido(pedidoId, nroContrato, usuarioId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/eliminarContratoPedidoSAF:: ",e);
-			error = "Se produjo un error en la base de datos";
+			LOG.error("Error pedido/eliminarContratoPedido:: ",e);
 			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
-		response.put("error",error);
+		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
 		
 		return response;
@@ -146,20 +155,22 @@ public class PedidoController {
 		System.out.println("EN METODO generarOrdenIrrevocable");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", error="";
+		String result="", detail="";
 		try{
-			String pedidoId = String.valueOf(params.get("pedidoId"));			
-			pedidoBusiness.generarOrdenIrrevocablePedido(pedidoId);
-			response.put("result","El documento se genero correctamente");
+			String pedidoId = String.valueOf(params.get("pedidoId"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			pedidoBusiness.generarOrdenIrrevocablePedido(pedidoId, usuarioId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/crearPedidoSAF:: ",e);
-			error = "Se produjo un error en la base de datos";
+			LOG.error("Error pedido/generarOrdenIrrevocable:: ",e);
 			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
-		response.put("error",error);
+		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
 		
 		return response;

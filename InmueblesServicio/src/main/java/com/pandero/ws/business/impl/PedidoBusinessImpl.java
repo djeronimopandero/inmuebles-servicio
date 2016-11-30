@@ -18,9 +18,11 @@ import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
+import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
+import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.InversionService;
@@ -28,7 +30,7 @@ import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
-import com.pandero.ws.util.MetodoUtil;
+import com.pandero.ws.util.Util;
 
 @Component
 public class PedidoBusinessImpl implements PedidoBusiness{
@@ -47,6 +49,8 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	@Autowired
 	ContratoDao contratoDao;
 	@Autowired
+	UsuarioDao usuarioDao;
+	@Autowired
 	PedidoService pedidoService;
 	@Autowired
 	ContratoService contratoService;
@@ -64,7 +68,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
 		
 		// Si no esta adjudicado
-		if(!MetodoUtil.esSituacionAdjudicado(contrato.getSituacionContrato())){
+		if(!Util.esSituacionAdjudicado(contrato.getSituacionContrato())){
 			// Actualizar estado del contrato a no adjudicado en Caspio
 			contratoService.actualizarSituacionContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
 			
@@ -141,14 +145,18 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 
-	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
+		// Caspio - obtener datos pedido
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
+		String nroPedido = pedido.getNroPedido();
+		
 		// SAF - agregar contrato pedido
 		pedidoDao.agregarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
 		
-		// Caspio: Obtener contratoID
+		// Caspio - obtener datos contrato
 		Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
-		
+				
 		// Caspio - agregar contrato pedido
 		String contratoCaspioId = String.valueOf(contrato.getContratoId().intValue());
 		pedidoService.agregarContratoPedidoCaspio(pedidoCaspioId, contratoCaspioId);
@@ -159,12 +167,16 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 	
-	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroPedido, String nroContrato, String usuarioSAFId) throws Exception{
+	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
 		ResultadoBean resultado = new ResultadoBean();
+		// Caspio - obtener datos pedido
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
+		String nroPedido = pedido.getNroPedido();
+		
 		// SAF - eliminar contrato pedido
 		pedidoDao.eliminarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
 		
-		// Caspio: Obtener contratoID
+		// Caspio - Obtener datos contrato
 		Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
 				
 		// Caspio - eliminar contrato pedido
@@ -179,9 +191,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	
 	
 	@Override
-	public void generarOrdenIrrevocablePedido(String pedidoId) throws Exception {
+	public void generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception {
 		LOG.info("generarOrdenIrrevocablePedido");
-		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado.docx";
+		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado-"+pedidoId+".docx";
 		try{
 			String gestionInmobiliaria="gestion_inversion_inmobiliaria_desembolso";
 			 
@@ -208,8 +220,8 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 List<Constante> listaDocuIdentidad = constanteService.obtenerListaDocumentosIdentidad();
 		    	 
 				 // Obtener sumatorias totales
-				 double sumaContratos = MetodoUtil.getSumaContratosxPedido(listaContratos);
-				 double sumaInversiones = MetodoUtil.getSumaInversionesxPedido(listaInversiones);
+				 double sumaContratos = Util.getSumaContratosxPedido(listaContratos);
+				 double sumaInversiones = Util.getSumaInversionesxPedido(listaInversiones);
 				 double saldo = sumaInversiones-sumaContratos;
 				 
 		    	 List<Parametro> listaParametros=getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId);
@@ -220,7 +232,17 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         
 		         System.out.println("SE GENERO EL DOCUMENTO");
 		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
-		         mailService.sendMail("desarrollo@pandero.com.pe", documentoEmailTo, asunto, nombreDocumento);
+		         Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
+		         System.out.println("usuario:: "+usuario.getCelulaCorreo()+" - "+usuario.getEmpleadoCorreo());
+		         String emailTo = documentoEmailTo;
+		         if(!Util.esVacio(usuario.getCelulaCorreo())){
+		        	 emailTo = usuario.getCelulaCorreo();
+		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
+		        	 emailTo = usuario.getEmpleadoCorreo();
+		         }
+//		         emailTo = documentoEmailTo;
+		         
+		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento);
 		     }
 			
 		}catch(Exception e){
@@ -235,10 +257,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		try{
 			listParam = new ArrayList<>();
 			
-			Parametro parametro = new Parametro("$fecha", MetodoUtil.getDateFormat(new Date(),Constantes.FORMATO_DATE_NORMAL));
+			Parametro parametro = new Parametro("$fecha", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_NORMAL));
 			listParam.add(parametro);
 			
-			parametro = new Parametro("$hora", MetodoUtil.getDateFormat(new Date(),Constantes.FORMATO_DATE_HH_MIN_SS));
+			parametro = new Parametro("$hora", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_HH_MIN_SS));
 			listParam.add(parametro);
 			
 			String nroPedido = "P000"+pedidoId;

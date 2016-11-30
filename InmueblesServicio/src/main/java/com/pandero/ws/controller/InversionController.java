@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.service.InversionService;
+import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.JsonUtil;
 
 @Controller
 @RequestMapping("/inversionPedido")
@@ -32,14 +35,19 @@ public class InversionController {
 		System.out.println("EN METODO obtenerDatosInversion");
 		System.out.println("REQUEST: " +  params);		
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="1", detail="";
+		String result="", detail="";
 		try{
 			String inversionId = String.valueOf(params.get("inversionId"));
-			inversionService.obtenerInversionCaspio(inversionId);			
+			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);		
+			if(inversion!=null){
+				detail = JsonUtil.toJson(inversion);
+			}
+			result = Constantes.Service.RESULTADO_EXITOSO;
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerInversion:: ",e);
 			e.printStackTrace();
-			result="0";
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
@@ -58,11 +66,13 @@ public class InversionController {
 		String result="1", detail="";
 		try{
 			String inversionId = String.valueOf(params.get("inversionId"));
-			result  = inversionBusiness.confirmarInversion(inversionId);		
+			String situacionConfirmado = String.valueOf(params.get("situacionConfirmado"));
+			result  = inversionBusiness.confirmarInversion(inversionId,situacionConfirmado);		
 		}catch(Exception e){
 			LOG.error("Error inversion/confirmarInversion:: ",e);
 			e.printStackTrace();
-			result="0";
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
