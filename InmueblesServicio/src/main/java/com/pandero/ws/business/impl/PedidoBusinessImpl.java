@@ -82,8 +82,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				String nroPedido = String.valueOf(resultado.getResultado());
 				// Obtener ContratoCaspio
 				Contrato contratoCaspio = contratoService.obtenerContratoCaspio(nroContrato);
-				String contratoId = String.valueOf(contratoCaspio.getAsociadoId().intValue());
-				String asociadoId = String.valueOf(contratoCaspio.getContratoId().intValue());
+				String asociadoId = String.valueOf(contratoCaspio.getAsociadoId().intValue());
+				String contratoId = String.valueOf(contratoCaspio.getContratoId().intValue());
+				
 				// Crear pedido en Caspio
 				pedidoService.crearPedidoCaspio(nroPedido, asociadoId);
 				
@@ -93,6 +94,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				
 				// Crear contrato-pedido en Caspio
 				pedidoService.agregarContratoPedidoCaspio(pedidoId, contratoId);
+				
+				// Actualizar estado asociacion del contrato 
+				contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_NO_ASOCIADO);
 				
 				resultado.setResultado(pedidoId);
 			}
@@ -215,6 +219,13 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 
 				 // Obtener inversiones del pedido
 				 List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
+				 if(listaInversiones!=null && listaInversiones.size()>0){
+					 for(Inversion inversion : listaInversiones){
+						 if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
+							 listaInversiones.remove(inversion);
+						 }
+					 }
+				 }
 				 
 				 // Obtener inversiones del pedido
 				 List<Constante> listaDocuIdentidad = constanteService.obtenerListaDocumentosIdentidad();

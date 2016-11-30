@@ -83,17 +83,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 							|| Util.esVacio(inversion.getNroCredito())
 							|| Util.esVacio(inversion.getSectorista())
 							|| Util.esVacio(inversion.getTelefonoContacto())){
+						System.out.println("DATOS_PENDIENTES - 1");
 						permiteConfirmar = false;
 					}
 				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
-					if(!inversion.getServicioConstructora()){
+					if(inversion.getServicioConstructora()){
 						if(!Util.esVacio(inversion.getConstructoraTipoDoc())){
 							if(Util.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
 								if(Util.esVacio(inversion.getConstructoraNroDoc())
 										|| Util.esVacio(inversion.getConstructoraRazonSocial())
 										|| Util.esVacio(inversion.getConstructoraTelefono())
 										|| Util.esVacio(inversion.getConstructoraContacto())){
-									permiteConfirmar = false;
+									System.out.println("DATOS_PENDIENTES - 2");
 								}
 							}else{
 								if(Util.esVacio(inversion.getConstructoraNroDoc())
@@ -101,14 +102,17 @@ public class InversionBusinessImpl implements InversionBusiness{
 										|| Util.esVacio(inversion.getConstructoraApePaterno())
 										|| Util.esVacio(inversion.getConstructoraApeMaterno())
 										|| Util.esVacio(inversion.getConstructoraTelefono())){
+									System.out.println("DATOS_PENDIENTES - 3");
 									permiteConfirmar = false;
 								}
 							}
 						}else{
+							System.out.println("DATOS_PENDIENTES - 4");
 							permiteConfirmar = false;
 						}
 					}
 					if(Util.esVacio(inversion.getDescripcionObra())){
+						System.out.println("DATOS_PENDIENTES - 5");
 						permiteConfirmar = false;
 					}
 				}
@@ -122,12 +126,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 								|| Util.esVacio(inversion.getRepresentanteApePaterno())
 								|| Util.esVacio(inversion.getRepresentanteApeMaterno())
 								|| Util.esVacio(inversion.getRepresentanteNombres())){
+							System.out.println("DATOS_PENDIENTES - 6");
 							permiteConfirmar = false;
 						}
 					}else{
 						if(Util.esVacio(inversion.getPropietarioNombres())
 								|| Util.esVacio(inversion.getPropietarioApePaterno())
 								|| Util.esVacio(inversion.getPropietarioApeMaterno())){
+							System.out.println("DATOS_PENDIENTES - 7");
 							permiteConfirmar = false;
 						}
 					}
@@ -140,6 +146,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 								|| Util.esVacio(inversion.getBeneficiarioNroDoc())
 								|| Util.esVacio(inversion.getBeneficiarioNombreCompleto())
 								|| inversion.getBeneficiarioRelacionAsociadoId()==null){
+							System.out.println("DATOS_PENDIENTES - 8");
 							permiteConfirmar = false;
 						}
 					}
