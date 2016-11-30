@@ -59,7 +59,7 @@ public class ContratoServiceImpl implements ContratoService{
 	@Override
 	public Contrato obtenerContratoCaspio(String nroContrato) throws Exception{
 		Contrato contrato = null;
-		String serviceWhere = "{\"where\":\"NroContrato=" + nroContrato + "\"}";	
+		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String obtenerContratoURL = tableContratoURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerContratoURL,Object.class,null,serviceWhere);

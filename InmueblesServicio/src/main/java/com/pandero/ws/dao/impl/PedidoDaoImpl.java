@@ -94,7 +94,7 @@ public class PedidoDaoImpl implements PedidoDao {
 	public void agregarContratoPedidoSAF(String nroPedido, String nroContrato,
 			String usuarioId) {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
-		call.withProcedureName("dbo.USP_LOG_AgregarPedidoContrato");
+		call.withProcedureName("dbo.USP_LOG_Inmb_AgregarPedidoContrato");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
 		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
@@ -115,16 +115,17 @@ public class PedidoDaoImpl implements PedidoDao {
 	public void eliminarContratoPedidoSAF(String nroPedido, String nroContrato,
 			String usuarioId) {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
-		call.withProcedureName("dbo.USP_LOG_EliminarPedidoContrato");
+		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarPedidoContrato");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
 		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@ContratoNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		
+		System.out.println("usuarioId:: "+usuarioId);
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
 		parameters.addValue("@PedidoNumero", nroPedido);
-        parameters.addValue("@ContratoNumero", nroContrato);		
+        parameters.addValue("@ContratoNumero", nroContrato);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);

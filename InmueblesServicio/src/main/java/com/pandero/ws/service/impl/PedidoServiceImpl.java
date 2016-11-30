@@ -33,6 +33,8 @@ public class PedidoServiceImpl implements PedidoService{
 		
 	@Value("${url.service.table.pedido}")
 	private String tablePedidoURL;
+	@Value("${url.service.table.pedidoContrato}")
+	private String tablePedidoContratoURL;
 	@Value("${url.service.view.tablaPedidoContrato}")
 	private String viewTablaPedidoContratoURL;
 	@Value("${url.service.view.tablaDetalleInversion}")
@@ -55,7 +57,7 @@ public class PedidoServiceImpl implements PedidoService{
 		request.put("PedidoId", pedidoId);
 		request.put("ContratoId", contratoId);
 		request.put("Estado", "1");			
-        ServiceRestTemplate.postForObject(restTemplate,viewTablaPedidoContratoURL,Object.class,request,null);	
+        ServiceRestTemplate.postForObject(restTemplate,tablePedidoContratoURL,Object.class,request,null);	
 		return null;
 	}
 	
@@ -193,7 +195,7 @@ public class PedidoServiceImpl implements PedidoService{
 		Map<String, String> request = new HashMap<String, String>();
 		
 		String serviceWhere = "{\"where\":\"PedidoId="+pedidoId+" and ContratoId="+contratoId+"\"}";	
-		String actualizarPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
+		String actualizarPedidoURL = tablePedidoContratoURL+Constantes.Service.URL_WHERE;
 		
         ServiceRestTemplate.deleteForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;

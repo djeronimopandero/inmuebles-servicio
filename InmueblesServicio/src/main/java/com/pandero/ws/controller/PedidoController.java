@@ -121,7 +121,8 @@ public class PedidoController {
 		return response;
 	}
 	
-	
+	@RequestMapping(value = "/eliminarContratoPedido", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
 	public Map<String, Object> eliminarContratoPedido(@RequestBody Map<String, Object> params) {
 		System.out.println("EN METODO eliminarContratoPedido");
 		System.out.println("REQUEST: " +  params);		
