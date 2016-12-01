@@ -7,7 +7,7 @@ public interface PersonaService {
 
 	public void setTokenCaspio(String token);
 	
-	public PersonaCaspio obtenerPersonaCaspio(PersonaSAF persona) throws Exception;
+	public PersonaCaspio obtenerPersonaCaspio(String tipoDocumento, String nroDocumento) throws Exception;
 	public String crearPersonaCaspio(PersonaSAF persona)throws Exception;
 
 }

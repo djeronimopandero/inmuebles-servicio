@@ -39,15 +39,10 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	PersonaService personaService;
 	
 	@Override
-	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() {
+	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
 		LOGGER.info("###sincronizarContratosyAsociadosSafACaspio execute "
 				+ new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()));
-		String tokenCaspio = "";
-		try {
-			tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
 		personaService.setTokenCaspio(tokenCaspio);
 		
@@ -70,8 +65,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						contratoService.actualizarSituacionContratoCaspio(contratoSAF.getNroContrato(),
 								String.valueOf(contratoSAF.getSituacionContratoID()),
 								contratoSAF.getSituacionContrato(), contratoSAF.getFechaAdjudicacion());
-					} else {
-						
+					} else {						
 						// 2.1.-Verificar existencia del asociado
 						PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
 
@@ -81,10 +75,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								.obtenerTipoDocumentoByCodigo(null != personaSAF.getTipoDocumentoID()
 										? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
 
-						PersonaSAF personaParam = new PersonaSAF();
-						personaParam.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio()));
-						personaParam.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
-						PersonaCaspio personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
+						PersonaCaspio personaCaspio = personaService.obtenerPersonaCaspio(String.valueOf(tipoDoc.getCodigoCaspio()),personaSAF.getPersonaCodigoDocumento());
 						
 						if (null == personaCaspio
 								|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
@@ -101,9 +92,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 							personaNuevaCaspio.setNombreCompleto(personaSAF.getNombreCompleto());
 							personaService.crearPersonaCaspio(personaNuevaCaspio);
 						}
-						
-//						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
-						
+												
 						// else --> insert todos los datos
 						ContratoSAF contratoCaspioReg = new ContratoSAF();
 						contratoCaspioReg.setContratoId(contratoSAF.getContratoId());

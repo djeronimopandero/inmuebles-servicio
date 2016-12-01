@@ -15,6 +15,7 @@ import com.pandero.ws.dao.impl.ContratoDaoImpl;
 import com.pandero.ws.dao.impl.PersonaDaoImpl;
 import com.pandero.ws.service.impl.ContratoServiceImpl;
 import com.pandero.ws.service.impl.PersonaServiceImpl;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
 
 //@Component
@@ -26,12 +27,14 @@ public class RunMeTask {
 		LOGGER.info("###sincronizarPedidos execute "+new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()) );
 		
 		try {
-
 			ApplicationContextProvider appContext = new ApplicationContextProvider();
 			ContratoDaoImpl contratoDaoImpl = appContext.getApplicationContext().getBean("contratoDaoImpl", ContratoDaoImpl.class);
 			PersonaDaoImpl personaDaoImpl = appContext.getApplicationContext().getBean("personaDaoImpl", PersonaDaoImpl.class);
 			ContratoServiceImpl contratoServiceImpl = appContext.getApplicationContext().getBean("contratoServiceImpl", ContratoServiceImpl.class);
 			PersonaServiceImpl personaServiceImpl = appContext.getApplicationContext().getBean("personaServiceImpl", PersonaServiceImpl.class);
+			String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+			contratoServiceImpl.setTokenCaspio(tokenCaspio);
+			personaServiceImpl.setTokenCaspio(tokenCaspio);
 			
 			// 1.-Obtener contratos con movimientos a la fecha actual del SAF
 			List<ContratoSAF> listContratosSAF = null;
@@ -65,10 +68,7 @@ public class RunMeTask {
 								.obtenerTipoDocumentoByCodigo(null != personaSAF.getTipoDocumentoID()
 										? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
 
-						PersonaSAF personaParam = new PersonaSAF();
-						personaParam.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio()));
-						personaParam.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
-						PersonaCaspio personaCaspio = personaServiceImpl.obtenerPersonaCaspio(personaParam);
+						PersonaCaspio personaCaspio = personaServiceImpl.obtenerPersonaCaspio(String.valueOf(tipoDoc.getCodigoCaspio()),personaSAF.getPersonaCodigoDocumento());
 						
 						if (null == personaCaspio
 								|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
@@ -85,9 +85,7 @@ public class RunMeTask {
 							personaNuevaCaspio.setNombreCompleto(personaSAF.getNombreCompleto());
 							personaServiceImpl.crearPersonaCaspio(personaNuevaCaspio);
 						}
-						
-//						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
-						
+												
 						// else --> insert todos los datos
 						ContratoSAF contratoCaspioReg = new ContratoSAF();
 						contratoCaspioReg.setContratoId(contratoSAF.getContratoId());
