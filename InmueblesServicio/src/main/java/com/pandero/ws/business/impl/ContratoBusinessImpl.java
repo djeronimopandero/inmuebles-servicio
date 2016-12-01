@@ -106,6 +106,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						
 						// else --> insert todos los datos
 						ContratoSAF contratoCaspioReg = new ContratoSAF();
+						contratoCaspioReg.setContratoId(contratoSAF.getContratoId());
 						contratoCaspioReg.setNroContrato(contratoSAF.getNroContrato());
 						contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
 						contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);

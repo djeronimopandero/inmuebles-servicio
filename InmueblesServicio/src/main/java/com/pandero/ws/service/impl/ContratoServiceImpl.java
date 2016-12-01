@@ -105,6 +105,7 @@ public class ContratoServiceImpl implements ContratoService{
 	@Override
 	public String crearContratoCaspio(ContratoSAF contrato) throws Exception {
 		Map<String, String> request = new HashMap<String, String>();
+		request.put("ContratoId", String.valueOf(contrato.getContratoId()));
 		request.put("NroContrato", contrato.getNroContrato());
 		request.put("FechaContrato", contrato.getFechaVenta());
 		request.put("MontoCertificado", String.valueOf(contrato.getMontoCertificado()));
