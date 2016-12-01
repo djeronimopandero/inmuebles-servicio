@@ -33,6 +33,11 @@ public class ConstanteServiceImpl implements ConstanteService {
 	private String viewListaTiposDocumentoURL;
 	@Value("${url.service.view.listaDocumentos}")
 	private String viewListaDocumentosURL;
+	
+	String tokenCaspio = "";
+	public void setTokenCaspio(String token){
+		tokenCaspio = token;
+	}
 			
 	@Override
 	public List<Constante> obtenerListaDocumentosIdentidad() {
@@ -40,7 +45,7 @@ public class ConstanteServiceImpl implements ConstanteService {
 		try{
 			Map<String, String> request = new HashMap<String, String>();
 			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,viewListaTiposDocumentoURL,Object.class,request,null);
+	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,viewListaTiposDocumentoURL,Object.class,request,null);
 	     	String response = JsonUtil.toJson(jsonResult);	     	
 	        if(response!=null && !response.isEmpty()){
 		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -77,7 +82,7 @@ public class ConstanteServiceImpl implements ConstanteService {
 			String serviceWhere = "{\"where\":\"TipoInversion='" + tipoInversion + "'\"}";	
 			String obtenerDocumentoTipoInversionURL = viewListaDocumentosURL+Constantes.Service.URL_WHERE;
 			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerDocumentoTipoInversionURL,Object.class,request,serviceWhere);
+	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerDocumentoTipoInversionURL,Object.class,request,serviceWhere);
 	     	String response = JsonUtil.toJson(jsonResult);	     	
 	        if(response!=null && !response.isEmpty()){
 		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);

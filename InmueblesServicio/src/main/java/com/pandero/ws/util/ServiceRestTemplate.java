@@ -43,7 +43,7 @@ public class ServiceRestTemplate {
 	    return requestHeaders;
 	}
 	
-	private static String obtenerTokenCaspio() throws Exception{
+	public static String obtenerTokenCaspio() throws Exception{
 		String caspioKey = "";
 		String request = "grant_type=refresh_token&refresh_token="+caspioRefreshToken;
 		HttpEntity<String> requestEntity = new HttpEntity<String>(request,getTokenHeaders());
@@ -79,26 +79,19 @@ public class ServiceRestTemplate {
 	    return requestHeaders;
 	}
 		
-	public static <T, E> T executeMethod(RestTemplate restTemplate, String url, Class<T> responseType, HttpMethod method, 
+	public static <T, E> T executeMethod(RestTemplate restTemplate, String token, String url, Class<T> responseType, HttpMethod method, 
 			E value, E parameters){
 		LOG.info("SERVICE URL ==> "+url);
 		String request = JsonUtil.toJson(value);
 		LOG.info("JSON Params:: "+parameters);
 		LOG.info("JSON Resquest:: "+request);
-		
-		String caspioKey="";
-		try {
-			caspioKey = obtenerTokenCaspio();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+				
 		HttpEntity<E> requestEntity = null;
 		if(value==null){
 			Map<String, String> valueEmpty = new HashMap<String, String>();
-			requestEntity = new HttpEntity(valueEmpty, getHeaders(caspioKey));
+			requestEntity = new HttpEntity(valueEmpty, getHeaders(token));
 		}else{
-			requestEntity = new HttpEntity(value, getHeaders(caspioKey));
+			requestEntity = new HttpEntity(value, getHeaders(token));
 		}
 		
 		MappingJackson2HttpMessageConverter jsonConverter=new MappingJackson2HttpMessageConverter();
@@ -115,24 +108,24 @@ public class ServiceRestTemplate {
 	    return response.getBody();
 	}
 		
-	public static <T, E> T postForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+	public static <T, E> T postForObject(RestTemplate restTemplate, String token, String url, Class<T> responseType, E value, E parameters)
 	    throws JsonParseException, JsonMappingException, IOException {
-	    return executeMethod(restTemplate, url, responseType, HttpMethod.POST, value, parameters);
+	    return executeMethod(restTemplate, token, url, responseType, HttpMethod.POST, value, parameters);
 	}
 	
-	public static <T, E> T getForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+	public static <T, E> T getForObject(RestTemplate restTemplate, String token, String url, Class<T> responseType, E value, E parameters)
 		    throws JsonParseException, JsonMappingException, IOException {
-		    return executeMethod(restTemplate, url, responseType, HttpMethod.GET, value, parameters);
+		    return executeMethod(restTemplate, token, url, responseType, HttpMethod.GET, value, parameters);
 	}
 	
-	public static <T, E> T putForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+	public static <T, E> T putForObject(RestTemplate restTemplate, String token, String url, Class<T> responseType, E value, E parameters)
 		    throws JsonParseException, JsonMappingException, IOException {
-		    return executeMethod(restTemplate, url, responseType, HttpMethod.PUT, value, parameters);
+		    return executeMethod(restTemplate, token, url, responseType, HttpMethod.PUT, value, parameters);
 	}
 	
-	public static <T, E> T deleteForObject(RestTemplate restTemplate, String url, Class<T> responseType, E value, E parameters)
+	public static <T, E> T deleteForObject(RestTemplate restTemplate, String token, String url, Class<T> responseType, E value, E parameters)
 		    throws JsonParseException, JsonMappingException, IOException {
-		    return executeMethod(restTemplate, url, responseType, HttpMethod.DELETE, value, parameters);
+		    return executeMethod(restTemplate, token, url, responseType, HttpMethod.DELETE, value, parameters);
 	}
 		
 }

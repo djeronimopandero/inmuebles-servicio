@@ -7,7 +7,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
@@ -19,6 +21,7 @@ import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PersonaDAO;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.PersonaService;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
 
 @Service
@@ -28,24 +31,28 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 
 	@Autowired
 	ContratoDao contratoDao;
-
 	@Autowired
 	PersonaDAO personaDao;
-
 	@Autowired
 	ContratoService contratoService;
-
 	@Autowired
 	PersonaService personaService;
-
+	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() {
 		LOGGER.info("###sincronizarContratosyAsociadosSafACaspio execute "
 				+ new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()));
-
+		String tokenCaspio = "";
+		try {
+			tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		contratoService.setTokenCaspio(tokenCaspio);
+		personaService.setTokenCaspio(tokenCaspio);
+		
 		ResultadoBean resultadoBean = null;
 		try {
-
 			// 1.-Obtener contratos con movimientos a la fecha actual del SAF
 			List<ContratoSAF> listContratosSAF = null;
 
@@ -59,17 +66,13 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 					Contrato contratoCaspio = contratoService.obtenerContratoCaspio(contratoSAF.getNroContrato());
 
 					if (null != contratoCaspio) {
-						// if exists --> update : situacion, fecha de
-						// adjudicacion
+						// if exists --> update : situacion, fecha de adjudicacion
 						contratoService.actualizarSituacionContratoCaspio(contratoSAF.getNroContrato(),
 								String.valueOf(contratoSAF.getSituacionContratoID()),
 								contratoSAF.getSituacionContrato(), contratoSAF.getFechaAdjudicacion());
 					} else {
 						
 						// 2.1.-Verificar existencia del asociado
-						// La llave con el saf es el tipo de documento y el numero
-						// de documento
-
 						PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
 
 						UtilEnum.TIPO_DOCUMENTO tipoDoc;

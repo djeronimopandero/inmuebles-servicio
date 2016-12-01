@@ -33,13 +33,18 @@ public class InversionServiceImpl implements InversionService {
 	private String tablePedidoInversionURL;
 	@Value("${url.service.view.tablaDetalleInversion}")
 	private String viewTablaDetalleInversionURL;
+	
+	String tokenCaspio = "";
+	public void setTokenCaspio(String token){
+		tokenCaspio = token;
+	}
 
 	public Inversion obtenerInversionCaspio(String inversionId) throws Exception {
 		Inversion inversion = null;
 		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";		
 		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
 	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -69,7 +74,7 @@ public class InversionServiceImpl implements InversionService {
 		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
 		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 
@@ -80,7 +85,7 @@ public class InversionServiceImpl implements InversionService {
 		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
 		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 }

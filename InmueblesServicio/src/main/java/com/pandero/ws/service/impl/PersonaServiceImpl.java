@@ -33,13 +33,18 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 	@Value("${url.service.table.persona}")
 	private String tablePersonaURL;
 	
+	String tokenCaspio = "";
+	public void setTokenCaspio(String token){
+		tokenCaspio = token;
+	}
+	
 	@Override
 	public PersonaCaspio obtenerPersonaCaspio(PersonaSAF personaParam) throws Exception {
 		PersonaCaspio personaCaspio = null;
 		String serviceWhere = "{\"where\":\"TipoDocumento='" + personaParam.getTipoDocumentoID() + "' and NroDocumento='"+personaParam.getPersonaCodigoDocumento()+"'\"}";	
 		String obtenerPedidoURL = tablePersonaURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -70,7 +75,7 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 		request.put("ApellidoMaterno", persona.getApellidoMaterno() );			
 		request.put("RazonSocial",  persona.getRazonSocial() );			
 		request.put("TipoPersona", persona.getTipoPersona());		
-        ServiceRestTemplate.postForObject(restTemplate,tablePersonaURL,Object.class,request,null);	
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tablePersonaURL,Object.class,request,null);	
 		return "SUCCESS";
 	}
 

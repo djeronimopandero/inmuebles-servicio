@@ -30,6 +30,7 @@ import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 
 @Component
@@ -63,6 +64,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 
 	@Override
 	public ResultadoBean registrarNuevoPedido(String nroContrato, String usuarioSAFId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		contratoService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
 		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
@@ -106,6 +111,11 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	}
 	
 	public ResultadoBean eliminarPedido(String pedidoCaspioId, String nroPedido, String usuarioSAFId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		contratoService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		inversionService.setTokenCaspio(tokenCaspio);
+		
 		ResultadoBean resultado = new ResultadoBean();
 		// Caspio - buscar inversiones del pedido
 		boolean inversionesConfirmadas = false;
@@ -150,6 +160,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	}
 
 	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		contratoService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		ResultadoBean resultado = new ResultadoBean();
 		// Caspio - obtener datos pedido
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
@@ -172,6 +186,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	}
 	
 	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		contratoService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		ResultadoBean resultado = new ResultadoBean();
 		// Caspio - obtener datos pedido
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
@@ -196,6 +214,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	
 	@Override
 	public void generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		constanteService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		LOG.info("generarOrdenIrrevocablePedido");
 		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado-"+pedidoId+".docx";
 		try{

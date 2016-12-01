@@ -15,6 +15,7 @@ import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 
 @Component
@@ -31,6 +32,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	
 	@Override
 	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
 		String resultado = "";
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
@@ -53,11 +57,26 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	public void validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		// Obtener inversiones del pedido
 		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
+		double totalInversion = 0;
+		if(listaInversiones!=null && listaInversiones.size()>0){
+			for(Inversion inversion : listaInversiones){
+				totalInversion += inversion.getImporteInversion();
+			}
+		}
 		
 		// Obtener contratos del pedido
 		List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(pedidoId);
+		double totalContratos = 0;
+		if(listaContratos!=null && listaContratos.size()>0){
+			for(Contrato contrato : listaContratos){
+				totalContratos += contrato.getMontoCertificado();
+			}
+		}
 		
 	}
 	
