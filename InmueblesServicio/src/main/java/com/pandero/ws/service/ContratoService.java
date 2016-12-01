@@ -8,5 +8,5 @@ public interface ContratoService {
 	public Contrato obtenerContratoCaspio(String nroContrato) throws Exception;
 	public Contrato actualizarSituacionContratoCaspio(String nroContrato, String situacionId, String situacionNom, String fechaSituacion) throws Exception;
 	public String actualizarAsociacionContrato(String nroContrato, String estadoAsociacion) throws Exception;
-	public String crearContratoCaspio(ContratoSAF contrato)throws Exception;
+	public String crearContratoCaspio(ContratoSAF contrato) throws Exception;
 }
