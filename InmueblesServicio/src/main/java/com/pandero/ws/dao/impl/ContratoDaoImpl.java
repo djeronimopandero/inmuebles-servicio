@@ -71,6 +71,7 @@ public class ContratoDaoImpl implements ContratoDao {
 			e.setFechaAdjudicacion(rs.getString("FechaAdjudicacion"));
 			e.setSituacionContratoID(rs.getInt("SituacionContratoID"));
 			e.setPersonaId(rs.getInt("PersonaID"));
+			e.setEsAdjudicado(rs.getInt("TipoAdjudicacion"));
 			return e;		    
 		}
 	}
