@@ -99,14 +99,14 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						contratoCaspioReg.setNroContrato(contratoSAF.getNroContrato());
 						contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
 						contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);
-						contratoCaspioReg.setMontoDisponible(null!=contratoSAF.getMontoDisponible()?contratoSAF.getMontoDisponible():0);
+						contratoCaspioReg.setMontoDisponible(contratoCaspioReg.getMontoCertificado());
 						contratoCaspioReg.setAsociadoId(Integer.parseInt(personaSAF.getPersonaID()));
 						contratoCaspioReg.setSituacionContratoCASPIO(contratoSAF.getSituacionContratoCASPIO());
 						contratoCaspioReg.setDiferenciaPrecio(null!=contratoSAF.getDiferenciaPrecio()?contratoSAF.getDiferenciaPrecio():0);
 						contratoCaspioReg.setDiferenciaPrecioDisponible(null!=contratoSAF.getDiferenciaPrecioDisponible()?contratoSAF.getDiferenciaPrecioDisponible():0);
 						contratoCaspioReg.setOtrosIngresos(null!=contratoSAF.getOtrosIngresos()?contratoSAF.getOtrosIngresos():0);
 						contratoCaspioReg.setOtrosDisponibles(null!=contratoSAF.getOtrosDisponibles()?contratoSAF.getOtrosDisponibles():0);
-						contratoCaspioReg.setTotalDisponible(null!=contratoSAF.getTotalDisponible()?contratoSAF.getTotalDisponible():0);
+//						contratoCaspioReg.setTotalDisponible(null!=contratoSAF.getTotalDisponible()?contratoSAF.getTotalDisponible():0);
 						contratoCaspioReg.setEstado(contratoSAF.getEstado());
 						contratoCaspioReg.setFechaAdjudicacion(contratoSAF.getFechaAdjudicacion());
 						contratoCaspioReg.setSituacionContrato(contratoSAF.getSituacionContrato());

@@ -17,6 +17,7 @@ import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
+import com.pandero.ws.util.ServiceRestTemplate;
 
 @Controller
 @RequestMapping("/inversionPedido")
@@ -24,8 +25,6 @@ public class InversionController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InversionController.class);
 
-	@Autowired
-	InversionService inversionService;
 	@Autowired
 	InversionBusiness inversionBusiness;
 	
@@ -37,11 +36,11 @@ public class InversionController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
-			String inversionId = String.valueOf(params.get("inversionId"));
-			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);		
-			if(inversion!=null){
-				detail = JsonUtil.toJson(inversion);
-			}
+//			String inversionId = String.valueOf(params.get("inversionId"));
+//			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);		
+//			if(inversion!=null){
+//				detail = JsonUtil.toJson(inversion);
+//			}
 			result = Constantes.Service.RESULTADO_EXITOSO;
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerInversion:: ",e);
@@ -91,7 +90,7 @@ public class InversionController {
 		String result="1", detail="";
 		try{
 			String inversionId = String.valueOf(params.get("inversionId"));
-			inversionService.actualizarEstadoInversionCaspio(inversionId, Constantes.Inversion.ESTADO_ANULADO);
+			inversionBusiness.eliminarInversion(inversionId);
 			result = Constantes.Service.RESULTADO_EXITOSO;
 		}catch(Exception e){
 			LOG.error("Error inversion/eliminarInversion:: ",e);
