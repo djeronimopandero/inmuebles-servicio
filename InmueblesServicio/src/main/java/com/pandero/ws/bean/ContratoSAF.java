@@ -17,6 +17,7 @@ public class ContratoSAF {
 	private String fechaVenta;
 	private Integer personaId;
 	private Integer asociadoId;
+	private Integer esAdjudicado;
 	
 	private Integer situacionContratoID; //SAF
 	private String situacionContrato; //SAF
@@ -129,6 +130,12 @@ public class ContratoSAF {
 	}
 	public void setSituacionContratoCASPIO(String situacionContratoCASPIO) {
 		this.situacionContratoCASPIO = situacionContratoCASPIO;
+	}
+	public Integer getEsAdjudicado() {
+		return esAdjudicado;
+	}
+	public void setEsAdjudicado(Integer esAdjudicado) {
+		this.esAdjudicado = esAdjudicado;
 	}
 	
 }

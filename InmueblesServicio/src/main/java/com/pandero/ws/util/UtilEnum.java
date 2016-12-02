@@ -40,4 +40,26 @@ public class UtilEnum {
 			}
 	}
 	
+	public static enum ADJUDICACION {
+		
+		SI(1, "ADJUDICADO"),
+		NO(2, "NO ADJUDICADO");
+		
+		private final Integer codigo;
+		private final String texto;
+
+		private ADJUDICACION(Integer codigo, String texto) {
+			this.codigo = codigo;
+			this.texto = texto;
+		}
+
+		public Integer getCodigo() {
+			return codigo;
+		}
+
+		public String getTexto() {
+			return texto;
+		}
+	}
+	
 }

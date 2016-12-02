@@ -66,61 +66,67 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								contratoSAF.getSituacionContrato(), contratoSAF.getFechaAdjudicacion());
 					} else {
 						
-						// 2.1.-Verificar existencia del asociado
-						// La llave con el saf es el tipo de documento y el numero
-						// de documento
-
-						PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
-
-						UtilEnum.TIPO_DOCUMENTO tipoDoc;
-
-						tipoDoc = UtilEnum.TIPO_DOCUMENTO
-								.obtenerTipoDocumentoByCodigo(null != personaSAF.getTipoDocumentoID()
-										? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
-
-						PersonaSAF personaParam = new PersonaSAF();
-						personaParam.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio()));
-						personaParam.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
-						PersonaCaspio personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
-						
-						if (null == personaCaspio
-								|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
-							// if not exists --> insert todos los campos
-							PersonaSAF personaNuevaCaspio = new PersonaSAF();
-							personaNuevaCaspio.setPersonaID(personaSAF.getPersonaID());
-							personaNuevaCaspio.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio().intValue()));
-							personaNuevaCaspio.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
-							personaNuevaCaspio.setNombre(personaSAF.getNombre());
-							personaNuevaCaspio.setApellidoPaterno(personaSAF.getApellidoPaterno());
-							personaNuevaCaspio.setApellidoMaterno(personaSAF.getApellidoMaterno());
-							personaNuevaCaspio.setRazonSocial(personaSAF.getRazonSocial());
-							personaNuevaCaspio.setTipoPersona(personaSAF.getTipoPersona());
-							personaNuevaCaspio.setNombreCompleto(personaSAF.getNombreCompleto());
-							personaService.crearPersonaCaspio(personaNuevaCaspio);
+							//Solo registar los contratos ADJUDICADOS
+							if(UtilEnum.ADJUDICACION.SI.getCodigo() == contratoSAF.getEsAdjudicado()){
+								LOGGER.info("###El contrato "+contratoSAF.getNroContrato()+" es adjudicado se procede a registrarlo");
+								
+								// 2.1.-Verificar existencia del asociado
+								// La llave con el saf es el tipo de documento y el numero
+								// de documento
+		
+								PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
+		
+								UtilEnum.TIPO_DOCUMENTO tipoDoc;
+		
+								tipoDoc = UtilEnum.TIPO_DOCUMENTO
+										.obtenerTipoDocumentoByCodigo(null != personaSAF.getTipoDocumentoID()
+												? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
+		
+								PersonaSAF personaParam = new PersonaSAF();
+								personaParam.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio()));
+								personaParam.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
+								PersonaCaspio personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
+								
+								if (null == personaCaspio
+										|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
+									// if not exists --> insert todos los campos
+									PersonaSAF personaNuevaCaspio = new PersonaSAF();
+									personaNuevaCaspio.setPersonaID(personaSAF.getPersonaID());
+									personaNuevaCaspio.setTipoDocumentoID(String.valueOf(tipoDoc.getCodigoCaspio().intValue()));
+									personaNuevaCaspio.setPersonaCodigoDocumento(personaSAF.getPersonaCodigoDocumento());
+									personaNuevaCaspio.setNombre(personaSAF.getNombre());
+									personaNuevaCaspio.setApellidoPaterno(personaSAF.getApellidoPaterno());
+									personaNuevaCaspio.setApellidoMaterno(personaSAF.getApellidoMaterno());
+									personaNuevaCaspio.setRazonSocial(personaSAF.getRazonSocial());
+									personaNuevaCaspio.setTipoPersona(personaSAF.getTipoPersona());
+									personaNuevaCaspio.setNombreCompleto(personaSAF.getNombreCompleto());
+									personaService.crearPersonaCaspio(personaNuevaCaspio);
+								}
+								
+		//						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
+								
+								// else --> insert todos los datos
+								ContratoSAF contratoCaspioReg = new ContratoSAF();
+								contratoCaspioReg.setContratoId(contratoSAF.getContratoId());
+								contratoCaspioReg.setNroContrato(contratoSAF.getNroContrato());
+								contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
+								contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);
+								contratoCaspioReg.setMontoDisponible(null!=contratoSAF.getMontoDisponible()?contratoSAF.getMontoDisponible():0);
+								contratoCaspioReg.setAsociadoId(Integer.parseInt(personaSAF.getPersonaID()));
+								contratoCaspioReg.setSituacionContratoCASPIO(contratoSAF.getSituacionContratoCASPIO());
+								contratoCaspioReg.setDiferenciaPrecio(null!=contratoSAF.getDiferenciaPrecio()?contratoSAF.getDiferenciaPrecio():0);
+								contratoCaspioReg.setDiferenciaPrecioDisponible(null!=contratoSAF.getDiferenciaPrecioDisponible()?contratoSAF.getDiferenciaPrecioDisponible():0);
+								contratoCaspioReg.setOtrosIngresos(null!=contratoSAF.getOtrosIngresos()?contratoSAF.getOtrosIngresos():0);
+								contratoCaspioReg.setOtrosDisponibles(null!=contratoSAF.getOtrosDisponibles()?contratoSAF.getOtrosDisponibles():0);
+								contratoCaspioReg.setTotalDisponible(null!=contratoSAF.getTotalDisponible()?contratoSAF.getTotalDisponible():0);
+								contratoCaspioReg.setEstado(contratoSAF.getEstado());
+								contratoCaspioReg.setFechaAdjudicacion(contratoSAF.getFechaAdjudicacion());
+								contratoCaspioReg.setSituacionContrato(contratoSAF.getSituacionContrato());
+								String success = contratoService.crearContratoCaspio(contratoCaspioReg);
+						}else{
+							LOGGER.info("###El contrato "+contratoSAF.getNroContrato()+" no esta adjudicado, no sera registrado en CASPIO");
 						}
-						
-//						personaCaspio = personaService.obtenerPersonaCaspio(personaParam);
-						
-						// else --> insert todos los datos
-						ContratoSAF contratoCaspioReg = new ContratoSAF();
-						contratoCaspioReg.setContratoId(contratoSAF.getContratoId());
-						contratoCaspioReg.setNroContrato(contratoSAF.getNroContrato());
-						contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
-						contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);
-						contratoCaspioReg.setMontoDisponible(null!=contratoSAF.getMontoDisponible()?contratoSAF.getMontoDisponible():0);
-						contratoCaspioReg.setAsociadoId(Integer.parseInt(personaSAF.getPersonaID()));
-						contratoCaspioReg.setSituacionContratoCASPIO(contratoSAF.getSituacionContratoCASPIO());
-						contratoCaspioReg.setDiferenciaPrecio(null!=contratoSAF.getDiferenciaPrecio()?contratoSAF.getDiferenciaPrecio():0);
-						contratoCaspioReg.setDiferenciaPrecioDisponible(null!=contratoSAF.getDiferenciaPrecioDisponible()?contratoSAF.getDiferenciaPrecioDisponible():0);
-						contratoCaspioReg.setOtrosIngresos(null!=contratoSAF.getOtrosIngresos()?contratoSAF.getOtrosIngresos():0);
-						contratoCaspioReg.setOtrosDisponibles(null!=contratoSAF.getOtrosDisponibles()?contratoSAF.getOtrosDisponibles():0);
-						contratoCaspioReg.setTotalDisponible(null!=contratoSAF.getTotalDisponible()?contratoSAF.getTotalDisponible():0);
-						contratoCaspioReg.setEstado(contratoSAF.getEstado());
-						contratoCaspioReg.setFechaAdjudicacion(contratoSAF.getFechaAdjudicacion());
-						contratoCaspioReg.setSituacionContrato(contratoSAF.getSituacionContrato());
-						String success = contratoService.crearContratoCaspio(contratoCaspioReg);
-					}
-
+				}
 
 				}
 
