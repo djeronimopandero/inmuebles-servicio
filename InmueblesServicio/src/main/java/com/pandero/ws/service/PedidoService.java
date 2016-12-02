@@ -9,6 +9,8 @@ import com.pandero.ws.bean.Pedido;
 
 public interface PedidoService {
 
+	public void setTokenCaspio(String token);
+	
 	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception;
 	public Pedido obtenerPedidoCaspio(String nroPedido) throws Exception;
 	public Pedido obtenerPedidoCaspioPorId(String pedidoId) throws Exception;

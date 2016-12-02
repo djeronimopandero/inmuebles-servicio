@@ -7,6 +7,8 @@ import com.pandero.ws.bean.DocumentoRequisito;
 
 public interface ConstanteService {
 
+	public void setTokenCaspio(String token);
+	
 	public List<Constante> obtenerListaDocumentosIdentidad();
 	public List<DocumentoRequisito> obtenerListaDocumentosPorTipoInversion(String tipoInversion);
 }

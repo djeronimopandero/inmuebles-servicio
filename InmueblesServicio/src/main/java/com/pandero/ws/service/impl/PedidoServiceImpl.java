@@ -39,6 +39,11 @@ public class PedidoServiceImpl implements PedidoService{
 	private String viewTablaPedidoContratoURL;
 	@Value("${url.service.view.tablaDetalleInversion}")
 	private String viewTablaDetalleInversionURL;
+	
+	String tokenCaspio = "";
+	public void setTokenCaspio(String token){
+		tokenCaspio = token;
+	}
 		
 	@Override
 	public String crearPedidoCaspio(String nroPedido, String asociadoId) throws Exception{
@@ -48,7 +53,7 @@ public class PedidoServiceImpl implements PedidoService{
 		request.put("Fecha", Util.getFechaActualYYYYMMDD());
 		request.put("Estado", Constantes.Pedido.ESTADO_EMITIDO);
 		request.put("Producto", Constantes.Producto.PRODUCTO_INMUEBLES);			
-        ServiceRestTemplate.postForObject(restTemplate,tablePedidoURL,Object.class,request,null);	
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tablePedidoURL,Object.class,request,null);	
 		return null;
 	}
 
@@ -58,7 +63,7 @@ public class PedidoServiceImpl implements PedidoService{
 		request.put("PedidoId", pedidoId);
 		request.put("ContratoId", contratoId);
 		request.put("Estado", "1");			
-        ServiceRestTemplate.postForObject(restTemplate,tablePedidoContratoURL,Object.class,request,null);	
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tablePedidoContratoURL,Object.class,request,null);	
 		return null;
 	}
 	
@@ -71,7 +76,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"NroPedido='" + nroPedido + "'\"}";	
 		String actualizarPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 
@@ -82,7 +87,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
 		String obtenerContratosxPedidoURL = viewTablaPedidoContratoURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -112,7 +117,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";		
 		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
 	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -142,7 +147,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"NroPedido='" + nroPedido + "'\"}";	
 		String obtenerPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -169,7 +174,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
 		String obtenerPedidoURL = tablePedidoURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -198,7 +203,7 @@ public class PedidoServiceImpl implements PedidoService{
 		String serviceWhere = "{\"where\":\"PedidoId="+pedidoId+" and ContratoId="+contratoId+"\"}";	
 		String actualizarPedidoURL = tablePedidoContratoURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.deleteForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);	
+        ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 	

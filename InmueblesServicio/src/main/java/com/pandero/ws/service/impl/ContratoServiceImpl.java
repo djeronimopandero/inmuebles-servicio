@@ -34,6 +34,11 @@ public class ContratoServiceImpl implements ContratoService{
 	@Value("${url.service.table.contrato}")
 	private String tableContratoURL;
 
+	String tokenCaspio = "";
+	public void setTokenCaspio(String token){
+		tokenCaspio = token;
+	}
+	
 	@Override
 	public Contrato actualizarSituacionContratoCaspio(String nroContrato,
 			String situacionId, String situacionNom, String fechaSituacion) throws Exception {		
@@ -52,7 +57,7 @@ public class ContratoServiceImpl implements ContratoService{
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
 		return null;
 	}
 
@@ -62,7 +67,7 @@ public class ContratoServiceImpl implements ContratoService{
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String obtenerContratoURL = tableContratoURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,obtenerContratoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
@@ -92,7 +97,7 @@ public class ContratoServiceImpl implements ContratoService{
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
 		
-        ServiceRestTemplate.putForObject(restTemplate,actualizarPedidoURL,Object.class,request,serviceWhere);
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
 		return null;
 		
 	}
@@ -115,7 +120,7 @@ public class ContratoServiceImpl implements ContratoService{
 		request.put("Estado", contrato.getEstado());			
 		request.put("FechaAdjudicacion", contrato.getFechaAdjudicacion());			
 		request.put("SituacionSAF", contrato.getSituacionContrato());			
-        ServiceRestTemplate.postForObject(restTemplate,tableContratoURL,Object.class,request,null);	
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableContratoURL,Object.class,request,null);	
 		return "SUCCESS";
 	}
 	

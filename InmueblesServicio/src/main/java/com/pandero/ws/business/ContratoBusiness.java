@@ -4,7 +4,7 @@ import com.pandero.ws.bean.ResultadoBean;
 
 public interface ContratoBusiness {
 
-	public ResultadoBean sincronizarContratosyAsociadosSafACaspio();
+	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception;
 	
 	
 }
