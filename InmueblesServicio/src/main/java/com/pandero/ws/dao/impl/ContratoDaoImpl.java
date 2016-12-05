@@ -1,7 +1,9 @@
 package com.pandero.ws.dao.impl;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -13,13 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
-import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
+import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.ContratoDao;
 
 @Repository
@@ -35,12 +39,12 @@ public class ContratoDaoImpl implements ContratoDao {
 	}
 
 	@Override
-	public Contrato obtenerContratoSAF(String nroContrato) throws Exception {
-			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID "+
+	public ContratoSAF obtenerContratoSAF(String nroContrato) throws Exception {
+			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID, ContratoID "+
 					"from FOC_Contrato where ContratoNumero='"+nroContrato+"'";
 							
-		List<Contrato> listaContratos = this.jdbcTemplate.query(query, new ContratoMapper());
-		Contrato contrato = null;	
+		List<ContratoSAF> listaContratos = this.jdbcTemplate.query(query, new ContratoMapper());
+		ContratoSAF contrato = null;	
 		if(listaContratos!=null && listaContratos.size()>0){	
 			contrato = listaContratos.get(0);
 			System.out.println("listaContratos:: "+listaContratos.size());
@@ -48,12 +52,13 @@ public class ContratoDaoImpl implements ContratoDao {
 		return contrato;
 	}
 	
-	private static final class ContratoMapper implements RowMapper<Contrato>{
-		public Contrato mapRow(ResultSet rs, int rowNum) throws SQLException {			
-			Contrato e = new Contrato();	
+	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
+		public ContratoSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			ContratoSAF e = new ContratoSAF();	
 			e.setNroContrato(rs.getString("ContratoNumero"));
 			e.setSituacionContrato(rs.getString("SituacionContratoID"));
 			e.setAsociadoId(rs.getInt("PersonaID"));
+			e.setContratoId(rs.getInt("ContratoID"));
 			return e;		    
 			}
 		}
@@ -98,6 +103,29 @@ public class ContratoDaoImpl implements ContratoDao {
 		}
 
 		return listContratos;
+	}
+
+	@Override
+	public Double obtenerDiferenciaPrecioPorContrato(Integer contratoId) throws Exception {
+		LOG.info("###obtenerDiferenciaPrecioPorContrato : "+contratoId);
+		ResultadoBean resultado = null;
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_FOC_ObtenerDiferenciaPrecioPorContrato");
+		call.withoutProcedureColumnMetaDataAccess();	
+		
+		call.addDeclaredParameter(new SqlParameter("@contratoid", Types.INTEGER));
+		call.addDeclaredParameter(new SqlOutParameter("@diferenciaPrecio", Types.DECIMAL));
+		
+		MapSqlParameterSource parameters = new MapSqlParameterSource();		
+        parameters.addValue("@contratoid", contratoId);
+				
+		Map resultadoSP = call.execute(parameters);
+		BigDecimal bdDiferenciaPrecio = resultadoSP.get("@diferenciaPrecio")!=null? 
+				new BigDecimal(String.valueOf(resultadoSP.get("@diferenciaPrecio"))):new BigDecimal("0");
+		LOG.info("###strDiferenciaPrecio:: "+bdDiferenciaPrecio);
+		
+		return bdDiferenciaPrecio.doubleValue();
 	}
 
 }

@@ -7,6 +7,8 @@ import com.pandero.ws.bean.ContratoSAF;
 
 public interface ContratoDao {
 
-	public Contrato obtenerContratoSAF(String nroContrato) throws Exception;
+	public ContratoSAF obtenerContratoSAF(String nroContrato) throws Exception;
 	public List<ContratoSAF> getListContratoAlDia()throws Exception;
+	public Double obtenerDiferenciaPrecioPorContrato(Integer contratoId)throws Exception;
+	
 }

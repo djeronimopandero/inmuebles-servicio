@@ -123,5 +123,16 @@ public class ContratoServiceImpl implements ContratoService{
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableContratoURL,Object.class,request,null);	
 		return "SUCCESS";
 	}
+
+	@Override
+	public void actualizarDifPrecioContratoCaspio(String nroContrato, Double dblDifPrecio) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();	
+		request.put("DiferenciaPrecio", String.valueOf(dblDifPrecio));
+		
+		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
+		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
+	}
 	
 }

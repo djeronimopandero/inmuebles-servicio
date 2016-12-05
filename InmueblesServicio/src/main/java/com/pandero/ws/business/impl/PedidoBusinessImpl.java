@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
@@ -70,12 +71,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
-		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
+		ContratoSAF contratoSAF = contratoDao.obtenerContratoSAF(nroContrato);
 		
 		// Si no esta adjudicado
-		if(!Util.esSituacionAdjudicado(contrato.getSituacionContrato())){
+		if(!Util.esSituacionAdjudicado(contratoSAF.getSituacionContrato())){
 			// Actualizar estado del contrato a no adjudicado en Caspio
-			contratoService.actualizarSituacionContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
+			contratoService.actualizarSituacionContratoCaspio(nroContrato, contratoSAF.getSituacionContrato(), null, null);
 			
 			// Enviar mensaje contrato no adjudicado
 			resultado.setMensajeError("El contrato no se encuentra adjudicado");
