@@ -14,11 +14,13 @@ import org.springframework.stereotype.Component;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
+import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
@@ -213,43 +215,55 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	
 	
 	@Override
-	public void generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception {
+	public String generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		constanteService.setTokenCaspio(tokenCaspio);
-		pedidoService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);		
+		
+		String resultado = "";
 		
 		LOG.info("generarOrdenIrrevocablePedido");
-		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado-"+pedidoId+".docx";
-		try{
-			String gestionInmobiliaria="gestion_inversion_inmobiliaria_desembolso";
+		String nombreDocumento="Orden-irrevocable-inversion-inmobiliaria-Generado-"+pedidoId+".docx";	
+		String gestionInmobiliaria="gestion_inversion_inmobiliaria_desembolso";
+		 
+		DocumentoUtil documentoUtil=new DocumentoUtil();	
+		XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/"+gestionInmobiliaria+"/"+"Orden-irrevocable-de-uso-de-certificado-para-inversion-inmobiliaria.docx");
+				 
+	     if (doc != null) {
+	    	// Obtener inversiones confirmadas del pedido
+			 List<Inversion> listaInversionesCaspio = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
+			 List<Inversion> listaInversiones = new ArrayList<Inversion>();
+			 if(listaInversionesCaspio!=null && listaInversionesCaspio.size()>0){
+				 for(Inversion inversion : listaInversionesCaspio){
+					 if(!Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
+						 listaInversiones.add(inversion);
+					 }
+				 }
+			 }
 			 
-			DocumentoUtil documentoUtil=new DocumentoUtil();	
-			XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/"+gestionInmobiliaria+"/"+"Orden-irrevocable-de-uso-de-certificado-para-inversion-inmobiliaria.docx");
-			
+			 boolean datosCompletos = true;
+			 if(listaInversiones!=null && listaInversiones.size()>0){
+				 for(Inversion inversion : listaInversiones){
+					// Obtener lista de documentos
+					List<DocumentoRequisito> listaDocumentos = obtenerDocumentosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
+					// Validar datos antes de confirmar
+					resultado = DocumentoUtil.validarConfirmarInversion(listaDocumentos, inversion);
+					datosCompletos = false;
+					break;
+				 }
+			 }
 			 
-		     if (doc != null) {
+			 if(datosCompletos){
 		    	 // Obtener contratos del pedido
 				 List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(pedidoId);
 				 
 				 // Obtener nro contrato del asociado
-				 String nroContrato = "";
-				 nroContrato = listaContratos.get(0).getNroContrato();
+				 String nroContrato = listaContratos.get(0).getNroContrato();
 				 System.out.println("nroContrato: "+nroContrato);
 				 				 
 				 // Obtener datos del o los asociados
 				 List<Asociado> listaAsociados=pedidoDao.obtenerAsociadosxContratoSAF(nroContrato);
-				 
-				 // Obtener inversiones del pedido
-				 List<Inversion> listaInversionesCaspio = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
-				 List<Inversion> listaInversiones = new ArrayList<Inversion>();
-				 if(listaInversionesCaspio!=null && listaInversionesCaspio.size()>0){
-					 for(Inversion inversion : listaInversionesCaspio){
-						 if(!Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
-							 listaInversiones.add(inversion);
-						 }
-					 }
-				 }
-				 
+				 			 
 				 // Obtener inversiones del pedido
 				 List<Constante> listaDocuIdentidad = constanteService.obtenerListaDocumentosIdentidad();
 		    	 
@@ -258,78 +272,50 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 double sumaInversiones = Util.getSumaInversionesxPedido(listaInversiones);
 				 double saldo = sumaInversiones-sumaContratos;
 				 
-		    	 List<Parametro> listaParametros=getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId);
+				 // Obtener los parametros a enviar al documento
+		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId);
 		    	 
+		    	 // Reemplazar los datos en la plantilla
 		         doc = DocumentoUtil.replaceTextOrdenIrrevocable(doc,listaParametros,listaDocuIdentidad, listaAsociados,listaContratos,listaInversiones);
 		         StringBuilder sb=new StringBuilder();
-		         documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append(nombreDocumento).toString());
 		         
+		         // Grabar el documento generado
+		         documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append(nombreDocumento).toString());		         
 		         System.out.println("SE GENERO EL DOCUMENTO");
-		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
-		         Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
-		         System.out.println("usuario:: "+usuario.getCelulaCorreo()+" - "+usuario.getEmpleadoCorreo());
+		         
+		         // Obtener correo para enviar documento
 		         String emailTo = documentoEmailTo;
+		         Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);		         
 		         if(!Util.esVacio(usuario.getCelulaCorreo())){
 		        	 emailTo = usuario.getCelulaCorreo();
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
-		         }
-//		         emailTo = documentoEmailTo;
-		         
+		         }	 
+		         // Enviar orden irrevocable a correo
+		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
 		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento);
-		     }
-			
-		}catch(Exception e){
-			LOG.error("###Error:",e);
-			e.printStackTrace();
-		}
+			 }
+	     }
 		
+	     return resultado;
 	}
-	
-	private List<Parametro> getParametrosOrdenIrrevocable(double sumaContratos, double sumaInversiones, double saldo, String pedidoId) {
-		List<Parametro> listParam=null;		
-		try{
-			listParam = new ArrayList<>();
-			
-			Parametro parametro = new Parametro("$fecha", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_NORMAL));
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$hora", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_HH_MIN_SS));
-			listParam.add(parametro);
-			
-			String nroPedido = "P000"+pedidoId;
-			parametro = new Parametro("$numeroInversion", nroPedido);
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$tablaInversiones", "TABLA INVERSIONISTA");
-			listParam.add(parametro);
-						
-			parametro = new Parametro("$importeInversion", String.valueOf(sumaInversiones));
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$importeTotal", String.valueOf(sumaContratos));
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$diferenciaPrecio", "0.0");
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$otrosIngresos", "0.0");
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$saldoInversion", String.valueOf(saldo));
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$texto1", "TEXTO 1");
-			listParam.add(parametro);
-			
-			parametro = new Parametro("$tablaFirmas", "TABLA FIRMAS");
-			listParam.add(parametro);
-			
-		}catch(Exception e){
-			LOG.error("###Error:",e);
-			return listParam;
+		
+	private List<DocumentoRequisito> obtenerDocumentosTipoInversion(String tipoInversion, String tipoDocId) throws Exception{
+		List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
+		// Obtener lista de documentos
+		List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(tipoInversion);		
+		// Obtener la lista de documentos por tipo persona
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(tipoInversion)){
+			for(DocumentoRequisito documentoRequisito : listaDocumentosTotal){
+				String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(tipoDocId);
+				if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
+					listaDocumentos.add(documentoRequisito);
+				}
+			}
+		}else{
+			listaDocumentos = listaDocumentosTotal;
 		}
-		return listParam;
-	}
+		return listaDocumentos;
+	}	
 	
 }

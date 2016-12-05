@@ -9,6 +9,7 @@ public interface ConstanteService {
 
 	public void setTokenCaspio(String token);
 	
-	public List<Constante> obtenerListaDocumentosIdentidad();
-	public List<DocumentoRequisito> obtenerListaDocumentosPorTipoInversion(String tipoInversion);
+	public List<Constante> obtenerListaDocumentosIdentidad() throws Exception;
+	public List<DocumentoRequisito> obtenerListaDocumentosPorTipoInversion(String tipoInversion) throws Exception;
+	public List<DocumentoRequisito> obtenerListaRequisitosPorTipoInversion(String tipoInversion) throws Exception;
 }

@@ -82,8 +82,7 @@ public class PedidoServiceImpl implements PedidoService{
 
 	@Override
 	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId) throws Exception{
-		List<Contrato> listaContratos = null;		
-	
+		List<Contrato> listaContratos = null;	
 		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
 		String obtenerContratosxPedidoURL = viewTablaPedidoContratoURL+Constantes.Service.URL_WHERE;
 		

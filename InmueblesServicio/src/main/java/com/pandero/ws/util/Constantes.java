@@ -69,6 +69,14 @@ public class Constantes {
 		public final static String SECTORIZACION_CELULA_COD="00004";
 	}
 	
+	public class DocumentoRequisito{
+		public final static String TIPO_DOCUMENTO="DOCUMENTO";
+		public final static String TIPO_REQUISITO="REQUISITO";
+		public final static String ESTADO_REQUISITO_PENDIENTE="PENDIENTE";
+		public final static String ESTADO_REQUISITO_CONFORME="CONFORME";
+		public final static String ESTADO_REQUISITO_NO_CONFORME="NO CONFORME";
+	}
+	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	

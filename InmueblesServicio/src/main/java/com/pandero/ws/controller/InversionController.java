@@ -105,4 +105,30 @@ public class InversionController {
 		
 		return response;
 	}
+	
+	@RequestMapping(value = "/registrarInversionRequisitos", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> registrarInversionRequisitos(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO registrarInversionRequisitos");
+		System.out.println("REQUEST: " +  params);		
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			inversionBusiness.registrarInversionRequisitos(inversionId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+		}catch(Exception e){
+			LOG.error("Error inversion/registrarInversionRequisitos:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
 }

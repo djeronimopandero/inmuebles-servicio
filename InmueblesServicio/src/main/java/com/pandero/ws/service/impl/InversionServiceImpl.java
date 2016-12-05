@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.Util;
 
 @Service
 public class InversionServiceImpl implements InversionService {
@@ -33,7 +36,9 @@ public class InversionServiceImpl implements InversionService {
 	private String tablePedidoInversionURL;
 	@Value("${url.service.view.tablaDetalleInversion}")
 	private String viewTablaDetalleInversionURL;
-	
+	@Value("${url.service.table.inversionRequisito}")
+	private String tableInversionRequisitoURL;
+		
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
@@ -86,6 +91,49 @@ public class InversionServiceImpl implements InversionService {
 		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+
+	@Override
+	public List<InversionRequisito> obtenerRequisitosPorInversion(
+			String inversionId) throws Exception {
+		List<InversionRequisito> listaRequisitos = null;	
+		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";	
+		String obtenerRequisitosxInversionURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
+	        			listaRequisitos = new ArrayList<InversionRequisito>();
+	        			for(Object bean : mapRequisitos){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				InversionRequisito inversionRequisito =  JsonUtil.fromJson(beanString, InversionRequisito.class);
+	        				listaRequisitos.add(inversionRequisito);
+	        			}
+	        			System.out.println("listaRequisitos:: "+listaRequisitos.size());
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return listaRequisitos;
+	}
+
+	@Override
+	public String crearRequisitoInversion(String inversionId, String requisitoId)
+			throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("InversionId", inversionId);
+		request.put("RequisitoId", requisitoId);		
+		request.put("EstadoRequisito", Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE);
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableInversionRequisitoURL,Object.class,request,null);	
+		
 		return null;
 	}
 }
