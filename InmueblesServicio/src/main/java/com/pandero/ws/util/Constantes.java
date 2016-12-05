@@ -55,6 +55,8 @@ public class Constantes {
 		public final static String SITUACION_CONFIRMADO="SI";
 		public final static String SITUACION_NO_CONFIRMADO="NO";
 		public final static String ESTADO_ANULADO="ANULADO";
+		public final static String DIFERENCIA_PRECIO="DIFERENCIA_PRECIO";
+		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
 	}
 	
 	public class Persona{

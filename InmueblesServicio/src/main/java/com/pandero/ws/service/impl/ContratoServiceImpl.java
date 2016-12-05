@@ -116,7 +116,7 @@ public class ContratoServiceImpl implements ContratoService{
 		request.put("DiferenciaPrecioDisponible", String.valueOf(contrato.getDiferenciaPrecioDisponible()));			
 		request.put("OtrosIngresos", String.valueOf(contrato.getOtrosIngresos()));			
 		request.put("OtrosDisponibles", String.valueOf(contrato.getOtrosDisponibles()));			
-		request.put("TotalDisponible", String.valueOf(contrato.getTotalDisponible()));			
+//		request.put("TotalDisponible", String.valueOf(contrato.getTotalDisponible()));			
 		request.put("Estado", contrato.getEstado());			
 		request.put("FechaAdjudicacion", contrato.getFechaAdjudicacion());			
 		request.put("SituacionSAF", contrato.getSituacionContrato());			

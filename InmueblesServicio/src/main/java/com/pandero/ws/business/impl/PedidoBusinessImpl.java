@@ -102,7 +102,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				pedidoService.agregarContratoPedidoCaspio(pedidoId, contratoId);
 				
 				// Actualizar estado asociacion del contrato 
-				contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_NO_ASOCIADO);
+				contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_ASOCIADO);
 				
 				resultado.setResultado(pedidoId);
 			}
@@ -241,11 +241,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 List<Asociado> listaAsociados=pedidoDao.obtenerAsociadosxContratoSAF(nroContrato);
 				 
 				 // Obtener inversiones del pedido
-				 List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
-				 if(listaInversiones!=null && listaInversiones.size()>0){
-					 for(Inversion inversion : listaInversiones){
-						 if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
-							 listaInversiones.remove(inversion);
+				 List<Inversion> listaInversionesCaspio = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
+				 List<Inversion> listaInversiones = new ArrayList<Inversion>();
+				 if(listaInversionesCaspio!=null && listaInversionesCaspio.size()>0){
+					 for(Inversion inversion : listaInversionesCaspio){
+						 if(!Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
+							 listaInversiones.add(inversion);
 						 }
 					 }
 				 }

@@ -1,5 +1,6 @@
 package com.pandero.ws.business.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
@@ -34,6 +36,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		constanteService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
@@ -48,52 +52,70 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		// Confirmar-desconfirmar inversion
-		if(Util.esVacio(resultado)){
+		if(Util.esVacio(resultado)){						
+			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
+				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
+			}
 			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
-			resultado = Constantes.Service.RESULTADO_EXITOSO;
 		}
 							
 		return resultado;
 	}
 	
-	public void validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
-		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
-		pedidoService.setTokenCaspio(tokenCaspio);
-		
+	private String validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{		
+		String resultado = "";
 		// Obtener inversiones del pedido
 		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
-		double totalInversion = 0;
+		double montoTotalCertificados = 0, montoCertificadoUsado = 0, montoInversion = 0;		
 		if(listaInversiones!=null && listaInversiones.size()>0){
 			for(Inversion inversion : listaInversiones){
-				totalInversion += inversion.getImporteInversion();
+				System.out.println("inversion.getConfirmado():: "+inversion.getConfirmado());
+				if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
+					System.out.println("suma111");
+					montoCertificadoUsado += inversion.getImporteInversion();
+				}
+				if(String.valueOf(inversion.getInversionId().intValue()).equals(inversionId)){
+					montoInversion = inversion.getImporteInversion();
+				}
 			}
-		}
+		}		
 		
 		// Obtener contratos del pedido
 		List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(pedidoId);
-		double totalContratos = 0;
 		if(listaContratos!=null && listaContratos.size()>0){
 			for(Contrato contrato : listaContratos){
-				totalContratos += contrato.getMontoCertificado();
+				montoTotalCertificados += contrato.getMontoCertificado();
 			}
 		}
 		
+		double montoCertificadoDisponible = montoTotalCertificados-montoCertificadoUsado;		
+		double montoInversionRequerido = montoCertificadoDisponible-montoInversion;
+		System.out.println("montoTotalCertificados:: "+montoTotalCertificados+" - montoCertificadoUsado:: "+montoCertificadoUsado);
+		System.out.println("montoInversionRequerido:: "+montoInversionRequerido+" - montoInversion:: "+montoInversion);
+		if(montoInversionRequerido>0){
+			resultado=Constantes.Inversion.EXCEDENTE_CERTIFICADO;
+		}else if(montoInversionRequerido<0){
+			resultado=Constantes.Inversion.DIFERENCIA_PRECIO;
+		}
+		return resultado;
 	}
 	
-	private String validarConfirmarInversion(Inversion inversion){
+	private String validarConfirmarInversion(Inversion inversion) throws Exception {
 		String resultado="";
 		if(inversion!=null){
 			// Obtener lista de documentos
-			List<DocumentoRequisito> listaDocumentos = constanteService.obtenerListaDocumentosPorTipoInversion(inversion.getTipoInversion());
-			
+			List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(inversion.getTipoInversion());
+			List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
 			// Obtener la lista de documentos por tipo persona
 			if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
-				for(DocumentoRequisito documentoRequisito : listaDocumentos){
+				for(DocumentoRequisito documentoRequisito : listaDocumentosTotal){
 					String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(inversion.getPropietarioTipoDocId());
-					if(!documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
-						listaDocumentos.remove(documentoRequisito);
+					if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
+						listaDocumentos.add(documentoRequisito);
 					}
 				}
+			}else{
+				listaDocumentos = listaDocumentosTotal;
 			}
 			
 			boolean permiteConfirmar = true;
@@ -188,6 +210,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 				
 		return resultado;
+	}
+
+	@Override
+	public String eliminarInversion(String inversionId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.actualizarEstadoInversionCaspio(inversionId, Constantes.Inversion.ESTADO_ANULADO);
+		return null;
 	}
 	
 }
