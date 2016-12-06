@@ -68,7 +68,7 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 	@Override
 	public String crearPersonaCaspio(PersonaSAF persona) throws Exception {
 		Map<String, String> request = new HashMap<String, String>();
-		request.put("PersonaId", persona.getPersonaID());
+		request.put("PersonaId", String.valueOf(persona.getPersonaID()));
 		request.put("TipoDocumento", persona.getTipoDocumentoID());
 		request.put("NroDocumento", persona.getPersonaCodigoDocumento());
 		request.put("Nombres", persona.getNombre());

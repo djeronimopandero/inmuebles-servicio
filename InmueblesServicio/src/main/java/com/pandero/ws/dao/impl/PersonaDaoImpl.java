@@ -72,7 +72,8 @@ public class PersonaDaoImpl implements PersonaDAO {
 			p.setRazonSocial(rs.getString("PersonaRazonSocial"));
 			p.setTipoPersona(rs.getString("PersonaTipoID"));
 			p.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
-			p.setPersonaID(rs.getString("PersonaID"));
+			p.setPersonaID(rs.getInt("PersonaID"));
+			p.setPersonaRelacionadaID(rs.getInt("PersonaRelacionadaID"));
 			
 			return p;		    
 		}
