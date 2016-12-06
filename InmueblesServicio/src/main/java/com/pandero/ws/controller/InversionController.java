@@ -12,12 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
-import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
-import com.pandero.ws.util.JsonUtil;
-import com.pandero.ws.util.ServiceRestTemplate;
 
 @Controller
 @RequestMapping("/inversionPedido")
@@ -105,4 +102,32 @@ public class InversionController {
 		
 		return response;
 	}
+	
+	@RequestMapping(value = "anularVerificacion", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody ResultadoBean anularVerificacion(@RequestBody Map<String, Object> params) {
+		System.out.println("###anularVerificacion params:"+params);
+		
+		ResultadoBean response = null;
+		try{
+			
+			if(null!=params){
+				if(null!=params.get("inversionId")){
+					
+					String inversionId = String.valueOf(params.get("inversionId"));
+					inversionBusiness.anularVerificacion(inversionId);
+					
+					response = new ResultadoBean();
+					response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+				}
+			}
+			
+		}catch(Exception e){
+			LOG.error("###Error ",e);
+			response = new ResultadoBean();
+			response.setMensajeError(Constantes.Service.RESULTADO_ERROR_INESPERADO);
+		}
+			
+		return response;
+	}
+	
 }

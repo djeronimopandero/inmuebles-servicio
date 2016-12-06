@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.InversionRequisitoCaspio;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
@@ -218,6 +218,16 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		inversionService.actualizarEstadoInversionCaspio(inversionId, Constantes.Inversion.ESTADO_ANULADO);
 		return null;
+	}
+
+	@Override
+	public void anularVerificacion(String inversionId) throws Exception {
+		LOG.info("###anularVerificacion inversionId:"+inversionId);
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		if(null!=inversionId){
+			inversionService.actualizarEstadoInversionRequisitoCaspio(inversionId, Constantes.InversionRequisito.PENDIENTE);
+		}
 	}
 	
 }
