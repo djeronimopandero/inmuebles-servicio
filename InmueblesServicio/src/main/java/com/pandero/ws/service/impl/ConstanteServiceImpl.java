@@ -33,81 +33,105 @@ public class ConstanteServiceImpl implements ConstanteService {
 	private String viewListaTiposDocumentoURL;
 	@Value("${url.service.view.listaDocumentos}")
 	private String viewListaDocumentosURL;
-	
+	@Value("${url.service.table.documentoRequisito}")
+	private String tableDocumentoRequisito;
+		
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
 	}
 			
 	@Override
-	public List<Constante> obtenerListaDocumentosIdentidad() {
+	public List<Constante> obtenerListaDocumentosIdentidad() throws Exception {
 		List<Constante> listaConstantes = null;
-		try{
-			Map<String, String> request = new HashMap<String, String>();
-			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,viewListaTiposDocumentoURL,Object.class,request,null);
-	     	String response = JsonUtil.toJson(jsonResult);	     	
-	        if(response!=null && !response.isEmpty()){
-		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
-		        if(responseMap!=null){
-		        	Object jsonResponse = responseMap.get("Result");
-		        	if(jsonResponse!=null){        		
-		        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-		        		if(mapConstantes!=null && mapConstantes.size()>0){
-		        			listaConstantes = new ArrayList<Constante>();
-		        			for(Object bean : mapConstantes){
-		        				String beanString = JsonUtil.toJson(bean);
-		        				Constante constante =  JsonUtil.fromJson(beanString, Constante.class);
-		        				listaConstantes.add(constante);        				
-		        			}
-		        			System.out.println("listaConstantes:: "+listaConstantes.size());
-		        		}        		
-		        	}
-		        }
-		    }	        
-		}catch(Exception e){
-			LOG.error("ERROR obtenerListaDocumentosIdentidad::",e);
-			e.printStackTrace();
-		}
+		Map<String, String> request = new HashMap<String, String>();
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,viewListaTiposDocumentoURL,Object.class,request,null);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapConstantes!=null && mapConstantes.size()>0){
+	        			listaConstantes = new ArrayList<Constante>();
+	        			for(Object bean : mapConstantes){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				Constante constante =  JsonUtil.fromJson(beanString, Constante.class);
+	        				listaConstantes.add(constante);        				
+	        			}
+	        			System.out.println("listaConstantes:: "+listaConstantes.size());
+	        		}        		
+	        	}
+	        }
+	    }	
 	    
 		return listaConstantes;
 	}
 
 	@Override
 	public List<DocumentoRequisito> obtenerListaDocumentosPorTipoInversion(
-			String tipoInversion) {
-		List<DocumentoRequisito> listaConstantes = null;
-		try{
-			Map<String, String> request = new HashMap<String, String>();
-			String serviceWhere = "{\"where\":\"TipoInversion='" + tipoInversion + "'\"}";	
-			String obtenerDocumentoTipoInversionURL = viewListaDocumentosURL+Constantes.Service.URL_WHERE;
-			
-	        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerDocumentoTipoInversionURL,Object.class,request,serviceWhere);
-	     	String response = JsonUtil.toJson(jsonResult);	     	
-	        if(response!=null && !response.isEmpty()){
-		        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
-		        if(responseMap!=null){
-		        	Object jsonResponse = responseMap.get("Result");
-		        	if(jsonResponse!=null){        		
-		        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-		        		if(mapConstantes!=null && mapConstantes.size()>0){
-		        			listaConstantes = new ArrayList<DocumentoRequisito>();
-		        			for(Object bean : mapConstantes){
-		        				String beanString = JsonUtil.toJson(bean);
-		        				DocumentoRequisito constante =  JsonUtil.fromJson(beanString, DocumentoRequisito.class);
-		        				listaConstantes.add(constante);        				
-		        			}
-		        			System.out.println("listaConstantes:: "+listaConstantes.size());
-		        		}        		
-		        	}
-		        }
-		    }	        
-		}catch(Exception e){
-			LOG.error("ERROR obtenerListaDocumentosPorTipoInversion::",e);
-			e.printStackTrace();
-		}
+			String tipoInversion) throws Exception {
+		List<DocumentoRequisito> listaDocumentos = null;
+		Map<String, String> request = new HashMap<String, String>();
+		String serviceWhere = "{\"where\":\"TipoInversion='" + tipoInversion + "'\"}";	
+		String obtenerDocumentoTipoInversionURL = viewListaDocumentosURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerDocumentoTipoInversionURL,Object.class,request,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapConstantes!=null && mapConstantes.size()>0){
+	        			listaDocumentos = new ArrayList<DocumentoRequisito>();
+	        			for(Object bean : mapConstantes){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				DocumentoRequisito constante =  JsonUtil.fromJson(beanString, DocumentoRequisito.class);
+	        				listaDocumentos.add(constante);        				
+	        			}
+	        			System.out.println("listaDocumentos:: "+listaDocumentos.size());
+	        		}        		
+	        	}
+	        }
+	    }	
 	    
-		return listaConstantes;
+		return listaDocumentos;
+	}
+
+	@Override
+	public List<DocumentoRequisito> obtenerListaRequisitosPorTipoInversion(
+			String tipoInversion) throws Exception {
+		List<DocumentoRequisito> listaRequisitos = null;
+		Map<String, String> request = new HashMap<String, String>();
+		String serviceWhere = "{\"where\":\"TipoInversion='" + tipoInversion + "' and TipoDocumento='"+Constantes.DocumentoRequisito.TIPO_REQUISITO+"'\"}";	
+		String obtenerRequisitosTipoInversionURL = tableDocumentoRequisito+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosTipoInversionURL,Object.class,request,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapConstantes!=null && mapConstantes.size()>0){
+	        			listaRequisitos = new ArrayList<DocumentoRequisito>();
+	        			for(Object bean : mapConstantes){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				DocumentoRequisito constante =  JsonUtil.fromJson(beanString, DocumentoRequisito.class);
+	        				listaRequisitos.add(constante);        				
+	        			}
+	        			System.out.println("listaRequisitos:: "+listaRequisitos.size());
+	        		}        		
+	        	}
+	        }
+	    }	
+	    
+		return listaRequisitos;
 	}
 
 }

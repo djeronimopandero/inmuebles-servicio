@@ -5,11 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
 import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
@@ -35,6 +36,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
@@ -513,7 +515,149 @@ public class DocumentoUtil {
 			e.printStackTrace();
 		}
 	}
-
+	
+	public static List<Parametro> getParametrosOrdenIrrevocable(double sumaContratos, double sumaInversiones, double saldo, String pedidoId) {
+		List<Parametro> listParam=null;		
+		try{
+			listParam = new ArrayList<>();
+			
+			Parametro parametro = new Parametro("$fecha", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_NORMAL));
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$hora", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_HH_MIN_SS));
+			listParam.add(parametro);
+			
+			String nroPedido = "P000"+pedidoId;
+			parametro = new Parametro("$numeroInversion", nroPedido);
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$tablaInversiones", "TABLA INVERSIONISTA");
+			listParam.add(parametro);
+						
+			parametro = new Parametro("$importeInversion", String.valueOf(sumaInversiones));
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$importeTotal", String.valueOf(sumaContratos));
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$diferenciaPrecio", "0.0");
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$otrosIngresos", "0.0");
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$saldoInversion", String.valueOf(saldo));
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$texto1", "TEXTO 1");
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$tablaFirmas", "TABLA FIRMAS");
+			listParam.add(parametro);
+			
+		}catch(Exception e){
+			LOG.error("###Error:",e);
+			return listParam;
+		}
+		return listParam;
+	}
+	
+	public static String validarConfirmarInversion(List<DocumentoRequisito> listaDocumentos, Inversion inversion) throws Exception {
+		String resultado="";
+		if(inversion!=null){									
+			// Validar la lista de documentos
+			boolean permiteConfirmar = true;
+			if(inversion.getDocumentosRequeridos()!=null && !inversion.getDocumentosRequeridos().equals("")){
+				String[] listaDocuSelec = inversion.getDocumentosRequeridos().split(",");
+				if(listaDocuSelec.length!=listaDocumentos.size()){
+					permiteConfirmar = false;
+				}
+			}else{
+				permiteConfirmar = false;
+			}
+			if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_PENDIENTE_DOCUMENTOS;
+						
+			if(permiteConfirmar){
+				// Validar datos por tipo de inversion
+				if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+					if(inversion.getEntidadFinancieraId()==null
+							|| Util.esVacio(inversion.getNroCredito())
+							|| Util.esVacio(inversion.getSectorista())
+							|| Util.esVacio(inversion.getTelefonoContacto())){
+						System.out.println("DATOS_PENDIENTES - 1");
+						permiteConfirmar = false;
+					}
+				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+					if(inversion.getServicioConstructora()){
+						if(!Util.esVacio(inversion.getConstructoraTipoDoc())){
+							if(Util.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
+								if(Util.esVacio(inversion.getConstructoraNroDoc())
+										|| Util.esVacio(inversion.getConstructoraRazonSocial())
+										|| Util.esVacio(inversion.getConstructoraTelefono())
+										|| Util.esVacio(inversion.getConstructoraContacto())){
+									System.out.println("DATOS_PENDIENTES - 2");
+								}
+							}else{
+								if(Util.esVacio(inversion.getConstructoraNroDoc())
+										|| Util.esVacio(inversion.getConstructoraNombres())
+										|| Util.esVacio(inversion.getConstructoraApePaterno())
+										|| Util.esVacio(inversion.getConstructoraApeMaterno())
+										|| Util.esVacio(inversion.getConstructoraTelefono())){
+									System.out.println("DATOS_PENDIENTES - 3");
+									permiteConfirmar = false;
+								}
+							}
+						}else{
+							System.out.println("DATOS_PENDIENTES - 4");
+							permiteConfirmar = false;
+						}
+					}
+					if(Util.esVacio(inversion.getDescripcionObra())){
+						System.out.println("DATOS_PENDIENTES - 5");
+						permiteConfirmar = false;
+					}
+				}
+				
+				// Validar datos del propietario
+				if(permiteConfirmar){
+					if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
+						if(Util.esVacio(inversion.getPropietarioRazonSocial())
+								|| Util.esVacio(inversion.getRepresentanteTipoDocId())
+								|| Util.esVacio(inversion.getRepresentanteNroDoc())
+								|| Util.esVacio(inversion.getRepresentanteApePaterno())
+								|| Util.esVacio(inversion.getRepresentanteApeMaterno())
+								|| Util.esVacio(inversion.getRepresentanteNombres())){
+							System.out.println("DATOS_PENDIENTES - 6");
+							permiteConfirmar = false;
+						}
+					}else{
+						if(Util.esVacio(inversion.getPropietarioNombres())
+								|| Util.esVacio(inversion.getPropietarioApePaterno())
+								|| Util.esVacio(inversion.getPropietarioApeMaterno())){
+							System.out.println("DATOS_PENDIENTES - 7");
+							permiteConfirmar = false;
+						}
+					}
+				}
+				
+				// Validar datos del beneficiario
+				if(permiteConfirmar){
+					if(!inversion.getBeneficiarioAsociado()){
+						if(Util.esVacio(inversion.getBeneficiarioTipoDocId())
+								|| Util.esVacio(inversion.getBeneficiarioNroDoc())
+								|| Util.esVacio(inversion.getBeneficiarioNombreCompleto())
+								|| inversion.getBeneficiarioRelacionAsociadoId()==null){
+							System.out.println("DATOS_PENDIENTES - 8");
+							permiteConfirmar = false;
+						}
+					}
+				}
+				if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_DATOS_PENDIENTES;				
+			}						
+		}
+				
+		return resultado;
+	}
 	
 	/*Prueba de concepto*/
 	public static void convertDocxToPdf(String filePath,String filePdf){
@@ -741,7 +885,5 @@ public class DocumentoUtil {
 		
 		return doc;
 	}
-	
-	/*Prueba de concepto*/
 	
 }

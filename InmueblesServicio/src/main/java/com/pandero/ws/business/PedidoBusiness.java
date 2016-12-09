@@ -11,5 +11,5 @@ public interface PedidoBusiness {
 	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception;
 	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception;
 	
-	public void generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception;
+	public String generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception;
 }

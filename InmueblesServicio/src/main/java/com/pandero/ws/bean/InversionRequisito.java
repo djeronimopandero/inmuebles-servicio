@@ -1,22 +1,22 @@
 package com.pandero.ws.bean;
 
-public class InversionRequisitoCaspio {
-	
-	private String InversionId;
-	private String RequisitoId;
+public class InversionRequisito {
+
+	private Integer InversionId;
+	private Integer RequisitoId;
 	private String EstadoRequisito;
 	private String Observacion;
 	
-	public String getInversionId() {
+	public Integer getInversionId() {
 		return InversionId;
 	}
-	public void setInversionId(String inversionId) {
+	public void setInversionId(Integer inversionId) {
 		InversionId = inversionId;
 	}
-	public String getRequisitoId() {
+	public Integer getRequisitoId() {
 		return RequisitoId;
 	}
-	public void setRequisitoId(String requisitoId) {
+	public void setRequisitoId(Integer requisitoId) {
 		RequisitoId = requisitoId;
 	}
 	public String getEstadoRequisito() {
@@ -31,7 +31,5 @@ public class InversionRequisitoCaspio {
 	public void setObservacion(String observacion) {
 		Observacion = observacion;
 	}
-	
-	
-	
+		
 }

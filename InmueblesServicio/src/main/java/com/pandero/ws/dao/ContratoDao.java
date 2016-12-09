@@ -2,7 +2,6 @@ package com.pandero.ws.dao;
 
 import java.util.List;
 
-import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 
 public interface ContratoDao {
