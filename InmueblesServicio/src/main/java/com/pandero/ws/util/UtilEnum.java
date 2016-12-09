@@ -37,7 +37,18 @@ public class UtilEnum {
 				  }
 			  }
 			  return null;
+		}
+		
+		public static TIPO_DOCUMENTO obtenerTipoDocumentoByCodigoCaspio(Integer codigoCaspio){
+			TIPO_DOCUMENTO[] valores = TIPO_DOCUMENTO.values();
+			for(int i=0; i< valores.length; i++){
+				if(valores[i].getCodigoCaspio().equals(codigoCaspio)){
+					return  valores[i];
+				}
 			}
+			return null;
+		}
+		
 	}
 	
 	public static enum ADJUDICACION {

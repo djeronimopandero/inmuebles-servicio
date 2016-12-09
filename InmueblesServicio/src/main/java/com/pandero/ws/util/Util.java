@@ -1,8 +1,11 @@
 package com.pandero.ws.util;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
@@ -23,6 +26,11 @@ public class Util {
 		String fecha=sdf.format(date);
 		sb.append(fecha);
 		return sb.toString();
+	}
+	
+	public static String getMontoFormateado(Double monto){
+		DecimalFormat dFormat = new DecimalFormat("####,###,###.00");
+		return dFormat.format(null!=monto?monto:0.00);
 	}
 	
 	public static String formatearFechaYYYYMMDD(Date fecha){
