@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
+import com.pandero.ws.util.UtilEnum;
 
 @Service
 public class ContratoServiceImpl implements ContratoService{
@@ -111,7 +113,7 @@ public class ContratoServiceImpl implements ContratoService{
 		request.put("MontoCertificado", String.valueOf(contrato.getMontoCertificado()));
 		request.put("MontoDisponible",  String.valueOf(contrato.getMontoDisponible())  );			
 		request.put("AsociadoId", String.valueOf(contrato.getAsociadoId()) );			
-		request.put("Situacion",  contrato.getSituacionContratoCASPIO() );			
+		request.put("Situacion",  (StringUtils.isEmpty(contrato.getSituacionContratoCASPIO())?UtilEnum.ADJUDICACION.SI.getTexto():contrato.getSituacionContratoCASPIO()) );			
 		request.put("DiferenciaPrecio", String.valueOf(contrato.getDiferenciaPrecio()));			
 		request.put("DiferenciaPrecioDisponible", String.valueOf(contrato.getDiferenciaPrecioDisponible()));			
 		request.put("OtrosIngresos", String.valueOf(contrato.getOtrosIngresos()));			

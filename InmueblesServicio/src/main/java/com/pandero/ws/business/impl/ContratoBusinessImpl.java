@@ -111,7 +111,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								contratoCaspioReg.setFechaVenta(contratoSAF.getFechaVenta());
 								contratoCaspioReg.setMontoCertificado(null!=contratoSAF.getMontoCertificado()?contratoSAF.getMontoCertificado():0);
 								contratoCaspioReg.setMontoDisponible(null!=contratoSAF.getMontoDisponible()?contratoSAF.getMontoDisponible():0);
-								contratoCaspioReg.setAsociadoId(Integer.parseInt(personaSAF.getPersonaID()));
+								contratoCaspioReg.setAsociadoId(personaSAF.getPersonaID());
 								contratoCaspioReg.setSituacionContratoCASPIO(contratoSAF.getSituacionContratoCASPIO());
 								contratoCaspioReg.setDiferenciaPrecio(null!=contratoSAF.getDiferenciaPrecio()?contratoSAF.getDiferenciaPrecio():0);
 								contratoCaspioReg.setDiferenciaPrecioDisponible(null!=contratoSAF.getDiferenciaPrecioDisponible()?contratoSAF.getDiferenciaPrecioDisponible():0);

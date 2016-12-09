@@ -59,6 +59,11 @@ public class Constantes {
 		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
 	}
 	
+	public class InversionRequisito{
+		public final static String PENDIENTE="PENDIENTE";
+		public final static String CONFORME="CONFORME";
+	}
+	
 	public class Persona{
 		public final static String PERSONA_NATURAL_COD="N";
 		public final static String PERSONA_JURIDICA_COD="J";

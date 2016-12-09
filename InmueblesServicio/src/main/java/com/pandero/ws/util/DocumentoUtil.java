@@ -1,12 +1,18 @@
 package com.pandero.ws.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xwpf.converter.pdf.PdfConverter;
+import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFFooter;
@@ -17,14 +23,22 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlCursor;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.itextpdf.text.pdf.PRStream;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfObject;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
 
 public class DocumentoUtil {
@@ -644,4 +658,232 @@ public class DocumentoUtil {
 				
 		return resultado;
 	}
+	
+	/*Prueba de concepto*/
+	public static void convertDocxToPdf(String filePath,String filePdf){
+		try{
+			
+	        FileInputStream fInputStream = new FileInputStream(new File(filePath));
+	        XWPFDocument document = new XWPFDocument(fInputStream);
+	
+	        File outFile = new File(filePdf);
+	        outFile.getParentFile().mkdirs();
+	
+	        OutputStream out = new FileOutputStream(outFile);
+//	        PdfOptions options = PdfOptions.create().fontEncoding("windows-1250");
+	        PdfOptions options = PdfOptions.create().fontEncoding("iso-8859-15");
+	        PdfConverter.getInstance().convert(document, out, options);
+	    
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+	}
+	
+	@Deprecated
+	public static void generarDocumento(String filePdf,String filePdfDestino) {
+		try{
+			
+			PdfReader reader = new PdfReader(filePdf);
+	        PdfDictionary dict = reader.getPageN(1);
+	        PdfObject object = dict.getDirectObject(PdfName.CONTENTS);
+	        if (object instanceof PRStream) {
+	            PRStream stream = (PRStream)object;
+	            byte[] data = PdfReader.getStreamBytes(stream);
+	            
+	            /*****/
+	            PRStream stream1 = (PRStream)object;
+	            PRStream stream2 = (PRStream)object;
+	            String texto=new String(data);
+	            
+	            stream1.setData(texto.replace("text_1", "Lima, 16 de agosto del 2016").getBytes());
+	            stream2.setData(texto.replace("text_2", "Arly Fernández ÑLlactahuamán").getBytes());
+	            /*****/
+	            
+//	            stream.setData(new String(data).replace("text_1", "Lima, 16 de agosto del 2016").getBytes());
+//	            stream.setData(new String(data).replace("text_2", "Arly Fernández ÑLlactahuamán").getBytes());
+	        }
+	        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(filePdfDestino));
+	        stamper.close();
+	        reader.close();
+	        
+	        //-------------------------------------------------
+			
+//			PdfReader reader = new PdfReader(filePdf);
+//	        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(filePdfDestino));
+//	        AcroFields form = stamper.getAcroFields();
+//	        form.setField("text_1", "Lima, 16 de agosto del 2016");
+//	        form.setField("text_2", "Arly Fernandez");
+	        
+//	        form.setField("text_1", "Bruno Lowagie");
+//	        form.setFieldProperty("text_2", "fflags", 0, null);
+//	        form.setFieldProperty("text_2", "bordercolor", BaseColor.RED, null);
+//	        form.setField("text_2", "bruno");
+//	        form.setFieldProperty("text_3", "clrfflags", TextField.PASSWORD, null);
+//	        form.setFieldProperty("text_3", "setflags", PdfAnnotation.FLAGS_PRINT, null);
+//	        form.setField("text_3", "12345678", "xxxxxxxx");
+//	        form.setFieldProperty("text_4", "textsize", new Float(12), null);
+//	        form.regenerateField("text_4");
+//	        stamper.close();
+//	        reader.close();
+		
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public static XWPFDocument replaceTextCartaValidacion(XWPFDocument doc, List<Parametro> params, List<ObservacionInversion> listObservacion) {
+		
+		
+		//************************************************ TEXTO *********************************************
+		LOG.info("---------------------------------------TEXTO----------------------------------------");
+		for(int i=0; i<doc.getParagraphs().size(); i++){
+			XWPFParagraph p=doc.getParagraphs().get(i);
+			List<XWPFRun> runs = p.getRuns();
+			if (runs != null) {
+				for (XWPFRun r : runs) {
+					String text = r.getText(0);
+					if (text != null) {
+						if (null != params) {
+							for (Parametro param : params) {
+								if (null != param) {
+									if (text.contains(param.getKey())) {
+										text = text.replace(param.getKey(), param.getValue());
+										r.setText(text, 0);
+									}
+									if(text.contains("text_6")){
+										text = text.replace("text_6", "");
+										r.setText(text, 0);
+										
+										for( ObservacionInversion obs:listObservacion){
+											
+											p.insertNewRun(i);
+											XWPFRun newRun = r;
+											CTRPr rPr = newRun.getCTR().isSetRPr() ? newRun.getCTR().getRPr() : newRun.getCTR().addNewRPr();
+											rPr.set(r.getCTR().getRPr());
+											newRun.setText(StringUtils.isEmpty(obs.getObservacion())?"":obs.getObservacion());
+											newRun.addCarriageReturn();
+										}
+										
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		//*******************************************************************************************************
+		
+		
+		//************************************************ TABLA *********************************************
+		LOG.info("---------------------------------------TABLA----------------------------------------");
+		for (XWPFTable tbl : doc.getTables()) {
+			for (XWPFTableRow row : tbl.getRows()) {
+				for (XWPFTableCell cell : row.getTableCells()) {
+					for (XWPFParagraph p : cell.getParagraphs()) {
+						for (XWPFRun r : p.getRuns()) {
+							String text = r.getText(0);
+							if (text != null) {
+								if (null != params) {
+									for (Parametro param : params) {
+										if (null != param) {
+											if (text.contains(param.getKey())) {
+												text = text.replace(param.getKey(), param.getValue());
+												r.setText(text, 0);
+											}
+
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+			}
+		}
+		//*******************************************************************************************************
+
+		XWPFHeaderFooterPolicy policy = new XWPFHeaderFooterPolicy(doc);
+
+		if (null != policy) {
+			
+			//************************************************ HEADER *********************************************
+			XWPFHeader header = policy.getDefaultHeader();
+			if (null != header) {
+				LOG.info("---------------------------------------HEADER----------------------------------------");
+				for (XWPFParagraph p : header.getParagraphs()) {
+					List<XWPFRun> runs = p.getRuns();
+					if (runs != null) {
+						for (XWPFRun r : runs) {
+							String text = r.getText(0);
+							if (text != null) {
+								if (null != params) {
+									for (Parametro param : params) {
+										if (null != param) {
+											if (text.contains(param.getKey())) {
+												text = text.replace(param.getKey(), param.getValue());
+												r.setText(text, 0);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			//*******************************************************************************************************
+
+			//************************************************ FOOTER *********************************************
+			XWPFFooter footer = policy.getDefaultFooter();
+			if (null != footer) {
+				LOG.info("---------------------------------------FOOTER----------------------------------------");
+				for (XWPFParagraph p : footer.getParagraphs()) {
+					List<XWPFRun> runs = p.getRuns();
+					if (runs != null) {
+						for (XWPFRun r : runs) {
+							String text = r.getText(0);
+							if (text != null) {
+								if (null != params) {
+									for (Parametro param : params) {
+										if (null != param) {
+											if (text.contains(param.getKey())) {
+												text = text.replace(param.getKey(), param.getValue());
+												r.setText(text, 0);
+											}
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+			}
+			//*******************************************************************************************************
+			
+		}
+		
+		
+		/*tabla 1*/
+//		 	CTTbl table = CTTbl.Factory.newInstance();
+//	        CTRow row = table.addNewTr();
+//	        CTTc cell = row.addNewTc();
+//	        CTP paragraph = cell.addNewP();
+//	        CTR run = paragraph.addNewR();
+//	        CTText text = run.addNewT();
+//	        text.setStringValue("XXXXX");
+//	        
+//	        
+//	        XWPFTable xtab = new XWPFTable(table, doc);
+//	        doc.insertTable(2,xtab);
+        /*tabla 1*/
+		
+		
+		return doc;
+	}
+	
 }

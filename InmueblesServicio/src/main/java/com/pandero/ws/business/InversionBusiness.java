@@ -1,6 +1,5 @@
 package com.pandero.ws.business;
 
-import com.pandero.ws.bean.Inversion;
 
 public interface InversionBusiness {
 
@@ -8,4 +7,7 @@ public interface InversionBusiness {
 	public String eliminarInversion(String inversionId) throws Exception;
 
 	public String registrarInversionRequisitos(String inversionId) throws Exception;
+	public void anularVerificacion(String inversionId) throws Exception;
+	public void generarCartaObservacion(String inversionId, String usuarioSAFId)throws Exception;
+	
 }

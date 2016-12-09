@@ -2,7 +2,7 @@ package com.pandero.ws.bean;
 
 public class PersonaSAF {
 
-	private String personaID;
+	private Integer personaID;
 	private String tipoDocumentoID;
 	private String personaCodigoDocumento;
 	private String nombre;
@@ -11,24 +11,30 @@ public class PersonaSAF {
 	private String razonSocial;
 	private String tipoPersona;
 	private String nombreCompleto;
+	private Integer personaRelacionadaID;
 	
 	public PersonaSAF() {
 		// TODO Auto-generated constructor stub
 	}
 	
 	
-	
-	public String getPersonaID() {
+
+	public Integer getPersonaID() {
 		return personaID;
 	}
 
-
-
-	public void setPersonaID(String personaID) {
+	public void setPersonaID(Integer personaID) {
 		this.personaID = personaID;
 	}
 
 
+	public Integer getPersonaRelacionadaID() {
+		return personaRelacionadaID;
+	}
+
+	public void setPersonaRelacionadaID(Integer personaRelacionadaID) {
+		this.personaRelacionadaID = personaRelacionadaID;
+	}
 
 	public String getTipoDocumentoID() {
 		return tipoDocumentoID;

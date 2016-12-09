@@ -13,14 +13,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
-import com.pandero.ws.bean.InversionRequisito;
+import com.pandero.ws.bean.InversionRequisitoCaspio;
+import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
-import com.pandero.ws.util.Util;
 
 @Service
 public class InversionServiceImpl implements InversionService {
@@ -34,11 +33,13 @@ public class InversionServiceImpl implements InversionService {
 
 	@Value("${url.service.table.pedidoInversion}")
 	private String tablePedidoInversionURL;
+	
 	@Value("${url.service.view.tablaDetalleInversion}")
 	private String viewTablaDetalleInversionURL;
+	
 	@Value("${url.service.table.inversionRequisito}")
 	private String tableInversionRequisitoURL;
-		
+	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
@@ -95,34 +96,74 @@ public class InversionServiceImpl implements InversionService {
 	}
 
 	@Override
-	public List<InversionRequisito> obtenerRequisitosPorInversion(
-			String inversionId) throws Exception {
-		List<InversionRequisito> listaRequisitos = null;	
-		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";	
-		String obtenerRequisitosxInversionURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
+	public List<InversionRequisitoCaspio> listInversionRequisitoPorIdInversion(String inversionId) throws Exception {
+		LOG.info("###listInversionRequisitoPorIdInversion inversionId:"+inversionId);
+		List<InversionRequisitoCaspio> listInversionReq=null;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
+		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";	
+		String obtenerContratosxPedidoURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
 	        if(responseMap!=null){
 	        	Object jsonResponse = responseMap.get("Result");
 	        	if(jsonResponse!=null){        		
-	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
-	        			listaRequisitos = new ArrayList<InversionRequisito>();
-	        			for(Object bean : mapRequisitos){
+	        		List mapInversionReq = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapInversionReq!=null && mapInversionReq.size()>0){
+	        			listInversionReq = new ArrayList<InversionRequisitoCaspio>();
+	        			for(Object bean : mapInversionReq){
 	        				String beanString = JsonUtil.toJson(bean);
-	        				InversionRequisito inversionRequisito =  JsonUtil.fromJson(beanString, InversionRequisito.class);
-	        				listaRequisitos.add(inversionRequisito);
+	        				InversionRequisitoCaspio inversionReq =  JsonUtil.fromJson(beanString, InversionRequisitoCaspio.class);
+	        				listInversionReq.add(inversionReq);
 	        			}
-	        			System.out.println("listaRequisitos:: "+listaRequisitos.size());
+	        			
 	        		}        		
 	        	}
 	        }
         }
         
-		return listaRequisitos;
+		return listInversionReq;
+	}
+	
+	@Override
+	public String actualizarEstadoInversionRequisitoCaspio(String inversionId,String estadoInversionReq) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("EstadoRequisito", estadoInversionReq);		
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
+		String actualizarInversionRequisitoURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarInversionRequisitoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+
+	@Override
+	public PedidoInversionCaspio obtenerPedidoInversionPorInversion(String inversionId) throws Exception {
+		PedidoInversionCaspio pedidoInversion = null;
+		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";		
+		String obtenerInversionesxPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapInversiones!=null && mapInversiones.size()>0){
+	        			for(Object bean : mapInversiones){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				pedidoInversion =  JsonUtil.fromJson(beanString, PedidoInversionCaspio.class);			
+	        			}
+	        		}        		
+	        	}
+	        }
+	    }
+
+		return pedidoInversion;
 	}
 
 	@Override
@@ -136,4 +177,5 @@ public class InversionServiceImpl implements InversionService {
 		
 		return null;
 	}
+	
 }
