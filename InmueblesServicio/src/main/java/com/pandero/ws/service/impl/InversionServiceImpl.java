@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Inversion;
-import com.pandero.ws.bean.InversionRequisitoCaspio;
+import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
@@ -96,35 +96,34 @@ public class InversionServiceImpl implements InversionService {
 	}
 
 	@Override
-	public List<InversionRequisitoCaspio> listInversionRequisitoPorIdInversion(String inversionId) throws Exception {
-		LOG.info("###listInversionRequisitoPorIdInversion inversionId:"+inversionId);
-		List<InversionRequisitoCaspio> listInversionReq=null;
-		
+	public List<InversionRequisito> obtenerRequisitosPorInversion(
+			String inversionId) throws Exception {
+		List<InversionRequisito> listaRequisitos = null;	
 		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";	
-		String obtenerContratosxPedidoURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
+		String obtenerRequisitosxInversionURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
 		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
         if(response!=null && !response.isEmpty()){
         Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
 	        if(responseMap!=null){
 	        	Object jsonResponse = responseMap.get("Result");
 	        	if(jsonResponse!=null){        		
-	        		List mapInversionReq = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-	        		if(mapInversionReq!=null && mapInversionReq.size()>0){
-	        			listInversionReq = new ArrayList<InversionRequisitoCaspio>();
-	        			for(Object bean : mapInversionReq){
+	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
+	        			listaRequisitos = new ArrayList<InversionRequisito>();
+	        			for(Object bean : mapRequisitos){
 	        				String beanString = JsonUtil.toJson(bean);
-	        				InversionRequisitoCaspio inversionReq =  JsonUtil.fromJson(beanString, InversionRequisitoCaspio.class);
-	        				listInversionReq.add(inversionReq);
+	        				InversionRequisito inversionRequisito =  JsonUtil.fromJson(beanString, InversionRequisito.class);
+	        				listaRequisitos.add(inversionRequisito);
 	        			}
-	        			
+	        			System.out.println("listaRequisitos:: "+listaRequisitos.size());
 	        		}        		
 	        	}
 	        }
         }
         
-		return listInversionReq;
+		return listaRequisitos;
 	}
 	
 	@Override

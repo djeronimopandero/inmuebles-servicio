@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
-import com.pandero.ws.bean.InversionRequisitoCaspio;
+import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.PedidoInversionCaspio;
@@ -65,9 +65,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
 		
-		// Validar datos antes de confirmar
+		// Si se va a confirmar la inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
-			String resultadoValidacion = validarConfirmarInversion(inversion);
+			// Obtener lista de documentos
+			List<DocumentoRequisito> listaDocumentos = obtenerDocumentosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
+			// Validar datos antes de confirmar
+			String resultadoValidacion = DocumentoUtil.validarConfirmarInversion(listaDocumentos, inversion);
 			if(!Util.esVacio(resultadoValidacion)){
 				resultado=resultadoValidacion;
 			}
@@ -122,118 +125,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultado;
 	}
 	
-	private String validarConfirmarInversion(Inversion inversion) throws Exception {
-		String resultado="";
-		if(inversion!=null){
-			// Obtener lista de documentos
-			List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(inversion.getTipoInversion());
-			List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
-			// Obtener la lista de documentos por tipo persona
-			if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
-				for(DocumentoRequisito documentoRequisito : listaDocumentosTotal){
-					String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(inversion.getPropietarioTipoDocId());
-					if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
-						listaDocumentos.add(documentoRequisito);
-					}
-				}
-			}else{
-				listaDocumentos = listaDocumentosTotal;
-			}
-			
-			boolean permiteConfirmar = true;
-			// Validar la lista de documentos
-			if(inversion.getDocumentosRequeridos()!=null && !inversion.getDocumentosRequeridos().equals("")){
-				String[] listaDocuSelec = inversion.getDocumentosRequeridos().split(",");
-				if(listaDocuSelec.length!=listaDocumentos.size()){
-					permiteConfirmar = false;
-				}
-			}else{
-				permiteConfirmar = false;
-			}
-			if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_PENDIENTE_DOCUMENTOS;
-						
-			if(permiteConfirmar){
-				// Validar datos por tipo de inversion
-				if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
-					if(inversion.getEntidadFinancieraId()==null
-							|| Util.esVacio(inversion.getNroCredito())
-							|| Util.esVacio(inversion.getSectorista())
-							|| Util.esVacio(inversion.getTelefonoContacto())){
-						System.out.println("DATOS_PENDIENTES - 1");
-						permiteConfirmar = false;
-					}
-				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
-					if(inversion.getServicioConstructora()){
-						if(!Util.esVacio(inversion.getConstructoraTipoDoc())){
-							if(Util.esPersonaJuridica(inversion.getConstructoraTipoDoc())){
-								if(Util.esVacio(inversion.getConstructoraNroDoc())
-										|| Util.esVacio(inversion.getConstructoraRazonSocial())
-										|| Util.esVacio(inversion.getConstructoraTelefono())
-										|| Util.esVacio(inversion.getConstructoraContacto())){
-									System.out.println("DATOS_PENDIENTES - 2");
-								}
-							}else{
-								if(Util.esVacio(inversion.getConstructoraNroDoc())
-										|| Util.esVacio(inversion.getConstructoraNombres())
-										|| Util.esVacio(inversion.getConstructoraApePaterno())
-										|| Util.esVacio(inversion.getConstructoraApeMaterno())
-										|| Util.esVacio(inversion.getConstructoraTelefono())){
-									System.out.println("DATOS_PENDIENTES - 3");
-									permiteConfirmar = false;
-								}
-							}
-						}else{
-							System.out.println("DATOS_PENDIENTES - 4");
-							permiteConfirmar = false;
-						}
-					}
-					if(Util.esVacio(inversion.getDescripcionObra())){
-						System.out.println("DATOS_PENDIENTES - 5");
-						permiteConfirmar = false;
-					}
-				}
-				
-				// Validar datos del propietario
-				if(permiteConfirmar){
-					if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
-						if(Util.esVacio(inversion.getPropietarioRazonSocial())
-								|| Util.esVacio(inversion.getRepresentanteTipoDocId())
-								|| Util.esVacio(inversion.getRepresentanteNroDoc())
-								|| Util.esVacio(inversion.getRepresentanteApePaterno())
-								|| Util.esVacio(inversion.getRepresentanteApeMaterno())
-								|| Util.esVacio(inversion.getRepresentanteNombres())){
-							System.out.println("DATOS_PENDIENTES - 6");
-							permiteConfirmar = false;
-						}
-					}else{
-						if(Util.esVacio(inversion.getPropietarioNombres())
-								|| Util.esVacio(inversion.getPropietarioApePaterno())
-								|| Util.esVacio(inversion.getPropietarioApeMaterno())){
-							System.out.println("DATOS_PENDIENTES - 7");
-							permiteConfirmar = false;
-						}
-					}
-				}
-				
-				// Validar datos del beneficiario
-				if(permiteConfirmar){
-					if(!inversion.getBeneficiarioAsociado()){
-						if(Util.esVacio(inversion.getBeneficiarioTipoDocId())
-								|| Util.esVacio(inversion.getBeneficiarioNroDoc())
-								|| Util.esVacio(inversion.getBeneficiarioNombreCompleto())
-								|| inversion.getBeneficiarioRelacionAsociadoId()==null){
-							System.out.println("DATOS_PENDIENTES - 8");
-							permiteConfirmar = false;
-						}
-					}
-				}
-				if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_DATOS_PENDIENTES;				
-			}						
-		}
-				
-		return resultado;
-	}
-
 	@Override
 	public String eliminarInversion(String inversionId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
@@ -242,6 +133,66 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return null;
 	}
 
+	@Override
+	public String registrarInversionRequisitos(String inversionId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		constanteService.setTokenCaspio(tokenCaspio);
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		// Obtener requisitos de la inversion
+		List<InversionRequisito> listaInversionRequisitos = inversionService.obtenerRequisitosPorInversion(inversionId);
+		
+		if(listaInversionRequisitos==null){
+			// Obtener datos de la inversion
+			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
+			// Obtener lista requisitos
+			List<DocumentoRequisito> listaRequisitos = obtenerRequisitosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
+			if(listaRequisitos!=null && listaRequisitos.size()>0){
+				for(DocumentoRequisito requisito : listaRequisitos){
+					// Crear el requisito de la inversion
+					inversionService.crearRequisitoInversion(inversionId, String.valueOf(requisito.getRequisitoId().intValue()));
+				}
+			}
+		}		
+		return null;
+	}
+	
+	private List<DocumentoRequisito> obtenerRequisitosTipoInversion(String tipoInversion, String tipoDocId) throws Exception{
+		List<DocumentoRequisito> listaRequisitos = new ArrayList<DocumentoRequisito>();
+		// Obtener lista de documentos
+		List<DocumentoRequisito> listaRequisitosTotal = constanteService.obtenerListaRequisitosPorTipoInversion(tipoInversion);		
+		// Obtener la lista de documentos por tipo persona
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(tipoInversion)){
+			for(DocumentoRequisito documentoRequisito : listaRequisitosTotal){
+				String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(tipoDocId);
+				if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
+					listaRequisitos.add(documentoRequisito);
+				}
+			}
+		}else{
+			listaRequisitos = listaRequisitosTotal;
+		}
+		return listaRequisitos;
+	}
+	
+	private List<DocumentoRequisito> obtenerDocumentosTipoInversion(String tipoInversion, String tipoDocId) throws Exception{
+		List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
+		// Obtener lista de documentos
+		List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(tipoInversion);		
+		// Obtener la lista de documentos por tipo persona
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(tipoInversion)){
+			for(DocumentoRequisito documentoRequisito : listaDocumentosTotal){
+				String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(tipoDocId);
+				if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
+					listaDocumentos.add(documentoRequisito);
+				}
+			}
+		}else{
+			listaDocumentos = listaDocumentosTotal;
+		}
+		return listaDocumentos;
+	}	
+	
 	@Override
 	public void anularVerificacion(String inversionId) throws Exception {
 		LOG.info("###anularVerificacion inversionId:"+inversionId);
@@ -257,10 +208,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
 		
 		if(!StringUtils.isEmpty(inversionId)){
-			 List<InversionRequisitoCaspio> list= inversionService.listInversionRequisitoPorIdInversion(inversionId);
+			 List<InversionRequisito> list= inversionService.obtenerRequisitosPorInversion(inversionId);
 			 if(null!=list){
 				 List<ObservacionInversion> listObs=new ArrayList<>();
-				 for(InversionRequisitoCaspio irc:list){
+				 for(InversionRequisito irc:list){
 					 ObservacionInversion obs=new ObservacionInversion();
 					 obs.setObservacion(irc.getObservacion());
 					 listObs.add(obs);
@@ -322,7 +273,4 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 	}
-	
-	
-	
 }
