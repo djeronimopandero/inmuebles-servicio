@@ -275,8 +275,6 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
-//		         emailTo = documentoEmailTo;
-		         
 		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento);
 		     }
 			

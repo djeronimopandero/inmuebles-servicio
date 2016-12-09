@@ -3,20 +3,30 @@ package com.pandero.ws.business.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisitoCaspio;
+import com.pandero.ws.bean.ObservacionInversion;
+import com.pandero.ws.bean.Parametro;
+import com.pandero.ws.bean.PedidoInversionCaspio;
+import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
+import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 
@@ -31,6 +41,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 	ConstanteService constanteService;
 	@Autowired
 	PedidoService pedidoService;
+	@Autowired
+	UsuarioDao usuarioDao;
+	@Value("${ruta.documentos.templates}")
+	private String rutaDocumentosTemplates;
+	@Value("${ruta.documentos.generados}")
+	private String rutaDocumentosGenerados;
+	@Value("${desarrollo.pandero.email}")
+	private String emailDesarrolloPandero;
+	@Value("${documento.email.to}")
+	private String documentoEmailTo;
+	@Autowired
+	MailService mailService;
 	
 	@Override
 	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception {
@@ -229,5 +251,78 @@ public class InversionBusinessImpl implements InversionBusiness{
 			inversionService.actualizarEstadoInversionRequisitoCaspio(inversionId, Constantes.InversionRequisito.PENDIENTE);
 		}
 	}
+
+	@Override
+	public void generarCartaObservacion(String inversionId, String usuarioSAFId) throws Exception {
+		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
+		
+		if(!StringUtils.isEmpty(inversionId)){
+			 List<InversionRequisitoCaspio> list= inversionService.listInversionRequisitoPorIdInversion(inversionId);
+			 if(null!=list){
+				 List<ObservacionInversion> listObs=new ArrayList<>();
+				 for(InversionRequisitoCaspio irc:list){
+					 ObservacionInversion obs=new ObservacionInversion();
+					 obs.setObservacion(irc.getObservacion());
+					 listObs.add(obs);
+				 }
+				 
+				String docxGenerado="Carta-de-validacion-de-datos-inversion-inmobiliaria-generado-"+inversionId+".docx";
+				String pdfConvertido="Carta-de-validacion-de-datos-inversion-inmobiliaria-generado-"+inversionId+".pdf";
+				String gestionInmobiliaria="gestion_inversion_inmobiliaria_desembolso";
+				
+				/*Generar documento*/
+				DocumentoUtil documentoUtil=new DocumentoUtil();
+				XWPFDocument docx = documentoUtil.openDocument(rutaDocumentosTemplates+"/"+gestionInmobiliaria+"/"+"Carta-de-validacion-de-datos-inversion-inmobiliaria-TEMPLATE.docx");
+				
+				/*Obtener datos del asociado de la inversion*/
+				String nombreAsociado = "";
+				PedidoInversionCaspio pic= inversionService.obtenerPedidoInversionPorInversion(inversionId);
+				List<Parametro> params=new ArrayList<>();
+				Parametro parametro1=new Parametro("text_1", "Lima, 09 de Diciembre del 2016");//fecha
+				Parametro parametro2=new Parametro("text_2", "Nombre del asociado");//asocaido
+				Parametro parametro3=new Parametro("text_3", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
+				Parametro parametro4=new Parametro("text_4", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
+				Parametro parametro5=new Parametro("text_5", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
+				Parametro parametro7=new Parametro("text_7", "Nombre del Funcionario");//Funcionario
+				
+				params.add(parametro1);
+				params.add(parametro2);
+				params.add(parametro3);
+				params.add(parametro4);
+				params.add(parametro5);
+				params.add(parametro7);
+				
+				
+				XWPFDocument docxEdit=DocumentoUtil.replaceTextCartaValidacion(docx,params,listObs);
+				StringBuilder sb=new StringBuilder();
+				documentoUtil.saveDocument(docxEdit, sb.append(rutaDocumentosGenerados).append("/").append(docxGenerado).toString());
+				
+				/*Convertir a pdf*/
+				DocumentoUtil.convertDocxToPdf(
+						sb.append(rutaDocumentosGenerados).append("/").append(docxGenerado).toString(),
+						sb.append(rutaDocumentosGenerados).append("/").append(pdfConvertido).toString());
+				
+				
+				/*Enviar correo con archivo adjunto*/
+				LOG.info("SE GENERO LA CARTA DE OBSERVACION");
+		        String asunto = "Carta de Validación de Inversión - "+nombreAsociado;
+		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
+		         
+		        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
+		         
+		         String emailTo = documentoEmailTo;
+		         if(!Util.esVacio(usuario.getCelulaCorreo())){
+		        	 emailTo = usuario.getCelulaCorreo();
+		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
+		        	 emailTo = usuario.getEmpleadoCorreo();
+		         }
+		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, sb.append(rutaDocumentosGenerados).append("/").append(pdfConvertido).toString());
+				
+			 }
+		}
+		
+	}
+	
+	
 	
 }
