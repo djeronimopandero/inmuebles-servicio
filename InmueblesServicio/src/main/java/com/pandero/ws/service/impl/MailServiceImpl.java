@@ -32,7 +32,7 @@ public class MailServiceImpl implements MailService{
 		helper.setFrom(emailFrom);
 		helper.setTo(emailTo);
 		helper.setSubject(asunto);
-		helper.setText("Se adjunta el orden irrevocable");
+		helper.setText("Se adjunta la orden irrevocable correspondiente");
 		String rutaDocumento = rutaDocumentosGenerados+"/"+documento;
 		System.out.println("RUTA DOCUMENTO:: "+rutaDocumento);
 		FileSystemResource file = new FileSystemResource(rutaDocumento);
