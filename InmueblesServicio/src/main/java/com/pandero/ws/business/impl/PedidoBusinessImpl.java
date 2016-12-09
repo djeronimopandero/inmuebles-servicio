@@ -1,7 +1,6 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -14,13 +13,13 @@ import org.springframework.stereotype.Component;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
-import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PedidoDao;
@@ -72,12 +71,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		
 		ResultadoBean resultado = new ResultadoBean();
 		// Obtener la situacion del contrato
-		Contrato contrato = contratoDao.obtenerContratoSAF(nroContrato);
+		ContratoSAF contratoSAF = contratoDao.obtenerContratoSAF(nroContrato);
 		
 		// Si no esta adjudicado
-		if(!Util.esSituacionAdjudicado(contrato.getSituacionContrato())){
+		if(!Util.esSituacionAdjudicado(contratoSAF.getSituacionContrato())){
 			// Actualizar estado del contrato a no adjudicado en Caspio
-			contratoService.actualizarSituacionContratoCaspio(nroContrato, contrato.getSituacionContrato(), null, null);
+			contratoService.actualizarSituacionContratoCaspio(nroContrato, contratoSAF.getSituacionContrato(), null, null);
 			
 			// Enviar mensaje contrato no adjudicado
 			resultado.setMensajeError("El contrato no se encuentra adjudicado");
@@ -248,10 +247,13 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 					List<DocumentoRequisito> listaDocumentos = obtenerDocumentosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
 					// Validar datos antes de confirmar
 					resultado = DocumentoUtil.validarConfirmarInversion(listaDocumentos, inversion);
-					datosCompletos = false;
+					if(!resultado.equals("")){
+						datosCompletos = false;
+					}
 					break;
 				 }
 			 }
+			 System.out.println("VALIDACION DATOS COMPLETOS::: "+datosCompletos+" - "+resultado);
 			 
 			 if(datosCompletos){
 		    	 // Obtener contratos del pedido
@@ -316,6 +318,8 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 			listaDocumentos = listaDocumentosTotal;
 		}
 		return listaDocumentos;
-	}	
+	}
+	
+	
 	
 }

@@ -7,9 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
@@ -20,6 +18,7 @@ import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PersonaDAO;
 import com.pandero.ws.service.ContratoService;
+import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.service.PersonaService;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
@@ -37,6 +36,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	ContratoService contratoService;
 	@Autowired
 	PersonaService personaService;
+	@Autowired
+	PedidoService pedidoService;
 	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
@@ -139,6 +140,36 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		} catch (Exception e) {
 			LOGGER.error("###Sincronizacion manual de contratos y asociados:", e);
 		}
+		return resultadoBean;
+	}
+
+	@Override
+	public ResultadoBean actualizarDiferenciaPrecioContratos(Integer pedidoId) throws Exception {
+		LOGGER.info("###actualizarDiferenciaPrecioContratos pedidoId:"+pedidoId);
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		pedidoService.setTokenCaspio(tokenCaspio);
+		contratoService.setTokenCaspio(tokenCaspio);
+		ResultadoBean resultadoBean=null;
+		if(null!=pedidoId){
+			List<Contrato> listContrato= pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
+			
+			if(null!=listContrato){
+				for(Contrato contrato:listContrato){
+					ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato.getNroContrato());
+					Double dblDifPrecio=contratoDao.obtenerDiferenciaPrecioPorContrato(contratoSAF.getContratoId());
+					if(null!=dblDifPrecio){
+						if(dblDifPrecio>0){
+							contratoService.actualizarDifPrecioContratoCaspio(contrato.getNroContrato(), dblDifPrecio);
+						}
+					}
+				}
+			}
+			
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setResultado("Es necesario enviar el identificador de pedido");
+		}
+			
 		return resultadoBean;
 	}
 
