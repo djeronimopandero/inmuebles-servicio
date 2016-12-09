@@ -76,5 +76,6 @@ public class Constantes {
 	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
+	public static final String FORMATO_CARTA_VALIDACION_INVERSION = "dd 'de' MMMM 'del' yyyy";
 	
 }

@@ -17,9 +17,12 @@ import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisitoCaspio;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PedidoInversionCaspio;
+import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.dao.PersonaDAO;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
@@ -43,6 +46,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	PedidoService pedidoService;
 	@Autowired
 	UsuarioDao usuarioDao;
+	@Autowired
+	PersonaDAO personaDao;
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
 	@Value("${ruta.documentos.generados}")
@@ -274,16 +279,20 @@ public class InversionBusinessImpl implements InversionBusiness{
 				DocumentoUtil documentoUtil=new DocumentoUtil();
 				XWPFDocument docx = documentoUtil.openDocument(rutaDocumentosTemplates+"/"+gestionInmobiliaria+"/"+"Carta-de-validacion-de-datos-inversion-inmobiliaria-TEMPLATE.docx");
 				
-				/*Obtener datos del asociado de la inversion*/
+				/*Obtener datos de la inversion*/
 				String nombreAsociado = "";
 				PedidoInversionCaspio pic= inversionService.obtenerPedidoInversionPorInversion(inversionId);
+				
+				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(pic.getPedidoId());
+				PersonaSAF personaSAF= personaDao.obtenerPersonaSAF(String.valueOf(pedidoCaspio.getAsociadoId()));
+				
 				List<Parametro> params=new ArrayList<>();
-				Parametro parametro1=new Parametro("text_1", "Lima, 09 de Diciembre del 2016");//fecha
-				Parametro parametro2=new Parametro("text_2", "Nombre del asociado");//asocaido
+				Parametro parametro1=new Parametro("text_1", Util.getFechaFormateada(Util.getFechaActual(), Constantes.FORMATO_CARTA_VALIDACION_INVERSION) );//fecha
+				Parametro parametro2=new Parametro("text_2", personaSAF.getNombreCompleto());//asociado
 				Parametro parametro3=new Parametro("text_3", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
 				Parametro parametro4=new Parametro("text_4", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
 				Parametro parametro5=new Parametro("text_5", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
-				Parametro parametro7=new Parametro("text_7", "Nombre del Funcionario");//Funcionario
+				Parametro parametro7=new Parametro("text_7", "Nombre del Funcionario");//Funcionario de servicios y ventas
 				
 				params.add(parametro1);
 				params.add(parametro2);

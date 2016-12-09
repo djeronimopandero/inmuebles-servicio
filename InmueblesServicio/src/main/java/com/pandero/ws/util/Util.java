@@ -16,6 +16,15 @@ public class Util {
 		return today;
 	}
 	
+	public static String getFechaFormateada(Date date, String format){
+		StringBuilder sb=new StringBuilder();
+		sb.append("Lima, ");
+		SimpleDateFormat sdf=new SimpleDateFormat(format);
+		String fecha=sdf.format(date);
+		sb.append(fecha);
+		return sb.toString();
+	}
+	
 	public static String formatearFechaYYYYMMDD(Date fecha){
 		String fechaText = null;
 		if(fecha!=null){
