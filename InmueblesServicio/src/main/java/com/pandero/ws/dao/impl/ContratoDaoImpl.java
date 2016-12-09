@@ -40,16 +40,39 @@ public class ContratoDaoImpl implements ContratoDao {
 
 	@Override
 	public ContratoSAF obtenerContratoSAF(String nroContrato) throws Exception {
-			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID, ContratoID "+
-					"from FOC_Contrato where ContratoNumero='"+nroContrato+"'";
-							
-		List<ContratoSAF> listaContratos = this.jdbcTemplate.query(query, new ContratoMapper());
-		ContratoSAF contrato = null;	
-		if(listaContratos!=null && listaContratos.size()>0){	
-			contrato = listaContratos.get(0);
-			System.out.println("listaContratos:: "+listaContratos.size());
-		}		
+		LOG.info("###ContratoDaoImpl.obtenerContratoSAF");
+		
+		List<ContratoSAF> listContratos = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_FOC_ObtenerContratoPorNumero");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@numeroContrato", Types.VARCHAR));
+		call.returningResultSet("contrato", new ContratoMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@numeroContrato", nroContrato);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		ContratoSAF contrato=null;
+		List resultado = (List) mapResultado.get("contrato");
+		if (resultado != null && resultado.size() > 0) {
+			listContratos = (List<ContratoSAF>) resultado;
+			contrato = listContratos.get(0);
+		}
+
 		return contrato;
+//			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID, ContratoID "+
+//					"from FOC_Contrato where ContratoNumero='"+nroContrato+"'";
+//							
+//		List<ContratoSAF> listaContratos = this.jdbcTemplate.query(query, new ContratoMapper());
+//		ContratoSAF contrato = null;	
+//		if(listaContratos!=null && listaContratos.size()>0){	
+//			contrato = listaContratos.get(0);
+//			System.out.println("listaContratos:: "+listaContratos.size());
+//		}		
+//		return contrato;
+		
 	}
 	
 	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
@@ -59,6 +82,7 @@ public class ContratoDaoImpl implements ContratoDao {
 			e.setSituacionContrato(rs.getString("SituacionContratoID"));
 			e.setAsociadoId(rs.getInt("PersonaID"));
 			e.setContratoId(rs.getInt("ContratoID"));
+			e.setFuncionarioServicioyVentas(rs.getString("funcionarioServicioyVentas"));
 			return e;		    
 			}
 		}

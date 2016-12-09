@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
@@ -22,6 +23,7 @@ import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.PersonaDAO;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
@@ -48,6 +50,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	UsuarioDao usuarioDao;
 	@Autowired
 	PersonaDAO personaDao;
+	@Autowired
+	ContratoDao contratoDao;
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
 	@Value("${ruta.documentos.generados}")
@@ -237,13 +241,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(pic.getPedidoId());
 				PersonaSAF personaSAF= personaDao.obtenerPersonaSAF(String.valueOf(pedidoCaspio.getAsociadoId()));
 				
+				List<Contrato> listContratos = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoCaspio.getPedidoId()));
+				//obtener primero contrato para buscar al funcionario de servicios
+				Contrato contrato1 = listContratos.get(0);
+				ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato1.getNroContrato());
+				
 				List<Parametro> params=new ArrayList<>();
 				Parametro parametro1=new Parametro("text_1", Util.getFechaFormateada(Util.getFechaActual(), Constantes.FORMATO_CARTA_VALIDACION_INVERSION) );//fecha
 				Parametro parametro2=new Parametro("text_2", personaSAF.getNombreCompleto());//asociado
 				Parametro parametro3=new Parametro("text_3", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
 				Parametro parametro4=new Parametro("text_4", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
 				Parametro parametro5=new Parametro("text_5", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
-				Parametro parametro7=new Parametro("text_7", "Nombre del Funcionario");//Funcionario de servicios y ventas
+				Parametro parametro7=new Parametro("text_7", contratoSAF.getFuncionarioServicioyVentas());//Funcionario de servicios y ventas
 				
 				params.add(parametro1);
 				params.add(parametro2);

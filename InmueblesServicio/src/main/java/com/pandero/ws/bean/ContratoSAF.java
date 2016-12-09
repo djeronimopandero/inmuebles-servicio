@@ -23,6 +23,8 @@ public class ContratoSAF {
 	private String situacionContrato; //SAF
 	private String situacionContratoCASPIO; //CASPIO
 	
+	private String funcionarioServicioyVentas;
+	
 	public Integer getContratoId() {
 		return contratoId;
 	}
@@ -136,6 +138,12 @@ public class ContratoSAF {
 	}
 	public void setEsAdjudicado(Integer esAdjudicado) {
 		this.esAdjudicado = esAdjudicado;
+	}
+	public String getFuncionarioServicioyVentas() {
+		return funcionarioServicioyVentas;
+	}
+	public void setFuncionarioServicioyVentas(String funcionarioServicioyVentas) {
+		this.funcionarioServicioyVentas = funcionarioServicioyVentas;
 	}
 	
 }
