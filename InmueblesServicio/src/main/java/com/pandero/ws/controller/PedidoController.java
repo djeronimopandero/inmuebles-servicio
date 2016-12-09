@@ -160,7 +160,8 @@ public class PedidoController {
 		try{
 			String pedidoId = String.valueOf(params.get("pedidoId"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
-			result = pedidoBusiness.generarOrdenIrrevocablePedido(pedidoId, usuarioId);
+			String pedidoNumero = String.valueOf(params.get("pedidoNumero"));
+			result = pedidoBusiness.generarOrdenIrrevocablePedido(pedidoId, usuarioId, pedidoNumero);
 			if(result.equals("")){
 				result = Constantes.Service.RESULTADO_EXITOSO;
 			}

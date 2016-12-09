@@ -537,7 +537,7 @@ public class DocumentoUtil {
 		}
 	}
 	
-	public static List<Parametro> getParametrosOrdenIrrevocable(double sumaContratos, double sumaInversiones, double saldo, String pedidoId) {
+	public static List<Parametro> getParametrosOrdenIrrevocable(double sumaContratos, double sumaInversiones, double saldo, String pedidoId, String pedidoNumero) {
 		List<Parametro> listParam=null;		
 		try{
 			listParam = new ArrayList<>();
@@ -549,7 +549,8 @@ public class DocumentoUtil {
 			listParam.add(parametro);
 			
 			String nroPedido = "P000"+pedidoId;
-			parametro = new Parametro("$numeroInversion", nroPedido);
+//			parametro = new Parametro("$numeroInversion", nroPedido);
+			parametro = new Parametro("$numeroInversion", pedidoNumero);
 			listParam.add(parametro);
 			
 			parametro = new Parametro("$tablaInversiones", "TABLA INVERSIONISTA");

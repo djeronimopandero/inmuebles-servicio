@@ -214,7 +214,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	
 	
 	@Override
-	public String generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId) throws Exception {
+	public String generarOrdenIrrevocablePedido(String pedidoId, String usuarioSAFId, String pedidoNumero) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		constanteService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);		
@@ -275,7 +275,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 double saldo = sumaInversiones-sumaContratos;
 				 
 				 // Obtener los parametros a enviar al documento
-		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId);
+		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId,pedidoNumero);
 		    	 
 		    	 // Reemplazar los datos en la plantilla
 		         doc = DocumentoUtil.replaceTextOrdenIrrevocable(doc,listaParametros,listaDocuIdentidad, listaAsociados,listaContratos,listaInversiones);
