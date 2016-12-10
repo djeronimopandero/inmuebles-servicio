@@ -9,6 +9,7 @@ public class Constantes {
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
 		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
+		public final static String RESULTADO_NO_INVERSIONES_CONFIRMADAS = "NO_INVERSIONES_CONFIRMADAS";
 	}
 	
 	public class Pedido {
