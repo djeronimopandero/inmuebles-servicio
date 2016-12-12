@@ -129,7 +129,8 @@ public class InversionServiceImpl implements InversionService {
 	@Override
 	public String actualizarEstadoInversionRequisitoCaspio(String inversionId,String estadoInversionReq) throws Exception {
 		Map<String, String> request = new HashMap<String, String>();
-		request.put("EstadoRequisito", estadoInversionReq);		
+		request.put("EstadoRequisito", estadoInversionReq);	
+		request.put("Observacion", "");	
 		
 		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
 		String actualizarInversionRequisitoURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;

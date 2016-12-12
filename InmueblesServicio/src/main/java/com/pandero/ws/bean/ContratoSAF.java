@@ -24,6 +24,7 @@ public class ContratoSAF {
 	private String situacionContratoCASPIO; //CASPIO
 	
 	private String funcionarioServicioyVentas;
+	private String correoCelula;
 	
 	public Integer getContratoId() {
 		return contratoId;
@@ -144,6 +145,12 @@ public class ContratoSAF {
 	}
 	public void setFuncionarioServicioyVentas(String funcionarioServicioyVentas) {
 		this.funcionarioServicioyVentas = funcionarioServicioyVentas;
+	}
+	public String getCorreoCelula() {
+		return correoCelula;
+	}
+	public void setCorreoCelula(String correoCelula) {
+		this.correoCelula = correoCelula;
 	}
 	
 }

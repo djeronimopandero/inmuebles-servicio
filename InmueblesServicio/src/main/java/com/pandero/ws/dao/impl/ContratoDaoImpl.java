@@ -83,6 +83,7 @@ public class ContratoDaoImpl implements ContratoDao {
 			e.setAsociadoId(rs.getInt("PersonaID"));
 			e.setContratoId(rs.getInt("ContratoID"));
 			e.setFuncionarioServicioyVentas(rs.getString("funcionarioServicioyVentas"));
+			e.setCorreoCelula(rs.getString("correoCelula"));
 			return e;		    
 			}
 		}

@@ -247,12 +247,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 				ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato1.getNroContrato());
 				
 				List<Parametro> params=new ArrayList<>();
-				Parametro parametro1=new Parametro("text_1", Util.getFechaFormateada(Util.getFechaActual(), Constantes.FORMATO_CARTA_VALIDACION_INVERSION) );//fecha
-				Parametro parametro2=new Parametro("text_2", personaSAF.getNombreCompleto());//asociado
-				Parametro parametro3=new Parametro("text_3", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
-				Parametro parametro4=new Parametro("text_4", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
-				Parametro parametro5=new Parametro("text_5", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
-				Parametro parametro7=new Parametro("text_7", contratoSAF.getFuncionarioServicioyVentas());//Funcionario de servicios y ventas
+				Parametro parametro1=new Parametro("$FechaDocumento", Util.getFechaFormateada(Util.getFechaActual(), Constantes.FORMATO_CARTA_VALIDACION_INVERSION) );//fecha
+				Parametro parametro2=new Parametro("$NombreCompleto", personaSAF.getNombreCompleto());//asociado
+				Parametro parametro3=new Parametro("$TipoInversion", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
+				Parametro parametro4=new Parametro("$TipoInmueble", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
+				Parametro parametro5=new Parametro("$Importe", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
+				Parametro parametro7=new Parametro("$FuncionarioServYVentas", contratoSAF.getFuncionarioServicioyVentas());//Funcionario de servicios y ventas
 				
 				params.add(parametro1);
 				params.add(parametro2);

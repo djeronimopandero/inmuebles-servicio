@@ -705,59 +705,6 @@ public class DocumentoUtil {
 
 	}
 	
-	@Deprecated
-	public static void generarDocumento(String filePdf,String filePdfDestino) {
-		try{
-			
-			PdfReader reader = new PdfReader(filePdf);
-	        PdfDictionary dict = reader.getPageN(1);
-	        PdfObject object = dict.getDirectObject(PdfName.CONTENTS);
-	        if (object instanceof PRStream) {
-	            PRStream stream = (PRStream)object;
-	            byte[] data = PdfReader.getStreamBytes(stream);
-	            
-	            /*****/
-	            PRStream stream1 = (PRStream)object;
-	            PRStream stream2 = (PRStream)object;
-	            String texto=new String(data);
-	            
-	            stream1.setData(texto.replace("text_1", "Lima, 16 de agosto del 2016").getBytes());
-	            stream2.setData(texto.replace("text_2", "Arly Fernández ÑLlactahuamán").getBytes());
-	            /*****/
-	            
-//	            stream.setData(new String(data).replace("text_1", "Lima, 16 de agosto del 2016").getBytes());
-//	            stream.setData(new String(data).replace("text_2", "Arly Fernández ÑLlactahuamán").getBytes());
-	        }
-	        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(filePdfDestino));
-	        stamper.close();
-	        reader.close();
-	        
-	        //-------------------------------------------------
-			
-//			PdfReader reader = new PdfReader(filePdf);
-//	        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(filePdfDestino));
-//	        AcroFields form = stamper.getAcroFields();
-//	        form.setField("text_1", "Lima, 16 de agosto del 2016");
-//	        form.setField("text_2", "Arly Fernandez");
-	        
-//	        form.setField("text_1", "Bruno Lowagie");
-//	        form.setFieldProperty("text_2", "fflags", 0, null);
-//	        form.setFieldProperty("text_2", "bordercolor", BaseColor.RED, null);
-//	        form.setField("text_2", "bruno");
-//	        form.setFieldProperty("text_3", "clrfflags", TextField.PASSWORD, null);
-//	        form.setFieldProperty("text_3", "setflags", PdfAnnotation.FLAGS_PRINT, null);
-//	        form.setField("text_3", "12345678", "xxxxxxxx");
-//	        form.setFieldProperty("text_4", "textsize", new Float(12), null);
-//	        form.regenerateField("text_4");
-//	        stamper.close();
-//	        reader.close();
-		
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
 	public static XWPFDocument replaceTextCartaValidacion(XWPFDocument doc, List<Parametro> params, List<ObservacionInversion> listObservacion) {
 		
 		
