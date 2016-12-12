@@ -277,8 +277,10 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 double sumaInversiones = Util.getSumaInversionesxPedido(listaInversiones);
 				 double saldo = sumaInversiones-sumaContratos;
 				 
+				 double diferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
+				 
 				 // Obtener los parametros a enviar al documento
-		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId,pedidoNumero);
+		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId,pedidoNumero,diferenciaPrecio);
 		    	 
 		    	 // Reemplazar los datos en la plantilla
 		         doc = DocumentoUtil.replaceTextOrdenIrrevocable(doc,listaParametros,listaDocuIdentidad, listaAsociados,listaContratos,listaInversiones);
@@ -323,6 +325,18 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return listaDocumentos;
 	}
 	
-	
+	private double getSumaDiferenciaPrecioxPedido(List<Contrato> listaContratos){
+		double sumaDiferenciaPrecio = 0;
+		for(Contrato contrato : listaContratos){
+			Double dblDifPrecioSaf=0.0;
+			try {
+				dblDifPrecioSaf = contratoDao.obtenerDiferenciaPrecioPorContrato(contrato.getContratoId());
+			} catch (Exception e) {
+				LOG.error("###Error al obtener la diferencia de precio en al suma:",e);
+			}
+			sumaDiferenciaPrecio = sumaDiferenciaPrecio + dblDifPrecioSaf;		
+		}
+		return sumaDiferenciaPrecio;
+	}
 	
 }
