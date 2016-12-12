@@ -12,13 +12,13 @@ public class PersonaSAF {
 	private String tipoPersona;
 	private String nombreCompleto;
 	private Integer personaRelacionadaID;
+	private Integer proveedorID;
+	private String tipoProveedor;
 	
-	public PersonaSAF() {
-		// TODO Auto-generated constructor stub
+	public PersonaSAF(){
+		
 	}
 	
-	
-
 	public Integer getPersonaID() {
 		return personaID;
 	}
@@ -99,13 +99,27 @@ public class PersonaSAF {
 	public void setNombreCompleto(String nombreCompleto) {
 		this.nombreCompleto = nombreCompleto;
 	}
-
+	
 	public PersonaSAF(String tipoDocumentoID, String personaCodigoDocumento) {
 		super();
 		this.tipoDocumentoID = tipoDocumentoID;
 		this.personaCodigoDocumento = personaCodigoDocumento;
 	}
+
+	public Integer getProveedorID() {
+		return proveedorID;
+	}
+
+	public void setProveedorID(Integer proveedorID) {
+		this.proveedorID = proveedorID;
+	}
 	
-	
+	public String getTipoProveedor() {
+		return tipoProveedor;
+	}
+
+	public void setTipoProveedor(String tipoProveedor) {
+		this.tipoProveedor = tipoProveedor;
+	}
 	
 }

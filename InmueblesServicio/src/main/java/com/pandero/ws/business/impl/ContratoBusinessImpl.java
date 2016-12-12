@@ -16,7 +16,7 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
-import com.pandero.ws.dao.PersonaDAO;
+import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.service.PersonaService;
@@ -31,7 +31,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	@Autowired
 	ContratoDao contratoDao;
 	@Autowired
-	PersonaDAO personaDao;
+	PersonaDao personaDao;
 	@Autowired
 	ContratoService contratoService;
 	@Autowired

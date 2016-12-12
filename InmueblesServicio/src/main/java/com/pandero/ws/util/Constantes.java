@@ -83,6 +83,12 @@ public class Constantes {
 		public final static String ESTADO_REQUISITO_NO_CONFORME="NO CONFORME";
 	}
 	
+	public class Proveedor{
+		public final static String TIPO_ENTIDAD_FINANCIERA="ENTIDAD_FINANCIERA";
+		public final static String TIPO_CONSTRUCTORA="CONTRUCTORA";
+		public final static String TIPO_PERSONA="PERSONA";
+	}
+	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	public static final String FORMATO_CARTA_VALIDACION_INVERSION = "dd 'de' MMMM 'del' yyyy";

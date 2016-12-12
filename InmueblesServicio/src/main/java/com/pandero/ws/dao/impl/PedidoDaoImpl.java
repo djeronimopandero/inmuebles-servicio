@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.Asociado;
+import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.PedidoDao;
 
@@ -162,4 +163,46 @@ public class PedidoDaoImpl implements PedidoDao {
 			return e;		    
 			}
 		}
+
+	@Override
+	public void agregarPedidoInversionSAF(PedidoInversionSAF pedidoInversionSAF) throws Exception {
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_AgregarPedidoInversion");
+		call.withoutProcedureColumnMetaDataAccess();	
+		
+		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlOutParameter("@ProveedorID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@InversionNumero", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@TipoInversionID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@ConfirmarID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));				
+//		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
+		
+		MapSqlParameterSource parameters = new MapSqlParameterSource();	
+		parameters.addValue("@PedidoNumero", pedidoInversionSAF.getNroPedido());
+        parameters.addValue("@ProveedorID", pedidoInversionSAF.getProveedorID());		
+		parameters.addValue("@InversionNumero", pedidoInversionSAF.getPedidoInversionNumero());
+		parameters.addValue("@TipoInversionID", pedidoInversionSAF.getPedidoTipoInversionID());
+		parameters.addValue("@ConfirmarID", "1");		
+		parameters.addValue("@UsuarioID", pedidoInversionSAF.getUsuarioIDCreacion());
+		
+		call.execute(parameters);	
+	}
+
+	@Override
+	public void eliminarPedidoInversionSAF(String nroInversion, String usuarioId) throws Exception {
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarPedidoInversion");
+		call.withoutProcedureColumnMetaDataAccess();	
+		
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
+		
+		MapSqlParameterSource parameters = new MapSqlParameterSource();	
+		parameters.addValue("@NumeroInversion", nroInversion);
+		parameters.addValue("@UsuarioID", usuarioId);
+				
+		call.execute(parameters);
+	}
+
 }

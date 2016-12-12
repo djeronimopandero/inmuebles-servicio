@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
-import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -136,33 +135,6 @@ public class InversionServiceImpl implements InversionService {
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarInversionRequisitoURL,Object.class,request,serviceWhere);	
 		return null;
-	}
-
-	@Override
-	public PedidoInversionCaspio obtenerPedidoInversionPorInversion(String inversionId) throws Exception {
-		PedidoInversionCaspio pedidoInversion = null;
-		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";		
-		String obtenerInversionesxPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
-		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
-     	String response = JsonUtil.toJson(jsonResult);	     	
-        if(response!=null && !response.isEmpty()){
-	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
-	        if(responseMap!=null){
-	        	Object jsonResponse = responseMap.get("Result");
-	        	if(jsonResponse!=null){        		
-	        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-	        		if(mapInversiones!=null && mapInversiones.size()>0){
-	        			for(Object bean : mapInversiones){
-	        				String beanString = JsonUtil.toJson(bean);
-	        				pedidoInversion =  JsonUtil.fromJson(beanString, PedidoInversionCaspio.class);			
-	        			}
-	        		}        		
-	        	}
-	        }
-	    }
-
-		return pedidoInversion;
 	}
 
 	@Override
