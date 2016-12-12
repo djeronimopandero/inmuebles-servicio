@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
-import com.pandero.ws.bean.PedidoInversionCaspio;
 
 public interface InversionService {
 
@@ -17,6 +16,5 @@ public interface InversionService {
 	public String crearRequisitoInversion(String inversionId, String requisitoId) throws Exception;
 	public List<InversionRequisito> obtenerRequisitosPorInversion(String inversionId) throws Exception;
 	public String actualizarEstadoInversionRequisitoCaspio(String inversionId,String estadoInversionReq) throws Exception;
-	public PedidoInversionCaspio obtenerPedidoInversionPorInversion(String inversionId)throws Exception;
 	
 }

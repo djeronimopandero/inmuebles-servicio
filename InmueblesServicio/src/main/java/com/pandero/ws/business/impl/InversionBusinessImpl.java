@@ -19,12 +19,11 @@ import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
-import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.dao.ContratoDao;
-import com.pandero.ws.dao.PersonaDAO;
+import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.InversionService;
@@ -49,7 +48,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Autowired
 	UsuarioDao usuarioDao;
 	@Autowired
-	PersonaDAO personaDao;
+	PersonaDao personaDao;
 	@Autowired
 	ContratoDao contratoDao;
 	@Value("${ruta.documentos.templates}")
@@ -64,7 +63,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	MailService mailService;
 	
 	@Override
-	public String confirmarInversion(String inversionId, String situacionConfirmado) throws Exception {
+	public String confirmarInversion(String inversionId, String situacionConfirmado, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
@@ -88,8 +87,61 @@ public class InversionBusinessImpl implements InversionBusiness{
 		// Confirmar-desconfirmar inversion
 		if(Util.esVacio(resultado)){						
 			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
+				// Verificar si existe excedente certificado o diferencia de precio
 				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
+				
+				try{
+				// Obtener tipo de proveedor
+				Integer proveedorID = null, personaID = null;
+				String tipoDocuProv="", nroDocuProv="", tipoProveedor="";
+				if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+					tipoProveedor = Constantes.Proveedor.TIPO_ENTIDAD_FINANCIERA;
+					personaID = inversion.getEntidadFinancieraId(); // CONSULTAR - GEN_Banco					
+				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+					if(inversion.getServicioConstructora()){
+						tipoProveedor = Constantes.Proveedor.TIPO_CONSTRUCTORA;
+						tipoDocuProv = inversion.getConstructoraTipoDoc();
+						nroDocuProv = inversion.getConstructoraNroDoc();
+					}else{
+						tipoProveedor = Constantes.Proveedor.TIPO_PERSONA;
+						Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+						personaID = pedido.getAsociadoId();
+					}
+				}else{
+					tipoProveedor = Constantes.Proveedor.TIPO_PERSONA;
+					tipoDocuProv = inversion.getPropietarioTipoDocId();
+					nroDocuProv = inversion.getPropietarioNroDoc();
+				}
+				// Obtener proveedor SAF
+				PersonaSAF proveedor = personaDao.obtenerProveedorSAF(tipoDocuProv, nroDocuProv, personaID);
+				if(proveedor==null){
+					PersonaSAF proveedorSAF = new PersonaSAF();
+					proveedorSAF.setPersonaID(personaID);
+					proveedorSAF.setTipoDocumentoID(tipoDocuProv);
+					proveedorSAF.setPersonaCodigoDocumento(nroDocuProv);
+					if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+							&& inversion.getServicioConstructora()){
+						proveedorSAF.setNombre(inversion.getConstructoraNombres());
+						proveedorSAF.setApellidoPaterno(inversion.getConstructoraApePaterno());
+						proveedorSAF.setApellidoMaterno(inversion.getConstructoraApeMaterno());
+						proveedorSAF.setRazonSocial(inversion.getConstructoraRazonSocial());
+					}else if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+						proveedorSAF.setNombre(inversion.getPropietarioNombres());
+						proveedorSAF.setApellidoPaterno(inversion.getPropietarioApePaterno());
+						proveedorSAF.setApellidoMaterno(inversion.getPropietarioApeMaterno());
+						proveedorSAF.setRazonSocial(inversion.getPropietarioRazonSocial());
+					}					
+					proveedor = personaDao.registrarProveedorSAF(proveedorSAF);
+				}
+				// Registrar pedido-inversion
+				
+				}catch(Exception e){
+					LOG.error("ERROR pedido-inversion:: "+e.getMessage());
+				}
+				
 			}
+			
+			// Registrar inversion en caspio
 			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
 		}
 							
@@ -236,9 +288,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				/*Obtener datos de la inversion*/
 				String nombreAsociado = "";
-				PedidoInversionCaspio pic= inversionService.obtenerPedidoInversionPorInversion(inversionId);
+				Inversion pic= inversionService.obtenerInversionCaspio(inversionId);
 				
-				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(pic.getPedidoId());
+				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(String.valueOf(pic.getPedidoId().intValue()));
 				PersonaSAF personaSAF= personaDao.obtenerPersonaSAF(String.valueOf(pedidoCaspio.getAsociadoId()));
 				
 				List<Contrato> listContratos = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoCaspio.getPedidoId()));
@@ -250,8 +302,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 				Parametro parametro1=new Parametro("$FechaDocumento", Util.getFechaFormateada(Util.getFechaActual(), Constantes.FORMATO_CARTA_VALIDACION_INVERSION) );//fecha
 				Parametro parametro2=new Parametro("$NombreCompleto", personaSAF.getNombreCompleto());//asociado
 				Parametro parametro3=new Parametro("$TipoInversion", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
-				Parametro parametro4=new Parametro("$TipoInmueble", StringUtils.isEmpty(pic.getTipoInmueble())?"":pic.getTipoInmueble());//tipo inmbueble
-				Parametro parametro5=new Parametro("$Importe", StringUtils.isEmpty(pic.getImporteInversion())?"":pic.getImporteInversion());//Importe
+				Parametro parametro4=new Parametro("$TipoInmueble", StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom());//tipo inmbueble
+				Parametro parametro5=new Parametro("$Importe", String.valueOf(pic.getImporteInversion()) );//Importe
 				Parametro parametro7=new Parametro("$FuncionarioServYVentas", contratoSAF.getFuncionarioServicioyVentas());//Funcionario de servicios y ventas
 				
 				params.add(parametro1);

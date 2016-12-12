@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PersonaBusiness;
-import com.pandero.ws.dao.PersonaDAO;
+import com.pandero.ws.dao.PersonaDao;
 
 @Controller
 @RequestMapping("/persona")
@@ -24,7 +24,7 @@ public class PersonaController {
 	PersonaBusiness personaBusiness;
 	
 	@Autowired
-	PersonaDAO personaDAO;
+	PersonaDao personaDAO;
 	
 	@RequestMapping(value = "obtenerPorPedidoId/{pedidoId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean getPersonaPorPedidoId(@PathVariable(value="pedidoId") Integer pedidoId){

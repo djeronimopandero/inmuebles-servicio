@@ -63,7 +63,8 @@ public class InversionController {
 		try{
 			String inversionId = String.valueOf(params.get("inversionId"));
 			String situacionConfirmado = String.valueOf(params.get("situacionConfirmado"));
-			result  = inversionBusiness.confirmarInversion(inversionId,situacionConfirmado);		
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			result  = inversionBusiness.confirmarInversion(inversionId,situacionConfirmado,usuarioId);		
 		}catch(Exception e){
 			LOG.error("Error inversion/confirmarInversion:: ",e);
 			e.printStackTrace();

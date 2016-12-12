@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.business.PersonaBusiness;
-import com.pandero.ws.dao.PersonaDAO;
+import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.ServiceRestTemplate;
 
@@ -21,7 +21,7 @@ public class PersonaBusinessImpl implements PersonaBusiness{
 	PedidoService pedidoService;
 	
 	@Autowired
-	PersonaDAO personaDAO;
+	PersonaDao personaDAO;
 	
 	@Override
 	public PersonaSAF obtenerPersonaSAF(String pedidoId) throws Exception {

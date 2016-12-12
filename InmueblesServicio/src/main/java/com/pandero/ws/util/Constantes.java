@@ -9,6 +9,7 @@ public class Constantes {
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
 		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
+		public final static String RESULTADO_NO_INVERSIONES_CONFIRMADAS = "NO_INVERSIONES_CONFIRMADAS";
 	}
 	
 	public class Pedido {
@@ -80,6 +81,12 @@ public class Constantes {
 		public final static String ESTADO_REQUISITO_PENDIENTE="PENDIENTE";
 		public final static String ESTADO_REQUISITO_CONFORME="CONFORME";
 		public final static String ESTADO_REQUISITO_NO_CONFORME="NO CONFORME";
+	}
+	
+	public class Proveedor{
+		public final static String TIPO_ENTIDAD_FINANCIERA="ENTIDAD_FINANCIERA";
+		public final static String TIPO_CONSTRUCTORA="CONTRUCTORA";
+		public final static String TIPO_PERSONA="PERSONA";
 	}
 	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";

@@ -724,8 +724,8 @@ public class DocumentoUtil {
 										text = text.replace(param.getKey(), param.getValue());
 										r.setText(text, 0);
 									}
-									if(text.contains("text_6")){
-										text = text.replace("text_6", "");
+									if(text.contains("$TablaObservaciones")){
+										text = text.replace("$TablaObservaciones", "");
 										r.setText(text, 0);
 										
 										for( ObservacionInversion obs:listObservacion){

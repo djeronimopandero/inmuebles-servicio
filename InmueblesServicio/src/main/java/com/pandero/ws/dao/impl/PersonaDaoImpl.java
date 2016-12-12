@@ -21,10 +21,10 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.PersonaSAF;
-import com.pandero.ws.dao.PersonaDAO;
+import com.pandero.ws.dao.PersonaDao;
 
 @Repository
-public class PersonaDaoImpl implements PersonaDAO {
+public class PersonaDaoImpl implements PersonaDao {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PersonaDaoImpl.class);
 	private JdbcTemplate jdbcTemplate;
@@ -37,8 +37,7 @@ public class PersonaDaoImpl implements PersonaDAO {
 	
 	@Override
 	public PersonaSAF obtenerPersonaSAF(String personaID) throws Exception {
-		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF");
-		
+		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF");		
 		List<PersonaSAF> listPersonas = null;
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
@@ -77,6 +76,85 @@ public class PersonaDaoImpl implements PersonaDAO {
 			
 			return p;		    
 		}
+	}
+
+	@Override
+	public PersonaSAF obtenerProveedorSAF(String tipoDocumento, String nroDocumento, Integer personaId) throws Exception {
+		List<PersonaSAF> listPersonas = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_PER_ObtenerProveedorPorDocumento");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@TipoDocumento", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@NroDocumento", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.VARCHAR));
+		call.returningResultSet("proveedor", new ProveedorMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento))
+		.addValue("@NroDocumento", nroDocumento)
+		.addValue("@PersonaID", personaId==null?"":String.valueOf(personaId.intValue()));
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		PersonaSAF persona=null;
+		List resultado = (List) mapResultado.get("proveedor");
+		if (resultado != null && resultado.size() > 0) {
+			listPersonas = (List<PersonaSAF>) resultado;
+			persona = listPersonas.get(0);
+		}
+
+		return persona;
+	}
+	
+	private static final class ProveedorMapper implements RowMapper<PersonaSAF>{
+		public PersonaSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			PersonaSAF p = new PersonaSAF();
+			p.setTipoDocumentoID(rs.getString("TipoDocumentoID"));
+			p.setPersonaCodigoDocumento(rs.getString("NroDocumento"));
+			p.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
+			p.setPersonaID(rs.getInt("PersonaID"));
+			p.setProveedorID(rs.getInt("ProveedorID"));
+			
+			return p;		    
+		}
+	}
+
+	@Override
+	public PersonaSAF registrarProveedorSAF(PersonaSAF personaSAF) throws Exception {
+		List<PersonaSAF> listPersonas = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_PER_RegistrarProveedor");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@TipoDocumento", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@NroDocumento", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaNombre", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaApellidoPaterno", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaApellidoMaterno", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaRazonSocial", Types.VARCHAR));	
+		call.addDeclaredParameter(new SqlParameter("@TipoProveedor", Types.VARCHAR));	
+		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.VARCHAR));
+		call.returningResultSet("proveedor", new ProveedorMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@TipoDocumento", personaSAF.getTipoDocumentoID())
+		.addValue("@NroDocumento", personaSAF.getPersonaCodigoDocumento())
+		.addValue("@PersonaNombre", personaSAF.getNombre())
+		.addValue("@PersonaApellidoPaterno", personaSAF.getApellidoPaterno())
+		.addValue("@PersonaApellidoMaterno", personaSAF.getApellidoMaterno())
+		.addValue("@PersonaRazonSocial", personaSAF.getRazonSocial())
+		.addValue("@TipoProveedor", personaSAF.getTipoProveedor())
+		.addValue("@PersonaID", personaSAF.getPersonaID()==null?"":String.valueOf(personaSAF.getPersonaID().intValue()));
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		PersonaSAF persona=null;
+		List resultado = (List) mapResultado.get("proveedor");
+		if (resultado != null && resultado.size() > 0) {
+			listPersonas = (List<PersonaSAF>) resultado;
+			persona = listPersonas.get(0);
+		}
+
+		return persona;
 	}
 
 }

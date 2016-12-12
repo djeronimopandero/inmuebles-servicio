@@ -252,6 +252,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 					}
 					break;
 				 }
+			 }else{
+				 datosCompletos=false;
+				 resultado=Constantes.Service.RESULTADO_NO_INVERSIONES_CONFIRMADAS;
 			 }
 			 System.out.println("VALIDACION DATOS COMPLETOS::: "+datosCompletos+" - "+resultado);
 			 
