@@ -79,21 +79,26 @@ public class PersonaDaoImpl implements PersonaDao {
 	}
 
 	@Override
-	public PersonaSAF obtenerProveedorSAF(String tipoDocumento, String nroDocumento, Integer personaId) throws Exception {
+	public PersonaSAF obtenerProveedorSAF(Integer proveedorId, String tipoProveedor, Integer personaID, 
+			String tipoDocumento, String nroDocumento) throws Exception {
 		List<PersonaSAF> listPersonas = null;
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
-		call.withProcedureName("USP_PER_ObtenerProveedorPorDocumento");
+		call.withProcedureName("USP_PER_ObtenerProveedor");
 		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@ProveedorID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@TipoProveedorID", Types.INTEGER));
 		call.addDeclaredParameter(new SqlParameter("@TipoDocumento", Types.INTEGER));
 		call.addDeclaredParameter(new SqlParameter("@NroDocumento", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.INTEGER));
 		call.returningResultSet("proveedor", new ProveedorMapper());
 		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@ProveedorID", proveedorId)
+		.addValue("@TipoProveedorID", Integer.parseInt(tipoProveedor))
+		.addValue("@PersonaID", personaID)
 		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento))
-		.addValue("@NroDocumento", nroDocumento)
-		.addValue("@PersonaID", personaId==null?"":String.valueOf(personaId.intValue()));
+		.addValue("@NroDocumento", nroDocumento);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
 		PersonaSAF persona=null;
@@ -127,24 +132,24 @@ public class PersonaDaoImpl implements PersonaDao {
 		call.withCatalogName("dbo");
 		call.withProcedureName("USP_PER_RegistrarProveedor");
 		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@TipoProveedor", Types.VARCHAR));	
+		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@TipoDocumento", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@NroDocumento", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@PersonaNombre", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@PersonaApellidoPaterno", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@PersonaApellidoMaterno", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@PersonaRazonSocial", Types.VARCHAR));	
-		call.addDeclaredParameter(new SqlParameter("@TipoProveedor", Types.VARCHAR));	
-		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PersonaRazonSocial", Types.VARCHAR));			
 		call.returningResultSet("proveedor", new ProveedorMapper());
 		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@TipoProveedor", personaSAF.getTipoProveedor())
+		.addValue("@PersonaID", personaSAF.getPersonaID())
 		.addValue("@TipoDocumento", personaSAF.getTipoDocumentoID())
 		.addValue("@NroDocumento", personaSAF.getPersonaCodigoDocumento())
 		.addValue("@PersonaNombre", personaSAF.getNombre())
 		.addValue("@PersonaApellidoPaterno", personaSAF.getApellidoPaterno())
 		.addValue("@PersonaApellidoMaterno", personaSAF.getApellidoMaterno())
-		.addValue("@PersonaRazonSocial", personaSAF.getRazonSocial())
-		.addValue("@TipoProveedor", personaSAF.getTipoProveedor())
-		.addValue("@PersonaID", personaSAF.getPersonaID()==null?"":String.valueOf(personaSAF.getPersonaID().intValue()));
+		.addValue("@PersonaRazonSocial", personaSAF.getRazonSocial());		
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
 		PersonaSAF persona=null;

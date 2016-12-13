@@ -195,11 +195,11 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarPedidoInversion");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@InversionNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
-		parameters.addValue("@NumeroInversion", nroInversion);
+		parameters.addValue("@InversionNumero", nroInversion);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);
