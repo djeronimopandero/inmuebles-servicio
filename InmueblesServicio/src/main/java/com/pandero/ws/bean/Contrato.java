@@ -9,6 +9,7 @@ public class Contrato{
 	private Integer AsociadoId;
 	private String SituacionContrato;
 	
+	
 	public String getNroContrato() {
 		return NroContrato;
 	}

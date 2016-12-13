@@ -156,7 +156,7 @@ public class InversionController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/generarCartaObservacion", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/generarCartaObservacion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> generarCartaObservacion(@RequestBody Map<String, Object> params) {
 		LOG.info("###generarCartaObservacion params:"+params);
