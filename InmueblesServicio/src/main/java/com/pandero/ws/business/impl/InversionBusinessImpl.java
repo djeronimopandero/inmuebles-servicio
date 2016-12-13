@@ -148,7 +148,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultado;
 	}
 	
-	private String validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{		
+	private String validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
 		String resultado = "";
 		// Obtener inversiones del pedido
 		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoId);
@@ -219,6 +222,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	private List<DocumentoRequisito> obtenerRequisitosTipoInversion(String tipoInversion, String tipoDocId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		constanteService.setTokenCaspio(tokenCaspio);
+		
 		List<DocumentoRequisito> listaRequisitos = new ArrayList<DocumentoRequisito>();
 		// Obtener lista de documentos
 		List<DocumentoRequisito> listaRequisitosTotal = constanteService.obtenerListaRequisitosPorTipoInversion(tipoInversion);		
@@ -237,6 +243,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	private List<DocumentoRequisito> obtenerDocumentosTipoInversion(String tipoInversion, String tipoDocId) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		constanteService.setTokenCaspio(tokenCaspio);
+		
 		List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
 		// Obtener lista de documentos
 		List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(tipoInversion);		
@@ -267,15 +276,22 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Override
 	public void generarCartaObservacion(String inversionId, String usuarioSAFId) throws Exception {
 		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
 		
 		if(!StringUtils.isEmpty(inversionId)){
 			 List<InversionRequisito> list= inversionService.obtenerRequisitosPorInversion(inversionId);
 			 if(null!=list){
 				 List<ObservacionInversion> listObs=new ArrayList<>();
 				 for(InversionRequisito irc:list){
-					 ObservacionInversion obs=new ObservacionInversion();
-					 obs.setObservacion(irc.getObservacion());
-					 listObs.add(obs);
+					 LOG.info("##irc.getEstadoRequisito():"+irc.getEstadoRequisito());
+					 if(Constantes.DocumentoRequisito.ESTADO_REQUISITO_NO_CONFORME.equals(irc.getEstadoRequisito()!=null?irc.getEstadoRequisito():"")){
+						 LOG.info("##Por agregar a la lista para el doc obs:"+irc.getObservacion());
+						 ObservacionInversion obs=new ObservacionInversion();
+						 obs.setObservacion(irc.getObservacion());
+						 listObs.add(obs);
+					 }
 				 }
 				 
 				String docxGenerado="Carta-de-validacion-de-datos-inversion-inmobiliaria-generado-"+inversionId+".docx";
@@ -288,14 +304,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				/*Obtener datos de la inversion*/
 				String nombreAsociado = "";
+				LOG.info("##Por obtener Inversion Caspio, inversionId:"+inversionId);
 				Inversion pic= inversionService.obtenerInversionCaspio(inversionId);
 				
-				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(String.valueOf(pic.getPedidoId().intValue()));
+				LOG.info("##Obtener Pedido Caspio Por Id, pic.getPedidoId():"+pic.getPedidoId());
+				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(String.valueOf(pic.getPedidoId()));
+				LOG.info("##Obtener Persona SAF, pedidoCaspio.getAsociadoId():"+pedidoCaspio.getAsociadoId());
 				PersonaSAF personaSAF= personaDao.obtenerPersonaSAF(String.valueOf(pedidoCaspio.getAsociadoId()));
 				
+				LOG.info("##Obtener ContratoxPedido, pedidoCaspio.getPedidoId():"+pedidoCaspio.getPedidoId());
 				List<Contrato> listContratos = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoCaspio.getPedidoId()));
 				//obtener primero contrato para buscar al funcionario de servicios
 				Contrato contrato1 = listContratos.get(0);
+				LOG.info("##Obtener Contrato SAF, contrato1.getNroContrato():"+contrato1.getNroContrato());
 				ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato1.getNroContrato());
 				
 				List<Parametro> params=new ArrayList<>();
@@ -303,7 +324,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				Parametro parametro2=new Parametro("$NombreCompleto", personaSAF.getNombreCompleto());//asociado
 				Parametro parametro3=new Parametro("$TipoInversion", StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion() );//tipo inversion
 				Parametro parametro4=new Parametro("$TipoInmueble", StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom());//tipo inmbueble
-				Parametro parametro5=new Parametro("$Importe", String.valueOf(pic.getImporteInversion()) );//Importe
+				Parametro parametro5=new Parametro("$Importe", Util.getMontoFormateado(pic.getImporteInversion()));//Importe
 				Parametro parametro7=new Parametro("$FuncionarioServYVentas", contratoSAF.getFuncionarioServicioyVentas());//Funcionario de servicios y ventas
 				
 				params.add(parametro1);
@@ -314,14 +335,16 @@ public class InversionBusinessImpl implements InversionBusiness{
 				params.add(parametro7);
 				
 				
-				XWPFDocument docxEdit=DocumentoUtil.replaceTextCartaValidacion(docx,params,listObs);
+				docx=DocumentoUtil.replaceTextCartaValidacion(docx,params,listObs);
 				StringBuilder sb=new StringBuilder();
-				documentoUtil.saveDocument(docxEdit, sb.append(rutaDocumentosGenerados).append("/").append(docxGenerado).toString());
+				documentoUtil.saveDocument(docx, sb.append(rutaDocumentosGenerados).append("/").append(docxGenerado).toString());
 				
 				/*Convertir a pdf*/
+				sb=new StringBuilder();
+				String strRutaGenerados=sb.append(rutaDocumentosGenerados).append("/").toString();
 				DocumentoUtil.convertDocxToPdf(
-						sb.append(rutaDocumentosGenerados).append("/").append(docxGenerado).toString(),
-						sb.append(rutaDocumentosGenerados).append("/").append(pdfConvertido).toString());
+						strRutaGenerados+docxGenerado,
+						strRutaGenerados+pdfConvertido);
 				
 				
 				/*Enviar correo con archivo adjunto*/
@@ -337,7 +360,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
-		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, sb.append(rutaDocumentosGenerados).append("/").append(pdfConvertido).toString());
+		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
+		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido,"Se adjunta la carta de validación de datos de inversión inmobiliaria correspondiente");
 				
 			 }
 		}
