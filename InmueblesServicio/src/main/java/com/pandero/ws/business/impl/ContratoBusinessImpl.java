@@ -155,8 +155,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			
 			if(null!=listContrato){
 				for(Contrato contrato:listContrato){
-					ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato.getNroContrato());
-					Double dblDifPrecio=contratoDao.obtenerDiferenciaPrecioPorContrato(contratoSAF.getContratoId());
+					//ContratoSAF contratoSAF= contratoDao.obtenerContratoSAF(contrato.getNroContrato());
+					Double dblDifPrecio=contratoDao.obtenerDiferenciaPrecioPorContrato(contrato.getNroContrato());
 					if(null!=dblDifPrecio){
 						if(dblDifPrecio>0){
 							contratoService.actualizarDifPrecioContratoCaspio(contrato.getNroContrato(), dblDifPrecio);

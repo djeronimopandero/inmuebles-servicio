@@ -131,19 +131,19 @@ public class ContratoDaoImpl implements ContratoDao {
 	}
 
 	@Override
-	public Double obtenerDiferenciaPrecioPorContrato(Integer contratoId) throws Exception {
-		LOG.info("###obtenerDiferenciaPrecioPorContrato : "+contratoId);
+	public Double obtenerDiferenciaPrecioPorContrato(String nroContrato) throws Exception {
+		LOG.info("###obtenerDiferenciaPrecioPorContrato : "+nroContrato);
 		ResultadoBean resultado = null;
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
 		call.withProcedureName("USP_FOC_ObtenerDiferenciaPrecioPorContrato");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
-		call.addDeclaredParameter(new SqlParameter("@contratoid", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@nroContrato", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@diferenciaPrecio", Types.DECIMAL));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
-        parameters.addValue("@contratoid", contratoId);
+        parameters.addValue("@nroContrato", nroContrato);
 				
 		Map resultadoSP = call.execute(parameters);
 		BigDecimal bdDiferenciaPrecio = resultadoSP.get("@diferenciaPrecio")!=null? 

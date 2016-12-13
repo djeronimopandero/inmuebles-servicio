@@ -394,6 +394,11 @@ public class DocumentoUtil {
 		row = t1.createRow();
 		row.getCell(0).setText("IMP. INVERSIÓN ($):");
 		row.getCell(1).setText(Util.getMontoFormateado(inversion.getImporteInversion()));		
+		if(inversion.getObservacion()!=null && !inversion.getObservacion().equals("")){
+			row = t1.createRow();
+			row.getCell(0).setText("OBSERVACIÓN:");
+			row.getCell(1).setText(inversion.getObservacion());
+		}	
 		
 		return row;
 	}
@@ -437,7 +442,7 @@ public class DocumentoUtil {
 		row.getCell(1).setText(inversion.getDistritoNom());
 		row = t1.createRow();
 		row.getCell(0).setText("ÁREA TOTAL (M2):");
-		row.getCell(1).setText(String.valueOf(inversion.getAreaTotal()));
+		row.getCell(1).setText(Util.getMontoFormateado(inversion.getAreaTotal()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROPIETARIO:");
 		if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
@@ -489,7 +494,7 @@ public class DocumentoUtil {
 		row.getCell(1).setText(inversion.getDistritoNom());
 		row = t1.createRow();
 		row.getCell(0).setText("ÁREA TOTAL (M2):");
-		row.getCell(1).setText(String.valueOf(inversion.getAreaTotal()));
+		row.getCell(1).setText(Util.getMontoFormateado(inversion.getAreaTotal()));
 		row = t1.createRow();
 		row.getCell(0).setText("PROPIETARIO:");
 		if(Util.esPersonaJuridica(inversion.getPropietarioTipoDocId())){
@@ -519,6 +524,11 @@ public class DocumentoUtil {
 		row = t1.createRow();
 		row.getCell(0).setText("IMP. INVERSIÓN ($):");
 		row.getCell(1).setText(Util.getMontoFormateado(inversion.getImporteInversion()));		
+		if(inversion.getObservacion()!=null && !inversion.getObservacion().equals("")){
+			row = t1.createRow();
+			row.getCell(0).setText("OBSERVACIÓN:");
+			row.getCell(1).setText(inversion.getObservacion());
+		}		
 		
 		return row;
 	}
@@ -539,11 +549,10 @@ public class DocumentoUtil {
 			Parametro parametro = new Parametro("$fecha", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_NORMAL));
 			listParam.add(parametro);
 			
+			
 			parametro = new Parametro("$hora", Util.getDateFormat(new Date(),Constantes.FORMATO_DATE_HH_MIN_SS));
 			listParam.add(parametro);
 			
-			String nroPedido = "P000"+pedidoId;
-//			parametro = new Parametro("$numeroInversion", nroPedido);
 			parametro = new Parametro("$numeroInversion", pedidoNumero);
 			listParam.add(parametro);
 			
@@ -555,11 +564,11 @@ public class DocumentoUtil {
 			
 			parametro = new Parametro("$importeTotal", Util.getMontoFormateado(sumaContratos));
 			listParam.add(parametro);
-			
+			System.out.println("diferenciaPrecio:: "+diferenciaPrecio);
 			parametro = new Parametro("$diferenciaPrecio", Util.getMontoFormateado(diferenciaPrecio));
 			listParam.add(parametro);
 			
-			parametro = new Parametro("$otrosIngresos", "0.0");
+			parametro = new Parametro("$otrosIngresos", Util.getMontoFormateado(new Double(0.0)));
 			listParam.add(parametro);
 			
 			parametro = new Parametro("$saldoInversion", Util.getMontoFormateado(saldo));
@@ -569,6 +578,9 @@ public class DocumentoUtil {
 			listParam.add(parametro);
 			
 			parametro = new Parametro("$tablaFirmas", "TABLA FIRMAS");
+			listParam.add(parametro);
+			
+			parametro = new Parametro("$guionFirmaPandero", "___________________________");
 			listParam.add(parametro);
 			
 			parametro = new Parametro("$firmaPandero", "PANDERO S.A. EAFC");
@@ -588,6 +600,8 @@ public class DocumentoUtil {
 			boolean permiteConfirmar = true;
 			if(inversion.getDocumentosRequeridos()!=null && !inversion.getDocumentosRequeridos().equals("")){
 				String[] listaDocuSelec = inversion.getDocumentosRequeridos().split(",");
+				System.out.println("inversion.getDocumentosRequeridos():: "+inversion.getDocumentosRequeridos());
+				System.out.println("listaDocuSelec:: "+listaDocuSelec.length);
 				if(listaDocuSelec.length!=listaDocumentos.size()){
 					permiteConfirmar = false;
 				}

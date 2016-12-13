@@ -249,8 +249,8 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 					resultado = DocumentoUtil.validarConfirmarInversion(listaDocumentos, inversion);
 					if(!resultado.equals("")){
 						datosCompletos = false;
-					}
-					break;
+						break;
+					}					
 				 }
 			 }else{
 				 datosCompletos=false;
@@ -275,9 +275,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 // Obtener sumatorias totales
 				 double sumaContratos = Util.getSumaContratosxPedido(listaContratos);
 				 double sumaInversiones = Util.getSumaInversionesxPedido(listaInversiones);
-				 double saldo = sumaInversiones-sumaContratos;
-				 
 				 double diferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
+				 double saldo = sumaInversiones+diferenciaPrecio-sumaContratos;				 
+				 System.out.println("diferenciaPrecio2: "+diferenciaPrecio);
 				 
 				 // Obtener los parametros a enviar al documento
 		    	 List<Parametro> listaParametros=DocumentoUtil.getParametrosOrdenIrrevocable(sumaContratos,sumaInversiones,saldo,pedidoId,pedidoNumero,diferenciaPrecio);
@@ -311,10 +311,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		List<DocumentoRequisito> listaDocumentos = new ArrayList<DocumentoRequisito>();
 		// Obtener lista de documentos
 		List<DocumentoRequisito> listaDocumentosTotal = constanteService.obtenerListaDocumentosPorTipoInversion(tipoInversion);		
+		
 		// Obtener la lista de documentos por tipo persona
 		if(Constantes.TipoInversion.ADQUISICION_COD.equals(tipoInversion)){
 			for(DocumentoRequisito documentoRequisito : listaDocumentosTotal){
 				String propietarioTipoPersona = Util.getTipoPersonaPorDocIden(tipoDocId);
+				System.out.println("propietarioTipoPersona:: "+propietarioTipoPersona);
 				if(documentoRequisito.getTipoPersona().equals(propietarioTipoPersona)){
 					listaDocumentos.add(documentoRequisito);
 				}
@@ -322,6 +324,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		}else{
 			listaDocumentos = listaDocumentosTotal;
 		}
+		System.out.println("listaDocumentos:: "+listaDocumentos.size());
 		return listaDocumentos;
 	}
 	
@@ -330,7 +333,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		for(Contrato contrato : listaContratos){
 			Double dblDifPrecioSaf=0.0;
 			try {
-				dblDifPrecioSaf = contratoDao.obtenerDiferenciaPrecioPorContrato(contrato.getContratoId());
+				dblDifPrecioSaf = contratoDao.obtenerDiferenciaPrecioPorContrato(contrato.getNroContrato());
 			} catch (Exception e) {
 				LOG.error("###Error al obtener la diferencia de precio en al suma:",e);
 			}

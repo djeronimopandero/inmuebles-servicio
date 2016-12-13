@@ -130,6 +130,7 @@ public class ContratoServiceImpl implements ContratoService{
 	public void actualizarDifPrecioContratoCaspio(String nroContrato, Double dblDifPrecio) throws Exception {
 		Map<String, String> request = new HashMap<String, String>();	
 		request.put("DiferenciaPrecio", String.valueOf(dblDifPrecio));
+		request.put("DiferenciaPrecioDisponible", String.valueOf(dblDifPrecio));
 		
 		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
 		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;

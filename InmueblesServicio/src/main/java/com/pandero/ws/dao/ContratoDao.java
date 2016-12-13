@@ -8,6 +8,6 @@ public interface ContratoDao {
 
 	public ContratoSAF obtenerContratoSAF(String nroContrato) throws Exception;
 	public List<ContratoSAF> getListContratoAlDia()throws Exception;
-	public Double obtenerDiferenciaPrecioPorContrato(Integer contratoId)throws Exception;
+	public Double obtenerDiferenciaPrecioPorContrato(String nroContrato)throws Exception;
 	
 }
