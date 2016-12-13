@@ -19,10 +19,12 @@ import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
@@ -51,6 +53,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 	PersonaDao personaDao;
 	@Autowired
 	ContratoDao contratoDao;
+	@Autowired
+	PedidoDao pedidoDao;
+	@Autowired
+	MailService mailService;
+	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
 	@Value("${ruta.documentos.generados}")
@@ -59,8 +66,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	private String emailDesarrolloPandero;
 	@Value("${documento.email.to}")
 	private String documentoEmailTo;
-	@Autowired
-	MailService mailService;
+	
 	
 	@Override
 	public String confirmarInversion(String inversionId, String situacionConfirmado, String usuarioId) throws Exception {
@@ -91,32 +97,34 @@ public class InversionBusinessImpl implements InversionBusiness{
 				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
 				
 				try{
+				// Obtener datos del pedido	
+					Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+					
 				// Obtener tipo de proveedor
-				Integer proveedorID = null, personaID = null;
+				Integer proveedorId = null, personaId = null;
 				String tipoDocuProv="", nroDocuProv="", tipoProveedor="";
 				if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
-					tipoProveedor = Constantes.Proveedor.TIPO_ENTIDAD_FINANCIERA;
-					personaID = inversion.getEntidadFinancieraId(); // CONSULTAR - GEN_Banco					
+					tipoProveedor = Constantes.Proveedor.TIPO_ENTIDAD_FINANCIERA_COD;
+					proveedorId = inversion.getEntidadFinancieraId();					
 				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
 					if(inversion.getServicioConstructora()){
-						tipoProveedor = Constantes.Proveedor.TIPO_CONSTRUCTORA;
+						tipoProveedor = Constantes.Proveedor.TIPO_CONSTRUCTORA_COD;
 						tipoDocuProv = inversion.getConstructoraTipoDoc();
 						nroDocuProv = inversion.getConstructoraNroDoc();
 					}else{
-						tipoProveedor = Constantes.Proveedor.TIPO_PERSONA;
-						Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
-						personaID = pedido.getAsociadoId();
+						tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
+						personaId = pedido.getAsociadoId();
 					}
 				}else{
-					tipoProveedor = Constantes.Proveedor.TIPO_PERSONA;
+					tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
 					tipoDocuProv = inversion.getPropietarioTipoDocId();
 					nroDocuProv = inversion.getPropietarioNroDoc();
 				}
 				// Obtener proveedor SAF
-				PersonaSAF proveedor = personaDao.obtenerProveedorSAF(tipoDocuProv, nroDocuProv, personaID);
+				PersonaSAF proveedor = personaDao.obtenerProveedorSAF(proveedorId, tipoProveedor, personaId, tipoDocuProv, nroDocuProv);
 				if(proveedor==null){
 					PersonaSAF proveedorSAF = new PersonaSAF();
-					proveedorSAF.setPersonaID(personaID);
+					proveedorSAF.setPersonaID(personaId);
 					proveedorSAF.setTipoDocumentoID(tipoDocuProv);
 					proveedorSAF.setPersonaCodigoDocumento(nroDocuProv);
 					if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
@@ -134,9 +142,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 					proveedor = personaDao.registrarProveedorSAF(proveedorSAF);
 				}
 				// Registrar pedido-inversion
+				PedidoInversionSAF pedidoInversionSAF = new PedidoInversionSAF();
+				pedidoInversionSAF.setNroPedido(pedido.getNroPedido());
+				pedidoInversionSAF.setProveedorID(String.valueOf(proveedor.getProveedorID().intValue()));
+				pedidoInversionSAF.setPedidoInversionNumero(inversion.getNroInversion());
+				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
+				pedidoInversionSAF.setConfirmarID("1");
+				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);
+				
+				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);
 				
 				}catch(Exception e){
 					LOG.error("ERROR pedido-inversion:: "+e.getMessage());
+					e.printStackTrace();
 				}
 				
 			}

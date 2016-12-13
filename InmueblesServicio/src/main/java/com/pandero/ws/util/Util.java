@@ -157,4 +157,16 @@ public class Util {
 		return resultado;
 	}
 	
+	public static String obtenerTipoInversionID(String tipoInversionCod){
+		String tipoInversionId = "";
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(tipoInversionCod)){
+			tipoInversionId = Constantes.TipoInversion.ADQUISICION_ID;
+		}else if(Constantes.TipoInversion.CANCELACION_COD.equals(tipoInversionCod)){
+			tipoInversionId = Constantes.TipoInversion.CANCELACION_ID;
+		}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(tipoInversionCod)){
+			tipoInversionId = Constantes.TipoInversion.CONSTRUCCION_ID;
+		}
+		return tipoInversionId;
+	}
+	
 }

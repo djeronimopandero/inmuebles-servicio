@@ -43,6 +43,9 @@ public class Constantes {
 		public final static String ADQUISICION_NOM="ADQUISICIÓN DE UN INMUEBLE (3)";
 		public final static String CANCELACION_NOM="CANCELACIÓN DE CRÉDITO HIPOTECARIO (2)";
 		public final static String CONSTRUCCION_NOM="CONSTRUCCIÓN, AMPLIACIÓN Y/O REFACCIÓN DE UN BIEN INMUEBLE (1)";
+		public final static String ADQUISICION_ID="1";
+		public final static String CANCELACION_ID="2";
+		public final static String CONSTRUCCION_ID="3";
 	}
 	
 	public class Contrato{
@@ -87,6 +90,9 @@ public class Constantes {
 		public final static String TIPO_ENTIDAD_FINANCIERA="ENTIDAD_FINANCIERA";
 		public final static String TIPO_CONSTRUCTORA="CONTRUCTORA";
 		public final static String TIPO_PERSONA="PERSONA";
+		public final static String TIPO_ENTIDAD_FINANCIERA_COD="9";
+		public final static String TIPO_CONSTRUCTORA_COD="10";
+		public final static String TIPO_PERSONA_COD="11";
 	}
 	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";

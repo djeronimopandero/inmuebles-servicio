@@ -6,7 +6,8 @@ public interface PersonaDao {
 
 	public PersonaSAF obtenerPersonaSAF(String personaID) throws Exception;
 	
-	public PersonaSAF obtenerProveedorSAF(String tipoDocumento, String nroDocumento, Integer personaID) throws Exception; // nuevo sp
+	public PersonaSAF obtenerProveedorSAF(Integer proveedorId, String tipoProveedor, Integer personaID, 
+			String tipoDocumento, String nroDocumento) throws Exception; // nuevo sp
 	public PersonaSAF registrarProveedorSAF(PersonaSAF personaSAF) throws Exception; // nuevo sp
 	
 }
