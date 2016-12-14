@@ -169,4 +169,28 @@ public class Util {
 		return tipoInversionId;
 	}
 	
+	public static String obtenerTipoDocuIdenSAFPorCaspioId(List<Constante> listaTiposDocuIden, String tipoDocuCaspioId){
+		String resultado = "";
+		if(listaTiposDocuIden!=null && listaTiposDocuIden.size()>0){
+			for(Constante tipoDocu : listaTiposDocuIden){
+				if(tipoDocuCaspioId.equals(String.valueOf(tipoDocu.getConstanteId().intValue()))){
+					resultado = tipoDocu.getListaId();
+				}
+			}
+		}
+		return resultado;
+	}
+	
+	public static String obtenerTipoDocuIdenCaspioPorSAFId(List<Constante> listaTiposDocuIden, String tipoDocuSAFId){
+		String resultado = "";
+		if(listaTiposDocuIden!=null && listaTiposDocuIden.size()>0){
+			for(Constante tipoDocu : listaTiposDocuIden){
+				if(tipoDocuSAFId.equals(tipoDocu.getListaId())){
+					resultado = String.valueOf(tipoDocu.getConstanteId().intValue());
+				}
+			}
+		}
+		return resultado;
+	}
+		
 }

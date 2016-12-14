@@ -171,7 +171,7 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.withoutProcedureColumnMetaDataAccess();	
 		
 		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlOutParameter("@ProveedorID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@ProveedorID", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@InversionNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@TipoInversionID", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@ConfirmarID", Types.VARCHAR));
