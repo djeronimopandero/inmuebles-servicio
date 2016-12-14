@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.PedidoContratoCaspio;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -204,6 +205,34 @@ public class PedidoServiceImpl implements PedidoService{
 		
         ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
+	}
+
+	@Override
+	public List<PedidoContratoCaspio> listarPedidoContrato(String pedidoId) throws Exception {
+		List<PedidoContratoCaspio> listaPedidoContrato = null;	
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
+		String obtenerContratosxPedidoURL = tablePedidoContratoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratosxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapPedidoContrato = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapPedidoContrato!=null && mapPedidoContrato.size()>0){
+	        			listaPedidoContrato = new ArrayList<PedidoContratoCaspio>();
+	        			for(Object bean : mapPedidoContrato){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				PedidoContratoCaspio pedidoContrato =  JsonUtil.fromJson(beanString, PedidoContratoCaspio.class);
+	        				listaPedidoContrato.add(pedidoContrato);
+	        			}
+	        		}        		
+	        	}
+	        }
+        }
+		return listaPedidoContrato;
 	}
 	
 }

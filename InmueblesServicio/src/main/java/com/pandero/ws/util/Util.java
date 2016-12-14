@@ -31,17 +31,16 @@ public class Util {
 	}
 	
 	public static String getMontoFormateado(Double monto){
-		Locale locale  = new Locale("en", "UK");
-		String pattern = "####,###,###.00";
-		DecimalFormat decimalFormat = (DecimalFormat)
-		NumberFormat.getNumberInstance(locale);
-		decimalFormat.applyPattern(pattern);
-
-		String format = decimalFormat.format(monto);
+		String format ="0.00";
+		if(null!=monto){
+			Locale locale  = new Locale("en", "UK");
+			String pattern = "####,###,###.00";
+			DecimalFormat decimalFormat = (DecimalFormat)
+			NumberFormat.getNumberInstance(locale);
+			decimalFormat.applyPattern(pattern);
+			format = decimalFormat.format(monto);
+		}
 		return format;
-		
-//		DecimalFormat dFormat = new DecimalFormat("####,###,###.00");
-//		return dFormat.format(null!=monto?monto:0.00);
 	}
 	
 	public static String formatearFechaYYYYMMDD(Date fecha){

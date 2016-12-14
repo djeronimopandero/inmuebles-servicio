@@ -4,16 +4,17 @@ public class PedidoInversionSAF {
 
 	private String pedidoID;
 	private String proveedorID;
-	private String BeneficiarioID;
-	private String InmuebleID;
-	private String PedidoInversionNumero;
-	private String PedidoTipoInversionID;
-	private String ConfirmarID;
-	private String PedidoInversionFechaConfirmacion;
-	private String PedidoInversionVigencia;
-	private String UsuarioIDCreacion;
+	private String beneficiarioID;
+	private String inmuebleID;
+	private String pedidoInversionNumero;
+	private String pedidoTipoInversionID;
+	private String confirmarID;
+	private String pedidoInversionFechaConfirmacion;
+	private String pedidoInversionVigencia;
+	private String usuarioIDCreacion;
 	private String nroPedido;
-
+	
+	
 	public String getPedidoID() {
 		return pedidoID;
 	}
@@ -27,52 +28,52 @@ public class PedidoInversionSAF {
 		this.proveedorID = proveedorID;
 	}
 	public String getBeneficiarioID() {
-		return BeneficiarioID;
+		return beneficiarioID;
 	}
 	public void setBeneficiarioID(String beneficiarioID) {
-		BeneficiarioID = beneficiarioID;
+		this.beneficiarioID = beneficiarioID;
 	}
 	public String getInmuebleID() {
-		return InmuebleID;
+		return inmuebleID;
 	}
 	public void setInmuebleID(String inmuebleID) {
-		InmuebleID = inmuebleID;
+		this.inmuebleID = inmuebleID;
 	}
 	public String getPedidoInversionNumero() {
-		return PedidoInversionNumero;
+		return pedidoInversionNumero;
 	}
 	public void setPedidoInversionNumero(String pedidoInversionNumero) {
-		PedidoInversionNumero = pedidoInversionNumero;
+		this.pedidoInversionNumero = pedidoInversionNumero;
 	}
 	public String getPedidoTipoInversionID() {
-		return PedidoTipoInversionID;
+		return pedidoTipoInversionID;
 	}
 	public void setPedidoTipoInversionID(String pedidoTipoInversionID) {
-		PedidoTipoInversionID = pedidoTipoInversionID;
+		this.pedidoTipoInversionID = pedidoTipoInversionID;
 	}
 	public String getConfirmarID() {
-		return ConfirmarID;
+		return confirmarID;
 	}
 	public void setConfirmarID(String confirmarID) {
-		ConfirmarID = confirmarID;
+		this.confirmarID = confirmarID;
 	}
 	public String getPedidoInversionFechaConfirmacion() {
-		return PedidoInversionFechaConfirmacion;
+		return pedidoInversionFechaConfirmacion;
 	}
 	public void setPedidoInversionFechaConfirmacion(String pedidoInversionFechaConfirmacion) {
-		PedidoInversionFechaConfirmacion = pedidoInversionFechaConfirmacion;
+		this.pedidoInversionFechaConfirmacion = pedidoInversionFechaConfirmacion;
 	}
 	public String getPedidoInversionVigencia() {
-		return PedidoInversionVigencia;
+		return pedidoInversionVigencia;
 	}
 	public void setPedidoInversionVigencia(String pedidoInversionVigencia) {
-		PedidoInversionVigencia = pedidoInversionVigencia;
+		this.pedidoInversionVigencia = pedidoInversionVigencia;
 	}
 	public String getUsuarioIDCreacion() {
-		return UsuarioIDCreacion;
+		return usuarioIDCreacion;
 	}
 	public void setUsuarioIDCreacion(String usuarioIDCreacion) {
-		UsuarioIDCreacion = usuarioIDCreacion;
+		this.usuarioIDCreacion = usuarioIDCreacion;
 	}
 	public String getNroPedido() {
 		return nroPedido;
@@ -80,5 +81,6 @@ public class PedidoInversionSAF {
 	public void setNroPedido(String nroPedido) {
 		this.nroPedido = nroPedido;
 	}
+	
 	
 }

@@ -13,4 +13,5 @@ public interface ContratoService {
 	public String crearContratoCaspio(ContratoSAF contrato) throws Exception;
 
 	public void actualizarDifPrecioContratoCaspio(String nroContrato, Double dblDifPrecio) throws Exception;
+	public Contrato obtenerContratoCaspioPorId(String contratoId) throws Exception;
 }

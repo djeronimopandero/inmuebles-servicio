@@ -137,5 +137,32 @@ public class ContratoServiceImpl implements ContratoService{
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
 	}
+
+	@Override
+	public Contrato obtenerContratoCaspioPorId(String contratoId) throws Exception {
+		Contrato contrato = null;
+		String serviceWhere = "{\"where\":\"ContratoId='" + contratoId + "'\"}";	
+		String obtenerContratoURL = tableContratoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerContratoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapCertificados = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapCertificados!=null && mapCertificados.size()>0){
+	        			for(Object bean : mapCertificados){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				contrato =  JsonUtil.fromJson(beanString, Contrato.class);
+	        			}
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return contrato;
+	}
 	
 }
