@@ -75,7 +75,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
-		constanteService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
@@ -428,7 +427,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        String speech = "Se ha finalizado la verificación de la inversión inmobiliaria Nro. "+pic.getNroInversion()+" quedando algunas revisiones"
 		        		+ " en estado NO CONFORME, se solicita emitir la carta de validación de datos para ser remitido al Asociado.";
 		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
-		         
+		        String textoEmail="Se adjunta la carta de validación de datos de inversión inmobiliaria correspondiente";
+		        
 		        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
 		         
 		         String emailTo = documentoEmailTo;
@@ -437,14 +437,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
+
 		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
 		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido,speech);
 		         
 		         msg="Se generó la carta de validación correctamente."; 
+
+		         
+		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido, textoEmail);
+				
 			 }
 		}
 		return msg;
 	}
-	
+
 	
 }

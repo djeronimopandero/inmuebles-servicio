@@ -22,7 +22,7 @@ public class MailServiceImpl implements MailService{
 	@Autowired
 	private JavaMailSender mailSender;
 
-	public void sendMail(String emailFrom, String emailTo, String asunto, String documento, String texto) {
+	public void sendMail(String emailFrom, String emailTo, String asunto, String documento, String textoEmail) {
 
 	   MimeMessage message = mailSender.createMimeMessage();
 
@@ -32,7 +32,7 @@ public class MailServiceImpl implements MailService{
 		helper.setFrom(emailFrom);
 		helper.setTo(emailTo);
 		helper.setSubject(asunto);
-		helper.setText(texto);
+		helper.setText(textoEmail);
 		String rutaDocumento = rutaDocumentosGenerados+"/"+documento;
 		System.out.println("RUTA DOCUMENTO:: "+rutaDocumento);
 		FileSystemResource file = new FileSystemResource(rutaDocumento);
