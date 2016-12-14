@@ -342,8 +342,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public void generarCartaObservacion(String inversionId, String usuarioSAFId) throws Exception {
+	public String generarCartaObservacion(String inversionId, String usuarioSAFId) throws Exception {
 		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
+		
+		String msg="";
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
@@ -360,6 +362,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 						 obs.setObservacion(irc.getObservacion());
 						 listObs.add(obs);
 					 }
+				 }
+				 
+				 if(listObs.size()==0){
+					 msg="No es posible generar la carta de validación por que no existen requisitos con estado NO CONFORME"; 
+					 return msg;
 				 }
 				 
 				String docxGenerado="Carta-de-validacion-de-datos-inversion-inmobiliaria-generado-"+inversionId+".docx";
@@ -417,7 +424,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				/*Enviar correo con archivo adjunto*/
 				LOG.info("SE GENERO LA CARTA DE OBSERVACION");
-		        String asunto = "Carta de Validación de Inversión - "+nombreAsociado;
+		        String asunto = "Resultado de verificación de inversión inmobiliaria - "+nombreAsociado;
+		        String speech = "Se ha finalizado la verificación de la inversión inmobiliaria Nro. "+pic.getNroInversion()+" quedando algunas revisiones"
+		        		+ " en estado NO CONFORME, se solicita emitir la carta de validación de datos para ser remitido al Asociado.";
 		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
 		         
 		        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
@@ -429,10 +438,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
 		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
-		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido,"Se adjunta la carta de validación de datos de inversión inmobiliaria correspondiente");
-				
+		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido,speech);
+		         
+		         msg="Se generó la carta de validación correctamente."; 
 			 }
 		}
-		
+		return msg;
 	}
+	
+	
 }
