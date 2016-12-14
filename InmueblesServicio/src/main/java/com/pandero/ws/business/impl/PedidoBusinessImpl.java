@@ -300,7 +300,8 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         }	 
 		         // Enviar orden irrevocable a correo
 		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
-		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento);
+		         String textoEmail = "Se adjunta la orden irrevocable correspondiente";
+		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento, textoEmail);
 			 }
 	     }
 		

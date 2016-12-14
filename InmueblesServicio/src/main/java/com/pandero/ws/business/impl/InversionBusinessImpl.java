@@ -75,7 +75,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
-		constanteService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
@@ -335,6 +334,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Override
 	public void generarCartaObservacion(String inversionId, String usuarioSAFId) throws Exception {
 		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
 		
 		if(!StringUtils.isEmpty(inversionId)){
 			 List<InversionRequisito> list= inversionService.obtenerRequisitosPorInversion(inversionId);
@@ -396,7 +398,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 				LOG.info("SE GENERO LA CARTA DE OBSERVACION");
 		        String asunto = "Carta de Validación de Inversión - "+nombreAsociado;
 		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
-		         
+		        String textoEmail="Existen algunas inversiones en estado no conforme. El detalle se encuentra en el documento adjunto.";
+		        
 		        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
 		         
 		         String emailTo = documentoEmailTo;
@@ -405,10 +408,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
-		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, sb.append(rutaDocumentosGenerados).append("/").append(pdfConvertido).toString());
+		         
+		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido, textoEmail);
 				
 			 }
 		}
 		
 	}
+
 }
