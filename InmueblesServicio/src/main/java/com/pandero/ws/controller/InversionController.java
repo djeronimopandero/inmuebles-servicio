@@ -171,7 +171,6 @@ public class InversionController {
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/generarCartaObservacion:: ",e);
-			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 		}
 			

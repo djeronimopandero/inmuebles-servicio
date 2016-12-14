@@ -302,6 +302,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
 		         String textoEmail = "Se adjunta la orden irrevocable correspondiente";
 		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento, textoEmail);
+
 			 }
 	     }
 		
@@ -330,9 +331,9 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	}
 	
 	private double getSumaDiferenciaPrecioxPedido(List<Contrato> listaContratos){
-		double sumaDiferenciaPrecio = 0;
+		double sumaDiferenciaPrecio=0.00;
 		for(Contrato contrato : listaContratos){
-			Double dblDifPrecioSaf=0.0;
+			Double dblDifPrecioSaf=0.00;
 			try {
 				dblDifPrecioSaf = contratoDao.obtenerDiferenciaPrecioPorContrato(contrato.getNroContrato());
 			} catch (Exception e) {

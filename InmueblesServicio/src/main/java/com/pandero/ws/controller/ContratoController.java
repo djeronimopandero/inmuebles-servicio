@@ -1,8 +1,5 @@
 package com.pandero.ws.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +43,6 @@ public class ContratoController {
 	@RequestMapping(value = "obtenerDiferenciaPrecio/{pedidoId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean getDiferenciaPrecioPorContrato(@PathVariable(value="pedidoId") Integer pedidoId){
 		LOG.info("###ContratoController.getDiferenciaPrecioPorContrato pedidoId:"+pedidoId);
-		Map<String, Object> response = new HashMap<String, Object>();
 		ResultadoBean resultadoBean = null;
 		if(null!=pedidoId){
 			try {
@@ -54,6 +50,22 @@ public class ContratoController {
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setResultado("Ocurrio un error al actualizar la diferencia de precio");
+				LOG.error("###getDiferenciaPrecioPorContrato:",e);
+			}
+		}
+		return resultadoBean;
+	}
+	
+	@RequestMapping(value = "obtenerDetalleDiferenciaPrecio/{pedidoId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean getDetalleDiferenciaPrecio(@PathVariable(value="pedidoId") Integer pedidoId){
+		LOG.info("###ContratoController.getDetalleDiferenciaPrecio pedidoId:"+pedidoId);
+		ResultadoBean resultadoBean = null;
+		if(null!=pedidoId){
+			try {
+				resultadoBean=contratoBusiness.getDetalleDiferenciaPrecio(pedidoId);
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setResultado("Ocurrio un error al obtener el detalle de la diferencia de precio");
 				LOG.error("###getDiferenciaPrecioPorContrato:",e);
 			}
 		}

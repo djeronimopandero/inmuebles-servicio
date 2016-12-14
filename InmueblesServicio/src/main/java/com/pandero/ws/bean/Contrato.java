@@ -5,6 +5,7 @@ public class Contrato{
 	private Integer PedidoId;
 	private String NroContrato;
 	private Double MontoCertificado;
+	private Double MontoDisponible;
 	private String FechaAdjudicacion;
 	private Integer AsociadoId;
 	private String SituacionContrato;
@@ -51,6 +52,12 @@ public class Contrato{
 	}
 	public void setContratoId(Integer contratoId) {
 		ContratoId = contratoId;
+	}
+	public Double getMontoDisponible() {
+		return MontoDisponible;
+	}
+	public void setMontoDisponible(Double montoDisponible) {
+		MontoDisponible = montoDisponible;
 	}	
 	
 }

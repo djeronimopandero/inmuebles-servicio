@@ -743,7 +743,7 @@ public class DocumentoUtil {
 											XWPFRun newRun = r;
 											CTRPr rPr = newRun.getCTR().isSetRPr() ? newRun.getCTR().getRPr() : newRun.getCTR().addNewRPr();
 											rPr.set(r.getCTR().getRPr());
-											newRun.setText(StringUtils.isEmpty(obs.getObservacion())?"":obs.getObservacion());
+											newRun.setText(StringUtils.isEmpty(obs.getObservacion())?"":"- "+obs.getObservacion());
 											newRun.addCarriageReturn();
 										}
 										
