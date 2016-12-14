@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
-import com.pandero.ws.bean.PedidoInversionCaspio;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -148,35 +147,6 @@ public class InversionServiceImpl implements InversionService {
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableInversionRequisitoURL,Object.class,request,null);	
 		
 		return null;
-	}
-
-	@Override
-	public List<PedidoInversionCaspio> listarPedidoInversionPorPedidoId(String pedidoId) throws Exception {
-		List<PedidoInversionCaspio> listaPedidoInversion = null;	
-		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
-		String obtenerRequisitosxInversionURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
-		
-        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
-     	String response = JsonUtil.toJson(jsonResult);	     	
-        if(response!=null && !response.isEmpty()){
-        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
-	        if(responseMap!=null){
-	        	Object jsonResponse = responseMap.get("Result");
-	        	if(jsonResponse!=null){        		
-	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
-	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
-	        			listaPedidoInversion = new ArrayList<PedidoInversionCaspio>();
-	        			for(Object bean : mapRequisitos){
-	        				String beanString = JsonUtil.toJson(bean);
-	        				PedidoInversionCaspio pedidoInversion =  JsonUtil.fromJson(beanString, PedidoInversionCaspio.class);
-	        				listaPedidoInversion.add(pedidoInversion);
-	        			}
-	        		}        		
-	        	}
-	        }
-        }
-        
-		return listaPedidoInversion;
 	}
 	
 }

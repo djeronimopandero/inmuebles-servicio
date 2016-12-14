@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
-import com.pandero.ws.bean.PedidoContratoCaspio;
-import com.pandero.ws.bean.PedidoInversionCaspio;
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.PersonaCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
@@ -197,9 +196,9 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			//1.- Suma de los certificados
 			//Consultar listado de PedidoContrato por pedidoId y obtener los contratos, capturar cada contratoId
 			//Sumar el monto disponible del certificado de cada contrato MontoDisponible
-			List<PedidoContratoCaspio> listPedidoContrato = pedidoService.listarPedidoContrato(String.valueOf(pedidoId));
+			List<Contrato> listPedidoContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
 			if(null!=listPedidoContrato){
-				for(PedidoContratoCaspio pc:listPedidoContrato){
+				for(Contrato pc:listPedidoContrato){
 					Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getContratoId()));
 					sumMontoDisponibleCertificado += contrato.getMontoDisponible();
 				}
@@ -208,10 +207,10 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			Double sumImporteTotalInversion=0.00;
 			//2.- Suma de el importe total de las inversiones
 			//Consultar el listado de PedidoInversion por pedidoId y sumar los montos de todas las inversiones
-			List<PedidoInversionCaspio> listPedidoInversionCaspio = inversionService.listarPedidoInversionPorPedidoId(String.valueOf(pedidoId));
+			List<Inversion> listPedidoInversionCaspio = pedidoService.obtenerInversionesxPedidoCaspio(String.valueOf(pedidoId));
 			if(null!=listPedidoInversionCaspio){
-				for(PedidoInversionCaspio pedidoInversionCaspio:listPedidoInversionCaspio){
-					sumImporteTotalInversion += (pedidoInversionCaspio.getImporteInversion()!=null?Double.parseDouble(pedidoInversionCaspio.getImporteInversion()):0.00);
+				for(Inversion pedidoInversionCaspio:listPedidoInversionCaspio){
+					sumImporteTotalInversion += pedidoInversionCaspio.getImporteInversion()==null?0.00:pedidoInversionCaspio.getImporteInversion();
 				}
 			}
 			

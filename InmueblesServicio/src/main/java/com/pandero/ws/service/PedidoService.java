@@ -5,7 +5,6 @@ import java.util.List;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Pedido;
-import com.pandero.ws.bean.PedidoContratoCaspio;
 
 
 public interface PedidoService {
@@ -23,5 +22,4 @@ public interface PedidoService {
 	public List<Contrato> obtenerContratosxPedidoCaspio(String pedidoId) throws Exception;
 	public List<Inversion> obtenerInversionesxPedidoCaspio(String pedidoId) throws Exception;
 	
-	public List<PedidoContratoCaspio> listarPedidoContrato(String pedidoId)throws Exception;
 }
