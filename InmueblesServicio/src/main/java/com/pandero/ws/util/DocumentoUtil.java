@@ -685,7 +685,8 @@ public class DocumentoUtil {
 						}
 					}
 				}
-				if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_DATOS_PENDIENTES;				
+				if(permiteConfirmar==false) resultado=Constantes.Service.RESULTADO_DATOS_PENDIENTES;	
+								
 			}						
 		}
 				

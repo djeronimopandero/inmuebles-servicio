@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
@@ -74,96 +75,145 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
+		constanteService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
 		
-		// Si se va a confirmar la inversion
+		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
 			// Obtener lista de documentos
 			List<DocumentoRequisito> listaDocumentos = obtenerDocumentosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
+			
 			// Validar datos antes de confirmar
 			String resultadoValidacion = DocumentoUtil.validarConfirmarInversion(listaDocumentos, inversion);
 			if(!Util.esVacio(resultadoValidacion)){
 				resultado=resultadoValidacion;
-			}
-		}
-		
-		// Confirmar-desconfirmar inversion
-		if(Util.esVacio(resultado)){						
-			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
-				// Verificar si existe excedente certificado o diferencia de precio
-				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
-				
-				try{
-				// Obtener datos del pedido	
-					Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
-					
-				// Obtener tipo de proveedor
-				Integer proveedorId = null, personaId = null;
-				String tipoDocuProv="", nroDocuProv="", tipoProveedor="";
-				if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
-					tipoProveedor = Constantes.Proveedor.TIPO_ENTIDAD_FINANCIERA_COD;
-					proveedorId = inversion.getEntidadFinancieraId();					
-				}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
-					if(inversion.getServicioConstructora()){
-						tipoProveedor = Constantes.Proveedor.TIPO_CONSTRUCTORA_COD;
-						tipoDocuProv = inversion.getConstructoraTipoDoc();
-						nroDocuProv = inversion.getConstructoraNroDoc();
-					}else{
-						tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
-						personaId = pedido.getAsociadoId();
+			}else{
+				// Validar verificacion de requisitos
+				boolean verificacionRequisitos = true;
+				 List<InversionRequisito> listaRequisitos = inversionService.obtenerRequisitosPorInversion(inversionId);
+				 if(listaRequisitos!=null && listaRequisitos.size()>0){
+					for(InversionRequisito requisito : listaRequisitos){
+						if(!Constantes.DocumentoRequisito.ESTADO_REQUISITO_CONFORME.equals(requisito.getEstadoRequisito())){
+							verificacionRequisitos=false;
+						}
 					}
-				}else{
-					tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
-					tipoDocuProv = inversion.getPropietarioTipoDocId();
-					nroDocuProv = inversion.getPropietarioNroDoc();
-				}
+				 }else{
+					 verificacionRequisitos=false;
+				 }
+				 if(verificacionRequisitos==false) resultado=Constantes.Service.RESULTADO_PENDIENTE_REQUISITOS;
+			}
+			
+			// Continuar si paso las validaciones
+			if(Util.esVacio(resultado)){
+				// Obtener datos del pedido	
+				Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+				
 				// Obtener proveedor SAF
-				PersonaSAF proveedor = personaDao.obtenerProveedorSAF(proveedorId, tipoProveedor, personaId, tipoDocuProv, nroDocuProv);
-				if(proveedor==null){
-					PersonaSAF proveedorSAF = new PersonaSAF();
-					proveedorSAF.setPersonaID(personaId);
-					proveedorSAF.setTipoDocumentoID(tipoDocuProv);
-					proveedorSAF.setPersonaCodigoDocumento(nroDocuProv);
-					if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
-							&& inversion.getServicioConstructora()){
-						proveedorSAF.setNombre(inversion.getConstructoraNombres());
-						proveedorSAF.setApellidoPaterno(inversion.getConstructoraApePaterno());
-						proveedorSAF.setApellidoMaterno(inversion.getConstructoraApeMaterno());
-						proveedorSAF.setRazonSocial(inversion.getConstructoraRazonSocial());
-					}else if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
-						proveedorSAF.setNombre(inversion.getPropietarioNombres());
-						proveedorSAF.setApellidoPaterno(inversion.getPropietarioApePaterno());
-						proveedorSAF.setApellidoMaterno(inversion.getPropietarioApeMaterno());
-						proveedorSAF.setRazonSocial(inversion.getPropietarioRazonSocial());
-					}					
-					proveedor = personaDao.registrarProveedorSAF(proveedorSAF);
-				}
-				// Registrar pedido-inversion
+				PersonaSAF proveedor = obtenerProveedor(inversion, pedido.getAsociadoId());
+				
+				// Registrar pedido-inversion SAF
 				PedidoInversionSAF pedidoInversionSAF = new PedidoInversionSAF();
 				pedidoInversionSAF.setNroPedido(pedido.getNroPedido());
 				pedidoInversionSAF.setProveedorID(String.valueOf(proveedor.getProveedorID().intValue()));
 				pedidoInversionSAF.setPedidoInversionNumero(inversion.getNroInversion());
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
 				pedidoInversionSAF.setConfirmarID("1");
-				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);
-				
-				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);
-				
-				}catch(Exception e){
-					LOG.error("ERROR pedido-inversion:: "+e.getMessage());
-					e.printStackTrace();
-				}
-				
+				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);				
+				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);								
 			}
+		}
+		
+		// Desconfirmar Inversion
+		if(Constantes.Inversion.SITUACION_NO_CONFIRMADO.equals(situacionConfirmado)){
+			// Validar verificacion de requisitos
+			boolean verificacionRequisitos = true;
+			List<InversionRequisito> listaRequisitos = inversionService.obtenerRequisitosPorInversion(inversionId);
+			if(listaRequisitos!=null && listaRequisitos.size()>0){
+				for(InversionRequisito requisito : listaRequisitos){
+					if(!Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE.equals(requisito.getEstadoRequisito())){
+						verificacionRequisitos=false;
+					}
+				}
+			}
+			if(verificacionRequisitos==false) resultado=Constantes.Service.RESULTADO_TIENE_REQUISITOS;
 			
-			// Registrar inversion en caspio
+			// Eliminar pedido-inversion en SAF
+			if(Util.esVacio(resultado)){
+				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
+			}
+		}
+		
+		// Actualizar situacion confirmacion inversion en Caspio
+		if(Util.esVacio(resultado)){				
 			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
+			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
+				// Verificar si existe excedente certificado o diferencia de precio
+				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
+			}
 		}
 							
 		return resultado;
+	}
+	
+	private PersonaSAF obtenerProveedor(Inversion inversion, Integer asociadoId) throws Exception{		
+		Integer proveedorId = null, personaId = null;
+		String tipoDocuProv="", nroDocuProv="", tipoProveedor="";
+		// Obtener tipo de proveedor
+		if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+			System.out.println("PROVEEDOR 1");
+			tipoProveedor = Constantes.Proveedor.TIPO_ENTIDAD_FINANCIERA_COD;
+			proveedorId = inversion.getEntidadFinancieraId();					
+		}else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			if(inversion.getServicioConstructora()){
+				System.out.println("PROVEEDOR 2");
+				tipoProveedor = Constantes.Proveedor.TIPO_CONSTRUCTORA_COD;
+				tipoDocuProv = inversion.getConstructoraTipoDoc();
+				nroDocuProv = inversion.getConstructoraNroDoc();
+			}else{
+				System.out.println("PROVEEDOR 3");
+				tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
+				personaId = asociadoId;
+			}
+		}else{
+			System.out.println("PROVEEDOR 4");
+			tipoProveedor = Constantes.Proveedor.TIPO_PERSONA_COD;
+			tipoDocuProv = inversion.getPropietarioTipoDocId();
+			nroDocuProv = inversion.getPropietarioNroDoc();
+		}
+		// Obtener tipos de documento
+		List<Constante> listaTiposDocuIden = constanteService.obtenerListaDocumentosIdentidad();
+
+		// Obtener proveedor SAF	
+		String tipoDocuIdenSAF = Util.obtenerTipoDocuIdenSAFPorCaspioId(listaTiposDocuIden, tipoDocuProv);
+		System.out.println("TIPO_DOCU_CASPIO:: "+tipoDocuProv);
+		System.out.println("TIPO_DOCU_SAF:: "+tipoDocuIdenSAF);
+		System.out.println("TIPO_PROVEEDOR: "+tipoProveedor);
+		PersonaSAF proveedor = personaDao.obtenerProveedorSAF(proveedorId, tipoProveedor, personaId, tipoDocuIdenSAF, nroDocuProv);
+		if(proveedor==null){
+			PersonaSAF proveedorSAF = new PersonaSAF();
+			proveedorSAF.setTipoProveedor(tipoProveedor);
+			proveedorSAF.setPersonaID(personaId);
+			proveedorSAF.setTipoDocumentoID(tipoDocuIdenSAF);
+			proveedorSAF.setPersonaCodigoDocumento(nroDocuProv);
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+					&& inversion.getServicioConstructora()){
+				proveedorSAF.setNombre(inversion.getConstructoraNombres());
+				proveedorSAF.setApellidoPaterno(inversion.getConstructoraApePaterno());
+				proveedorSAF.setApellidoMaterno(inversion.getConstructoraApeMaterno());
+				proveedorSAF.setRazonSocial(inversion.getConstructoraRazonSocial());
+			}else if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+				proveedorSAF.setNombre(inversion.getPropietarioNombres());
+				proveedorSAF.setApellidoPaterno(inversion.getPropietarioApePaterno());
+				proveedorSAF.setApellidoMaterno(inversion.getPropietarioApeMaterno());
+				proveedorSAF.setRazonSocial(inversion.getPropietarioRazonSocial());
+			}					
+			proveedor = personaDao.registrarProveedorSAF(proveedorSAF);
+		}
+		
+		return proveedor;
 	}
 	
 	private String validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
@@ -287,7 +337,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		if(null!=inversionId){
-			inversionService.actualizarEstadoInversionRequisitoCaspio(inversionId, Constantes.InversionRequisito.PENDIENTE);
+			inversionService.actualizarEstadoInversionRequisitoCaspio(inversionId, Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE);
 		}
 	}
 

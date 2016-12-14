@@ -2,9 +2,10 @@ package com.pandero.ws.bean;
 
 public class Constante {
 
-	public Integer ConstanteId;
-	public String TipoConstante;
-	public String NombreConstante;
+	private Integer ConstanteId;
+	private String TipoConstante;
+	private String NombreConstante;
+	private String ListaId;
 	
 	public Integer getConstanteId() {
 		return ConstanteId;
@@ -23,6 +24,12 @@ public class Constante {
 	}
 	public void setNombreConstante(String nombreConstante) {
 		NombreConstante = nombreConstante;
+	}
+	public String getListaId() {
+		return ListaId;
+	}
+	public void setListaId(String listaId) {
+		ListaId = listaId;
 	}
 		
 }

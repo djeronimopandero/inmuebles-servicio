@@ -10,6 +10,8 @@ public class Constantes {
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
 		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
 		public final static String RESULTADO_NO_INVERSIONES_CONFIRMADAS = "NO_INVERSIONES_CONFIRMADAS";
+		public final static String RESULTADO_PENDIENTE_REQUISITOS = "PENDIENTE_REQUISITOS";
+		public final static String RESULTADO_TIENE_REQUISITOS = "TIENE_REQUISITOS";
 	}
 	
 	public class Pedido {
@@ -63,10 +65,10 @@ public class Constantes {
 		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
 	}
 	
-	public class InversionRequisito{
-		public final static String PENDIENTE="PENDIENTE";
-		public final static String CONFORME="CONFORME";
-	}
+//	public class InversionRequisito{
+//		public final static String PENDIENTE="PENDIENTE";
+//		public final static String CONFORME="CONFORME";
+//	}
 	
 	public class Persona{
 		public final static String PERSONA_NATURAL_COD="N";
