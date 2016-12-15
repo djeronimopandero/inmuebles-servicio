@@ -15,6 +15,7 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
+import com.pandero.ws.bean.EmailBean;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.ObservacionInversion;
@@ -345,6 +346,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		LOG.info("###generarCartaObservacion inversionId:"+inversionId);
 		
 		String msg="";
+		boolean verificacionExitosa=false;
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
@@ -364,8 +366,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 				 }
 				 
 				 if(listObs.size()==0){
+					 verificacionExitosa = true;
+					 //Actualizar estado de la inversion como CONFORME
+					 
 					 msg="No es posible generar la carta de validación por que no existen requisitos con estado NO CONFORME"; 
-					 return msg;
+//					 return msg;
 				 }
 				 
 				String docxGenerado="Carta-de-validacion-de-datos-inversion-inmobiliaria-generado-"+inversionId+".docx";
@@ -377,7 +382,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 				XWPFDocument docx = documentoUtil.openDocument(rutaDocumentosTemplates+"/"+gestionInmobiliaria+"/"+"Carta-de-validacion-de-datos-inversion-inmobiliaria-TEMPLATE.docx");
 				
 				/*Obtener datos de la inversion*/
-				String nombreAsociado = "";
 				LOG.info("##Por obtener Inversion Caspio, inversionId:"+inversionId);
 				Inversion pic= inversionService.obtenerInversionCaspio(inversionId);
 				
@@ -423,12 +427,39 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				/*Enviar correo con archivo adjunto*/
 				LOG.info("SE GENERO LA CARTA DE OBSERVACION");
-		        String asunto = "Resultado de verificación de inversión inmobiliaria - "+nombreAsociado;
-		        String speech = "Se ha finalizado la verificación de la inversión inmobiliaria Nro. "+pic.getNroInversion()+" quedando algunas revisiones"
-		        		+ " en estado NO CONFORME, se solicita emitir la carta de validación de datos para ser remitido al Asociado.";
-		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
-		        String textoEmail="Se adjunta la carta de validación de datos de inversión inmobiliaria correspondiente";
+		        String asunto = "Resultado de verificación de inversión inmobiliaria - "+personaSAF.getNombreCompleto();
+		        String speech = "";
+		        boolean enviarArchivo=true;
+		        String strNroContratos = Util.getContratosFromList(listContratos);
 		        
+		        if(verificacionExitosa){
+		        	enviarArchivo=false;
+		        	speech = Util.getHtmlCartaValidacionConforme(
+		        			strNroContratos,
+		        			personaSAF.getNombreCompleto(), 
+		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
+		        			StringUtils.isEmpty(pic.getGravamen())?"":pic.getGravamen(), 
+		        			StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
+		        			Util.getMontoFormateado(pic.getImporteInversion()), 
+		        			Util.getMontoFormateado(pic.getAreaTotal()), 
+		        			StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion(),
+		        			pic.getNroInversion());
+		        	
+		        }else{
+		        	speech = Util.getHtmlCartaValidacionNoConforme(
+		        			strNroContratos,
+		        			personaSAF.getNombreCompleto(), 
+		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
+		        			StringUtils.isEmpty(pic.getGravamen())?"":pic.getGravamen(), 
+		        			StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
+		        			Util.getMontoFormateado(pic.getImporteInversion()), 
+		        			Util.getMontoFormateado(pic.getAreaTotal()), 
+		        			StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion(),
+		        			pic.getNroInversion(),
+		        			listObs);
+		        }
+		        
+		        Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
 		        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
 		         
 		         String emailTo = documentoEmailTo;
@@ -439,12 +470,21 @@ public class InversionBusinessImpl implements InversionBusiness{
 		         }
 
 		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
-		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido,speech);
+		         LOG.info("##enviarArchivo: "+enviarArchivo);
 		         
-		         msg="Se generó la carta de validación correctamente."; 
-
+		         EmailBean emailBean=new EmailBean();
+		         emailBean.setEmailFrom(emailDesarrolloPandero);
+		         emailBean.setEmailTo(emailTo);
+		         emailBean.setSubject(asunto);
+		         emailBean.setDocumento(pdfConvertido);
+		         emailBean.setTextoEmail(speech);
+		         emailBean.setFormatHtml(true);
+		         emailBean.setEnviarArchivo(enviarArchivo);
+		         mailService.sendMail(emailBean);
 		         
-		         mailService.sendMail(emailDesarrolloPandero, emailTo, asunto, pdfConvertido, textoEmail);
+		         if(!verificacionExitosa){
+		        	 msg="Operación exitosa. Se ha emitido la carta de validación de datos de la inversión inmobiliaria"; 
+		         }
 				
 			 }
 		}
