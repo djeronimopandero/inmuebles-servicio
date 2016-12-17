@@ -166,8 +166,8 @@ public class InversionController {
 			
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			String inversionId = String.valueOf(params.get("inversionId"));
-			inversionBusiness.generarCartaObservacion(inversionId, usuarioId);
-			result = Constantes.Service.RESULTADO_EXITOSO;
+			String resultado = inversionBusiness.generarCartaObservacion(inversionId, usuarioId);
+			result = resultado;
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/generarCartaObservacion:: ",e);

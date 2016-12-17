@@ -15,6 +15,7 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
+import com.pandero.ws.bean.EmailBean;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
@@ -301,7 +302,18 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         // Enviar orden irrevocable a correo
 		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
 		         String textoEmail = "Se adjunta la orden irrevocable correspondiente";
-		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento, textoEmail);
+		         
+		         
+		         EmailBean emailBean=new EmailBean();
+		         emailBean.setEmailFrom("desarrollo@pandero.com.pe");
+		         emailBean.setEmailTo(emailTo);
+		         emailBean.setSubject(asunto);
+		         emailBean.setDocumento(nombreDocumento);
+		         emailBean.setTextoEmail(textoEmail);
+		         emailBean.setFormatHtml(false);
+		         emailBean.setEnviarArchivo(true);
+		         mailService.sendMail(emailBean);
+//		         mailService.sendMail("desarrollo@pandero.com.pe", emailTo, asunto, nombreDocumento, textoEmail);
 
 			 }
 	     }
