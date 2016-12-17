@@ -267,7 +267,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				 System.out.println("nroContrato: "+nroContrato);
 				 				 
 				 // Obtener datos del o los asociados
-				 List<Asociado> listaAsociados=pedidoDao.obtenerAsociadosxContratoSAF(nroContrato);
+				 List<Asociado> listaAsociados=contratoDao.obtenerAsociadosxContratoSAF(nroContrato);
 				 			 
 				 // Obtener inversiones del pedido
 				 List<Constante> listaDocuIdentidad = constanteService.obtenerListaDocumentosIdentidad();

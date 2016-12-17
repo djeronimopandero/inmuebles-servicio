@@ -97,6 +97,21 @@ public class Constantes {
 		public final static String TIPO_PERSONA_COD="11";
 	}
 	
+	public class Liquidacion{
+		public final static String TIPO_LIQUI_COMPRAS="1";
+		public final static String TIPO_DOCU_CONTRATO="1";
+		public final static String TIPO_DOCU_DIF_PRECIO="2";
+		public final static String MONEDA_DORALES_ID="2";
+		public final static String LIQUI_ORIGEN_SISTEMA="S"; // DE CONTRATO
+		public final static String LIQUI_ORIGEN_EMPRESA="E"; // DE DIF. PRECIO
+		public final static String LIQUI_DESTINO_PROVEEDOR="1";
+		public final static String LIQUI_DESTINO_PANDERO="2";
+		public final static String LIQUI_DESTINO_FONDO_COLECTVO="3";
+		public final static String LIQUI_ESTADO_CREADO="1";
+		public final static String LIQUI_ESTADO_VB_CONTB="2";
+		public final static String LIQUI_ESTADO_DESEMBOLSADO="3";
+	}
+	
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	public static final String FORMATO_CARTA_VALIDACION_INVERSION = "dd 'de' MMMM 'del' yyyy";

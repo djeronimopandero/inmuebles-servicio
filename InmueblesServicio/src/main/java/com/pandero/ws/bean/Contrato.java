@@ -1,15 +1,20 @@
 package com.pandero.ws.bean;
 
 public class Contrato{
-	private Integer ContratoId;
-	private Integer PedidoId;
+	private Integer ContratoId;	
 	private String NroContrato;
+	private Integer PedidoId;
+	private String NroPedido;
 	private Double MontoCertificado;
 	private Double MontoDisponible;
 	private String FechaAdjudicacion;
 	private Integer AsociadoId;
 	private String SituacionContrato;
-	
+	private Double DiferenciaPrecio;
+	private Double DiferenciaPrecioDisponible;
+	private Double TotalDisponible;
+	private Double MontoLiquidacionContrato;
+	private Double MontoLiquidacionDifPrecio;
 	
 	public String getNroContrato() {
 		return NroContrato;
@@ -58,6 +63,42 @@ public class Contrato{
 	}
 	public void setMontoDisponible(Double montoDisponible) {
 		MontoDisponible = montoDisponible;
+	}
+	public Double getDiferenciaPrecio() {
+		return DiferenciaPrecio;
+	}
+	public void setDiferenciaPrecio(Double diferenciaPrecio) {
+		DiferenciaPrecio = diferenciaPrecio;
+	}
+	public Double getDiferenciaPrecioDisponible() {
+		return DiferenciaPrecioDisponible;
+	}
+	public void setDiferenciaPrecioDisponible(Double diferenciaPrecioDisponible) {
+		DiferenciaPrecioDisponible = diferenciaPrecioDisponible;
+	}
+	public Double getTotalDisponible() {
+		return TotalDisponible;
+	}
+	public void setTotalDisponible(Double totalDisponible) {
+		TotalDisponible = totalDisponible;
+	}
+	public Double getMontoLiquidacionContrato() {
+		return MontoLiquidacionContrato;
+	}
+	public void setMontoLiquidacionContrato(Double montoLiquidacionContrato) {
+		MontoLiquidacionContrato = montoLiquidacionContrato;
+	}
+	public Double getMontoLiquidacionDifPrecio() {
+		return MontoLiquidacionDifPrecio;
+	}
+	public void setMontoLiquidacionDifPrecio(Double montoLiquidacionDifPrecio) {
+		MontoLiquidacionDifPrecio = montoLiquidacionDifPrecio;
+	}
+	public String getNroPedido() {
+		return NroPedido;
+	}
+	public void setNroPedido(String nroPedido) {
+		NroPedido = nroPedido;
 	}	
 	
 }
