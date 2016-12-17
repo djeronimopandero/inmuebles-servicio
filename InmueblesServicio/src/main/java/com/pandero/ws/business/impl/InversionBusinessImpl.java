@@ -434,7 +434,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        
 		        if(verificacionExitosa){
 		        	enviarArchivo=false;
-		        	speech = Util.getHtmlCartaValidacionConforme(
+		        	speech = DocumentoUtil.getHtmlCartaValidacionConforme(
 		        			strNroContratos,
 		        			personaSAF.getNombreCompleto(), 
 		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
@@ -446,7 +446,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        			pic.getNroInversion());
 		        	
 		        }else{
-		        	speech = Util.getHtmlCartaValidacionNoConforme(
+		        	speech = DocumentoUtil.getHtmlCartaValidacionNoConforme(
 		        			strNroContratos,
 		        			personaSAF.getNombreCompleto(), 
 		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
