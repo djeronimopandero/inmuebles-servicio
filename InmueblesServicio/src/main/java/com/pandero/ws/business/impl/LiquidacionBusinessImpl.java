@@ -7,9 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
+import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
@@ -19,6 +21,7 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.Util;
 
 @Component
 public class LiquidacionBusinessImpl implements LiquidacionBusiness{
@@ -40,7 +43,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	
 	public List<Contrato> obtenerContratosPorPedidoActualizado(String nroPedido) throws Exception{		
 		// Obtener contratos del pedido
-		List<Contrato> listaContratosPedidoSAF = pedidoDao.obtenerContratosxPedido(nroPedido);
+		List<Contrato> listaContratosPedidoSAF = pedidoDao.obtenerContratosxPedidoSAF(nroPedido);
 		
 		// Obtener diferencia precio x contrato
 		Double diferenciaPrecio = 0.00;
@@ -93,20 +96,80 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
 		
-		// Obtener datos de la inversion
-//		Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
+		// Obtener datos pedido-inversion SAF
+		PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 		
 		// Obtener valores pedido-contrato actualizado
-//		List<Contrato> listaPedidoContrato = obtenerContratosPorPedidoActualizado(inversion.getn)
+		List<Contrato> listaPedidoContrato = obtenerContratosPorPedidoActualizado(pedidoInversionSAF.getNroPedido());
 		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(nroInversion);
+				
+		// Obtener NroArmada
+		int nroArmada = 0;
+		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
+			// Obtener liquidaciones del pedido
+			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+			if(liquidacionInversion==null || liquidacionInversion.size()==0){
+				nroArmada = 2;
+			}else{
+				int cantLiquidacion = liquidacionInversion.size();
+				nroArmada = cantLiquidacion+2;
+			}
+		}else{
+			nroArmada = 1;
+		}
+				
+		// Obtener monto a liquidar
+		double montoALiquidar = 0.00;
+		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
+			List<Constante> listaArmadasDesemb = constanteService.obtenerListaArmadasDesembolso();
+			double porcentajeArmada = Util.obtenerPorcentajeArmada(listaArmadasDesemb, nroArmada);
+			System.out.println("inversion.getImporteInversion(): "+inversion.getImporteInversion()+" - porcentajeArmada: "+porcentajeArmada);
+			montoALiquidar = inversion.getImporteInversion().doubleValue()*(porcentajeArmada/100);			
+		}else{
+			montoALiquidar = inversion.getImporteInversion();
+		}
+		System.out.println("montoALiquidar: "+montoALiquidar);
+		
+		// Generar liquidacion por monto
+		generarLiquidacionPorMonto(pedidoInversionSAF.getPedidoInversionID(), montoALiquidar, listaPedidoContrato);
 		
 		return null;
 	}
 	
-	private String generarLiquidacionArmada(String inversionId, int nroArmada){
+	private String generarLiquidacionPorMonto(String pedidoInversionId, double montoALiquidar, List<Contrato> listaPedidoContrato){
+		double montoLiquidado = 0.00;
 		
+		// Obtener el monto de los contratos
+		for(Contrato contrato : listaPedidoContrato){
+			if(montoALiquidar>montoLiquidado){
+				if(contrato.getMontoDisponible().doubleValue()>0){
+					
+				}
+			}else{
+				break;
+			}
+		}
 		
-		
+		// Obtener el monto de las diferencias de precio
+		for(Contrato contrato : listaPedidoContrato){
+			if(montoALiquidar>montoLiquidado){
+				if(contrato.getDiferenciaPrecioDisponible().doubleValue()>0){
+					
+				}
+			}else{
+				break;
+			}
+		}
+				
 		return null;
+	}
+	
+	private PedidoInversionSAF crearPedidoInversion(Integer contratoId){
+		PedidoInversionSAF pedidoInversion = new PedidoInversionSAF();
+		
+		
+		return pedidoInversion;
 	}
 }

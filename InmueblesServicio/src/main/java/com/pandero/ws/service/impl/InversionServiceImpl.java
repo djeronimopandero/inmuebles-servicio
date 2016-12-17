@@ -43,9 +43,35 @@ public class InversionServiceImpl implements InversionService {
 		tokenCaspio = token;
 	}
 
-	public Inversion obtenerInversionCaspio(String inversionId) throws Exception {
+	public Inversion obtenerInversionCaspioPorId(String inversionId) throws Exception {
 		Inversion inversion = null;
 		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";		
+		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapInversiones!=null && mapInversiones.size()>0){
+	        			for(Object bean : mapInversiones){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				inversion =  JsonUtil.fromJson(beanString, Inversion.class);			
+	        			}
+	        		}        		
+	        	}
+	        }
+	    }
+
+		return inversion;
+	}
+	
+	public Inversion obtenerInversionCaspioPorNro(String nroInversion) throws Exception {
+		Inversion inversion = null;
+		String serviceWhere = "{\"where\":\"NroInversion=" + nroInversion + "\"}";		
 		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);

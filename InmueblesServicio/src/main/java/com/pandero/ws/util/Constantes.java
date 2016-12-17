@@ -4,8 +4,8 @@ public class Constantes {
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
-		public final static String RESULTADO_EXITOSO = "OPERACION_EXITOSA";
 		public final static String RESULTADO_ERROR_INESPERADO = "Ocurrio un error inesperado";
+		public final static String RESULTADO_EXITOSO = "OPERACION_EXITOSA";		
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
 		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
@@ -64,12 +64,7 @@ public class Constantes {
 		public final static String DIFERENCIA_PRECIO="DIFERENCIA_PRECIO";
 		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
 	}
-	
-//	public class InversionRequisito{
-//		public final static String PENDIENTE="PENDIENTE";
-//		public final static String CONFORME="CONFORME";
-//	}
-	
+		
 	public class Persona{
 		public final static String PERSONA_NATURAL_COD="N";
 		public final static String PERSONA_JURIDICA_COD="J";
@@ -112,6 +107,10 @@ public class Constantes {
 		public final static String LIQUI_ESTADO_DESEMBOLSADO="3";
 	}
 	
+	public class GenLista{
+		public final static String TIPO_ARMADAS_DESEMBOLSO="INMUEBLES_ARMADAS_DESEMBOLSO";
+	}
+		
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";
 	public static final String FORMATO_DATE_HH_MIN_SS = "hh:mm:ss";
 	public static final String FORMATO_CARTA_VALIDACION_INVERSION = "dd 'de' MMMM 'del' yyyy";

@@ -13,6 +13,7 @@ public class PedidoInversionSAF {
 	private String pedidoInversionVigencia;
 	private String usuarioIDCreacion;
 	private String nroPedido;
+	private String pedidoInversionID;
 	
 	
 	public String getPedidoID() {
@@ -80,6 +81,12 @@ public class PedidoInversionSAF {
 	}
 	public void setNroPedido(String nroPedido) {
 		this.nroPedido = nroPedido;
+	}
+	public String getPedidoInversionID() {
+		return pedidoInversionID;
+	}
+	public void setPedidoInversionID(String pedidoInversionID) {
+		this.pedidoInversionID = pedidoInversionID;
 	}
 	
 	

@@ -6,6 +6,7 @@ public class Constante {
 	private String TipoConstante;
 	private String NombreConstante;
 	private String ListaId;
+	private String Descripcion;
 	
 	public Integer getConstanteId() {
 		return ConstanteId;
@@ -30,6 +31,12 @@ public class Constante {
 	}
 	public void setListaId(String listaId) {
 		ListaId = listaId;
+	}
+	public String getDescripcion() {
+		return Descripcion;
+	}
+	public void setDescripcion(String descripcion) {
+		Descripcion = descripcion;
 	}
 		
 }

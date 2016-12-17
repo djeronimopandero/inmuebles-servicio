@@ -177,7 +177,7 @@ public class PedidoDaoImpl implements PedidoDao {
 	}
 
 	@Override
-	public List<Contrato> obtenerContratosxPedido(String numeroPedido) throws Exception {
+	public List<Contrato> obtenerContratosxPedidoSAF(String numeroPedido) throws Exception {
 		List<Contrato> listContratos = null;
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
@@ -190,7 +190,6 @@ public class PedidoDaoImpl implements PedidoDao {
 		.addValue("@NumeroPedido", numeroPedido);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
-		PersonaSAF persona=null;
 		List resultado = (List) mapResultado.get("contratos");
 		if (resultado != null && resultado.size() > 0) {
 			listContratos = (List<Contrato>) resultado;
@@ -206,6 +205,43 @@ public class PedidoDaoImpl implements PedidoDao {
 			p.setNroContrato(rs.getString("ContratoNumero"));
 			p.setPedidoId(rs.getInt("PedidoID"));
 			p.setNroPedido(rs.getString("NumeroPedido"));
+			
+			return p;		    
+		}
+	}
+
+	@Override
+	public PedidoInversionSAF obtenerPedidoInversionSAF(String nroInversion)
+			throws Exception {
+		PedidoInversionSAF pedidoInversion = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_Inmb_ObtenerInversionPedido");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.returningResultSet("inversion", new InversionPedidoMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroInversion", nroInversion);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("inversion");
+		if (resultado != null && resultado.size() > 0) {
+			List<PedidoInversionSAF> listPedidoInversion = (List<PedidoInversionSAF>) resultado;
+			pedidoInversion=listPedidoInversion.get(0);
+		}
+
+		return pedidoInversion;
+	}
+	
+	private static final class InversionPedidoMapper implements RowMapper<PedidoInversionSAF>{
+		public PedidoInversionSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			PedidoInversionSAF p = new PedidoInversionSAF();
+			p.setPedidoID(rs.getString("PedidoID"));
+			p.setNroPedido(rs.getString("NumeroPedido"));
+			p.setPedidoInversionID(rs.getString("PedidoInversionID"));
+			p.setProveedorID(rs.getString("ProveedorID"));
+			p.setPedidoTipoInversionID(rs.getString("PedidoTipoInversionID"));
 			
 			return p;		    
 		}
