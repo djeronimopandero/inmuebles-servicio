@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.util.UtilEnum;
 
 @Controller
 @RequestMapping("/contrato")
@@ -65,6 +66,7 @@ public class ContratoController {
 				resultadoBean=contratoBusiness.getDetalleDiferenciaPrecio(pedidoId);
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
 				resultadoBean.setResultado("Ocurrio un error al obtener el detalle de la diferencia de precio");
 				LOG.error("###getDiferenciaPrecioPorContrato:",e);
 			}

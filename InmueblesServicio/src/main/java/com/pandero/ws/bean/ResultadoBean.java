@@ -3,10 +3,12 @@ package com.pandero.ws.bean;
 import java.util.List;
 
 public class ResultadoBean {
-
-	String mensajeError;
-	Object resultado;
-	List<Object> listaResultado;
+	
+	private Integer estado;
+	private String mensajeError;
+	private Object resultado;
+	private List<Object> listaResultado;
+	
 	public String getMensajeError() {
 		return mensajeError;
 	}
@@ -24,6 +26,12 @@ public class ResultadoBean {
 	}
 	public void setListaResultado(List<Object> listaResultado) {
 		this.listaResultado = listaResultado;
+	}
+	public Integer getEstado() {
+		return estado;
+	}
+	public void setEstado(Integer estado) {
+		this.estado = estado;
 	}
 	
 }

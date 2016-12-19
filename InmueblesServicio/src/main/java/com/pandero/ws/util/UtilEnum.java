@@ -73,4 +73,27 @@ public class UtilEnum {
 		}
 	}
 	
+	public static enum ESTADO_OPERACION {
+		
+		EXITO(0, "EXITO"),
+		ERROR(1, "ERROR"),
+		EXCEPTION(2, "EXCEPTION");
+		
+		private final Integer codigo;
+		private final String texto;
+
+		private ESTADO_OPERACION(Integer codigo, String texto) {
+			this.codigo = codigo;
+			this.texto = texto;
+		}
+
+		public Integer getCodigo() {
+			return codigo;
+		}
+
+		public String getTexto() {
+			return texto;
+		}
+	}
+	
 }

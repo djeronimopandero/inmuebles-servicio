@@ -232,8 +232,14 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			
 			resultadoBean.setResultado(ddp);
 			
+			if(diferenciaPrecio>0){
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			}else{
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setMensajeError("No existe una diferencia de precio");
+			}
+			
 		}
-		
 		return resultadoBean;
 	}
 	
