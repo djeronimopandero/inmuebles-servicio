@@ -79,7 +79,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		String resultado = "";
 		// Obtener datos de la inversion
-		Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		
 		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
@@ -276,7 +276,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		if(listaInversionRequisitos==null){
 			// Obtener datos de la inversion
-			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);
+			Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 			// Obtener lista requisitos
 			List<DocumentoRequisito> listaRequisitos = obtenerRequisitosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
 			if(listaRequisitos!=null && listaRequisitos.size()>0){
@@ -383,7 +383,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				/*Obtener datos de la inversion*/
 				LOG.info("##Por obtener Inversion Caspio, inversionId:"+inversionId);
-				Inversion pic= inversionService.obtenerInversionCaspio(inversionId);
+				Inversion pic= inversionService.obtenerInversionCaspioPorId(inversionId);
 				
 				LOG.info("##Obtener Pedido Caspio Por Id, pic.getPedidoId():"+pic.getPedidoId());
 				Pedido pedidoCaspio= pedidoService.obtenerPedidoCaspioPorId(String.valueOf(pic.getPedidoId()));
@@ -434,7 +434,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        
 		        if(verificacionExitosa){
 		        	enviarArchivo=false;
-		        	speech = Util.getHtmlCartaValidacionConforme(
+		        	speech = DocumentoUtil.getHtmlCartaValidacionConforme(
 		        			strNroContratos,
 		        			personaSAF.getNombreCompleto(), 
 		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
@@ -446,7 +446,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        			pic.getNroInversion());
 		        	
 		        }else{
-		        	speech = Util.getHtmlCartaValidacionNoConforme(
+		        	speech = DocumentoUtil.getHtmlCartaValidacionNoConforme(
 		        			strNroContratos,
 		        			personaSAF.getNombreCompleto(), 
 		        			StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 

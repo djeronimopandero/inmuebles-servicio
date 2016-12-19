@@ -22,7 +22,9 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.ContratoSAF;
+import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.ContratoDao;
 
@@ -61,18 +63,7 @@ public class ContratoDaoImpl implements ContratoDao {
 			contrato = listContratos.get(0);
 		}
 
-		return contrato;
-//			String query = 	"select ContratoNumero, SituacionContratoID, PersonaID, ContratoID "+
-//					"from FOC_Contrato where ContratoNumero='"+nroContrato+"'";
-//							
-//		List<ContratoSAF> listaContratos = this.jdbcTemplate.query(query, new ContratoMapper());
-//		ContratoSAF contrato = null;	
-//		if(listaContratos!=null && listaContratos.size()>0){	
-//			contrato = listaContratos.get(0);
-//			System.out.println("listaContratos:: "+listaContratos.size());
-//		}		
-//		return contrato;
-		
+		return contrato;		
 	}
 	
 	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
@@ -107,9 +98,7 @@ public class ContratoDaoImpl implements ContratoDao {
 	}
 	
 	@Override
-	public List<ContratoSAF> getListContratoAlDia() throws Exception {
-		LOG.info("###ContratoDaoImpl.getListContratoAlDia");
-		
+	public List<ContratoSAF> getListContratoAlDia() throws Exception {		
 		LOG.info("###ContratoDaoImpl.getListContratoAlDia");
 		
 		List<ContratoSAF> listContratos = null;
@@ -133,7 +122,6 @@ public class ContratoDaoImpl implements ContratoDao {
 	@Override
 	public Double obtenerDiferenciaPrecioPorContrato(String nroContrato) throws Exception {
 		LOG.info("###obtenerDiferenciaPrecioPorContrato : "+nroContrato);
-		ResultadoBean resultado = null;
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
 		call.withProcedureName("USP_FOC_ObtenerDiferenciaPrecioPorContrato");
@@ -153,4 +141,36 @@ public class ContratoDaoImpl implements ContratoDao {
 		return bdDiferenciaPrecio.doubleValue();
 	}
 
+	public List<Asociado> obtenerAsociadosxContratoSAF(String nroContrato){
+		List<Asociado> listAsociados = null;
+		
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_Inmb_ObtenerAsociadosPorContrato");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroContrato", Types.VARCHAR));
+		call.returningResultSet("asociados", new AsociadoMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroContrato", nroContrato);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		PersonaSAF persona=null;
+		List resultado = (List) mapResultado.get("asociados");
+		if (resultado != null && resultado.size() > 0) {
+			listAsociados = (List<Asociado>) resultado;
+		}
+		
+		return listAsociados;
+	}
+		
+	private static final class AsociadoMapper implements RowMapper<Asociado>{
+		public Asociado mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			Asociado e = new Asociado();	
+			e.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
+			e.setTipoDocumentoIdentidad(rs.getString("TipoDocumento"));
+			e.setNroDocumentoIdentidad(rs.getString("PersonaCodigoDocumento"));
+			e.setDireccion(rs.getString("PersonaDireccion"));
+			return e;		    
+			}
+		}
 }

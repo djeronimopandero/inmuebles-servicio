@@ -34,8 +34,10 @@ public class ConstanteServiceImpl implements ConstanteService {
 	@Value("${url.service.view.listaDocumentos}")
 	private String viewListaDocumentosURL;
 	@Value("${url.service.table.documentoRequisito}")
-	private String tableDocumentoRequisito;
-		
+	private String tableDocumentoRequisitoURL;
+	@Value("${url.service.table.constantes}")
+	private String tableConstantesURL;
+			
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
@@ -108,7 +110,7 @@ public class ConstanteServiceImpl implements ConstanteService {
 		List<DocumentoRequisito> listaRequisitos = null;
 		Map<String, String> request = new HashMap<String, String>();
 		String serviceWhere = "{\"where\":\"TipoInversion='" + tipoInversion + "' and TipoDocumento='"+Constantes.DocumentoRequisito.TIPO_REQUISITO+"'\"}";	
-		String obtenerRequisitosTipoInversionURL = tableDocumentoRequisito+Constantes.Service.URL_WHERE;
+		String obtenerRequisitosTipoInversionURL = tableDocumentoRequisitoURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosTipoInversionURL,Object.class,request,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
@@ -132,6 +134,37 @@ public class ConstanteServiceImpl implements ConstanteService {
 	    }	
 	    
 		return listaRequisitos;
+	}
+
+	@Override
+	public List<Constante> obtenerListaArmadasDesembolso() throws Exception {
+		List<Constante> listaConstantes = null;
+		Map<String, String> request = new HashMap<String, String>();
+		String serviceWhere = "{\"where\":\"TipoConstante='" + Constantes.GenLista.TIPO_ARMADAS_DESEMBOLSO + "'\"}";
+		String obtenerConstantesArmadaDesembURL = tableConstantesURL+Constantes.Service.URL_WHERE;
+	
+		Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerConstantesArmadaDesembURL,Object.class,request,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapConstantes!=null && mapConstantes.size()>0){
+	        			listaConstantes = new ArrayList<Constante>();
+	        			for(Object bean : mapConstantes){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				Constante constante =  JsonUtil.fromJson(beanString, DocumentoRequisito.class);
+	        				listaConstantes.add(constante);        				
+	        			}
+	        			System.out.println("listaConstantesArmadaDesemb:: "+listaConstantes.size());
+	        		}        		
+	        	}
+	        }
+	    }	
+	    
+		return listaConstantes;
 	}
 
 }

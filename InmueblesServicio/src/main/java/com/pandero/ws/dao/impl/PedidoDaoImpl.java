@@ -17,11 +17,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
-import com.pandero.ws.bean.Asociado;
+import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.PedidoInversionSAF;
+import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.PedidoDao;
 
@@ -132,37 +134,6 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.execute(parameters);
 	}
 	
-	public List<Asociado> obtenerAsociadosxContratoSAF(String nroContrato){
-		String query = 	"select PersonaNombreCompleto,ListaNombreCorto as TipoDocumento,PersonaCodigoDocumento, "+
-				"(select DireccionDetalle+' - '+y.UbigeoNombre "+
-				"from PER_Direccion x inner join GEN_Ubigeo y "+
-				"on x.UbigeoID=UbigeoDepartamentoID+UbigeoProvinciaID+UbigeoDistritoID "+
-				"where  DireccionTipoID='01' and PersonaID=a.PersonaID) as PersonaDireccion "+
-				"from FOC_Asociado d inner join FOC_Contrato c "+
-				"on d.ContratoID=c.ContratoID inner join PER_Persona a "+
-				"on d.PersonaID=a.PersonaID inner join GEN_Lista b "+
-				"on a.TipoDocumentoID=b.ListaID and ListaTipo='DOCUMENTO_IDENTIDAD' "+
-				"where c.ContratoNumero='"+nroContrato+"'";
-							
-		List<Asociado> listAsociados = this.jdbcTemplate.query(query, new AsociadoMapper());
-				
-		if(listAsociados!=null ){			
-			System.out.println("listAsociados:: "+listAsociados.size());
-		}
-		
-		return listAsociados;
-	}
-		
-	private static final class AsociadoMapper implements RowMapper<Asociado>{
-		public Asociado mapRow(ResultSet rs, int rowNum) throws SQLException {			
-			Asociado e = new Asociado();	
-			e.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
-			e.setTipoDocumentoIdentidad(rs.getString("TipoDocumento"));
-			e.setNroDocumentoIdentidad(rs.getString("PersonaCodigoDocumento"));
-			e.setDireccion(rs.getString("PersonaDireccion"));
-			return e;		    
-			}
-		}
 
 	@Override
 	public void agregarPedidoInversionSAF(PedidoInversionSAF pedidoInversionSAF) throws Exception {
@@ -203,6 +174,77 @@ public class PedidoDaoImpl implements PedidoDao {
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);
+	}
+
+	@Override
+	public List<Contrato> obtenerContratosxPedidoSAF(String numeroPedido) throws Exception {
+		List<Contrato> listContratos = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_Inmb_ObtenerContratosPorPedido");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroPedido", Types.VARCHAR));
+		call.returningResultSet("contratos", new ContratoPedidoMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroPedido", numeroPedido);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("contratos");
+		if (resultado != null && resultado.size() > 0) {
+			listContratos = (List<Contrato>) resultado;
+		}
+
+		return listContratos;
+	}
+	
+	private static final class ContratoPedidoMapper implements RowMapper<Contrato>{
+		public Contrato mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			Contrato p = new Contrato();
+			p.setContratoId(rs.getInt("ContratoID"));
+			p.setNroContrato(rs.getString("ContratoNumero"));
+			p.setPedidoId(rs.getInt("PedidoID"));
+			p.setNroPedido(rs.getString("NumeroPedido"));
+			
+			return p;		    
+		}
+	}
+
+	@Override
+	public PedidoInversionSAF obtenerPedidoInversionSAF(String nroInversion)
+			throws Exception {
+		PedidoInversionSAF pedidoInversion = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_Inmb_ObtenerInversionPedido");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.returningResultSet("inversion", new InversionPedidoMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroInversion", nroInversion);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("inversion");
+		if (resultado != null && resultado.size() > 0) {
+			List<PedidoInversionSAF> listPedidoInversion = (List<PedidoInversionSAF>) resultado;
+			pedidoInversion=listPedidoInversion.get(0);
+		}
+
+		return pedidoInversion;
+	}
+	
+	private static final class InversionPedidoMapper implements RowMapper<PedidoInversionSAF>{
+		public PedidoInversionSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			PedidoInversionSAF p = new PedidoInversionSAF();
+			p.setPedidoID(rs.getString("PedidoID"));
+			p.setNroPedido(rs.getString("NumeroPedido"));
+			p.setPedidoInversionID(rs.getString("PedidoInversionID"));
+			p.setProveedorID(rs.getString("ProveedorID"));
+			p.setPedidoTipoInversionID(rs.getString("PedidoTipoInversionID"));
+			
+			return p;		    
+		}
 	}
 
 }
