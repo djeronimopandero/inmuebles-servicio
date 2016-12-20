@@ -133,9 +133,10 @@ public class PedidoController {
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoBusiness.eliminarContratoPedido(pedidoId, nroContrato, usuarioId);
-			result = Constantes.Service.RESULTADO_EXITOSO;
-			
+			result = pedidoBusiness.eliminarContratoPedido(pedidoId, nroContrato, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
 		}catch(Exception e){
 			LOG.error("Error pedido/eliminarContratoPedido:: ",e);
 			e.printStackTrace();

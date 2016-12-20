@@ -18,6 +18,7 @@ import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.EmailBean;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
+import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
@@ -26,6 +27,7 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
@@ -59,6 +61,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	PedidoDao pedidoDao;
 	@Autowired
 	MailService mailService;
+	@Autowired
+	LiquidacionDao liquidacionDao;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -83,6 +87,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
+			System.out.println("inversion:: "+inversion);
+			System.out.println("inversion.getTipoInversion(): "+inversion.getTipoInversion()+" - inversion.getPropietarioTipoDocId(): "+inversion.getPropietarioTipoDocId());
 			// Obtener lista de documentos
 			List<DocumentoRequisito> listaDocumentos = obtenerDocumentosTipoInversion(inversion.getTipoInversion(), inversion.getPropietarioTipoDocId());
 			
@@ -151,7 +157,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
 			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
 				// Verificar si existe excedente certificado o diferencia de precio
-				resultado=validarDiferenciPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
+				resultado=validarDiferenciaPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
 			}
 		}
 							
@@ -216,7 +222,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return proveedor;
 	}
 	
-	private String validarDiferenciPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
+	private String validarDiferenciaPrecioExcedenteEnInversion(String inversionId, String pedidoId) throws Exception{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
@@ -228,7 +234,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 			for(Inversion inversion : listaInversiones){
 				System.out.println("inversion.getConfirmado():: "+inversion.getConfirmado());
 				if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversion.getConfirmado())){
-					System.out.println("suma111");
 					montoCertificadoUsado += inversion.getImporteInversion();
 				}
 				if(String.valueOf(inversion.getInversionId().intValue()).equals(inversionId)){
@@ -332,13 +337,25 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}	
 	
 	@Override
-	public void anularVerificacion(String inversionId) throws Exception {
+	public String anularVerificacion(String inversionId) throws Exception {
+		String resultado = "";
 		LOG.info("###anularVerificacion inversionId:"+inversionId);
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		if(null!=inversionId){
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+				
+		// Validar si existe liquidacion
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		
+		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
+			resultado = Constantes.Service.EXISTE_LIQUIDACION;
+		}else{
+			// Anular verificacion
 			inversionService.actualizarEstadoInversionRequisitoCaspio(inversionId, Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE);
 		}
+		return resultado;
 	}
 
 	@Override

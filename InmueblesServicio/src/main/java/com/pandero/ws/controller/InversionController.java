@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.util.Constantes;
 
 @Controller
@@ -24,6 +25,8 @@ public class InversionController {
 
 	@Autowired
 	InversionBusiness inversionBusiness;
+	@Autowired
+	LiquidacionBusiness liquidacionBusiness;
 	
 	@RequestMapping(value = "/obtenerInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
@@ -129,24 +132,24 @@ public class InversionController {
 		return response;
 	}
 	
-	@RequestMapping(value = "anularVerificacion", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/anularVerificacion", method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody ResultadoBean anularVerificacion(@RequestBody Map<String, Object> params) {
 		System.out.println("###anularVerificacion params:"+params);
 		
 		ResultadoBean response = null;
-		try{
-			
+		try{			
 			if(null!=params){
-				if(null!=params.get("inversionId")){
-					
+				if(null!=params.get("inversionId")){					
 					String inversionId = String.valueOf(params.get("inversionId"));
-					inversionBusiness.anularVerificacion(inversionId);
-					
+					String resultado = inversionBusiness.anularVerificacion(inversionId);					
 					response = new ResultadoBean();
-					response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+					if(!resultado.equals("")){
+						response.setResultado(resultado);
+					}else{
+						response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+					}
 				}
-			}
-			
+			}			
 		}catch(Exception e){
 			LOG.error("###Error ",e);
 			response = new ResultadoBean();
@@ -176,6 +179,27 @@ public class InversionController {
 			
 		response.put("result",result);
 		
+		return response;
+	}
+	
+	@RequestMapping(value = "/generarLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody ResultadoBean generarLiquidacionInversion(@RequestBody Map<String, Object> params) {		
+		ResultadoBean response = null;
+		try{			
+			if(null!=params){						
+				String nroInversion = String.valueOf(params.get("nroInversion"));
+				String nroArmada = String.valueOf(params.get("nroArmada"));
+				String usuarioId = String.valueOf(params.get("usuarioId"));				
+				response = new ResultadoBean();
+				liquidacionBusiness.generarLiquidacionPorInversion(nroInversion, nroArmada, usuarioId);
+				response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+			}			
+		}catch(Exception e){
+			LOG.error("###Error ",e);
+			response = new ResultadoBean();
+			response.setMensajeError(Constantes.Service.RESULTADO_ERROR_INESPERADO);
+		}
+			
 		return response;
 	}
 	

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Repository;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.PersonaSAF;
+import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.LiquidacionDao;
 
 @Repository
@@ -43,7 +45,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
-		call.withProcedureName("USP_LOG_Inmb_ObtenerLiquidacionInversion");
+		call.withProcedureName("USP_LOG_Inmb_ObtenerLiquidacionInversion"); // EN .net USP_LOG_Inmb_ObtenerLiquidacionInversionDetalle
 		call.withoutProcedureColumnMetaDataAccess();
 		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
 		call.returningResultSet("liquidacion", new LiquidacionMapper());
@@ -101,9 +103,66 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		}
 
 	@Override
-	public String registrarLiquidacionInversionSAF(LiquidacionSAF liquidacionSAF)
+	public String obtenerCorrelativoLiquidacion(String pedidoId) throws Exception{
+		String nroCorrelativo = null;
+		
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_ObtenerCorrelativoLiquidacion");
+		call.withoutProcedureColumnMetaDataAccess();	
+				
+		call.addDeclaredParameter(new SqlParameter("@PedidoID", Types.INTEGER));		
+		call.addDeclaredParameter(new SqlOutParameter("@LiquidacionNumero", Types.VARCHAR));
+				
+		MapSqlParameterSource parameters = new MapSqlParameterSource();		
+        parameters.addValue("@PedidoID", pedidoId);
+				
+		Map resultadoSP = call.execute(parameters);
+		nroCorrelativo = resultadoSP.get("@LiquidacionNumero")!=null?(String)resultadoSP.get("@LiquidacionNumero"):"";
+		System.out.println("NRO CORRELATIVO:: "+nroCorrelativo);
+		
+		return nroCorrelativo;
+	}
+	
+	@Override
+	public String registrarLiquidacionInversionSAF(LiquidacionSAF liquidacionSAF, String usuarioId)
 			throws Exception {
-		// TODO Auto-generated method stub
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_RegistrarLiquidacion");
+		call.withoutProcedureColumnMetaDataAccess();	
+				
+		call.addDeclaredParameter(new SqlParameter("@PedidoID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@PedidoInversion", Types.INTEGER));		
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionNumero", Types.VARCHAR));		
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionTipo", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@ProveedorID", Types.INTEGER));		
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionTipoDocumento", Types.VARCHAR));		
+		call.addDeclaredParameter(new SqlParameter("@ContratoID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@MonedaID", Types.VARCHAR));		
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionImporte", Types.DECIMAL));		
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionOrigen", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionDestino", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@LiquidacionEstado", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@NroArmada", Types.VARCHAR));
+						
+		MapSqlParameterSource parameters = new MapSqlParameterSource();		
+        parameters.addValue("@PedidoID", liquidacionSAF.getPedidoID());
+        parameters.addValue("@PedidoInversion", liquidacionSAF.getPedidoInversionID());
+        parameters.addValue("@LiquidacionNumero", liquidacionSAF.getLiquidacionNumero());
+        parameters.addValue("@LiquidacionTipo", liquidacionSAF.getLiquidacionTipo());
+        parameters.addValue("@ProveedorID", liquidacionSAF.getProveedorID());
+        parameters.addValue("@LiquidacionTipoDocumento", liquidacionSAF.getLiquidacionTipoDocumento());
+        parameters.addValue("@ContratoID", liquidacionSAF.getContratoID());
+        parameters.addValue("@MonedaID", liquidacionSAF.getMonedaID());
+        parameters.addValue("@LiquidacionImporte", liquidacionSAF.getLiquidacionImporte());
+        parameters.addValue("@LiquidacionOrigen", liquidacionSAF.getLiquidacionOrigen());
+        parameters.addValue("@LiquidacionDestino", liquidacionSAF.getLiquidacionDestino());
+        parameters.addValue("@LiquidacionEstado", liquidacionSAF.getLiquidacionEstado());
+		parameters.addValue("@UsuarioID", usuarioId);
+		parameters.addValue("@NroArmada", liquidacionSAF.getNroArmada());
+				
+		call.execute(parameters);
+		
 		return null;
 	}
 	

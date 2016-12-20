@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.util.Constantes.Persona;
 
@@ -217,17 +218,31 @@ public class Util {
 		return strContratos;
 	}
 	
-	public static double obtenerPorcentajeArmada(List<Constante> listaArmadas, int nroArmada){
+	public static double obtenerPorcentajeArmada(List<Constante> listaArmadas, String nroArmada){
 		double resultado = 0.00;
 		if(listaArmadas!=null && listaArmadas.size()>0){
 			for(Constante armada : listaArmadas){
-				if(armada.getListaId().equals(String.valueOf(nroArmada))){
+				if(armada.getListaId().equals(nroArmada)){
 					resultado = Double.parseDouble(armada.getDescripcion());
 					break;
 				}
 			}
 		}
 		return resultado;
+	}
+	
+	
+	public static String obtenerEstadoLiquidacionPorNroArmada(List<LiquidacionSAF> liquidacionInversion, String nroArmada){
+		String estadoLiquidacion = "";
+		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
+			for(LiquidacionSAF liquidacion : liquidacionInversion){
+				if(String.valueOf(liquidacion.getNroArmada()).equals(nroArmada)){
+					estadoLiquidacion = liquidacion.getLiquidacionEstado();
+					break;
+				}
+			}
+		}		
+		return estadoLiquidacion;
 	}
 	
 }
