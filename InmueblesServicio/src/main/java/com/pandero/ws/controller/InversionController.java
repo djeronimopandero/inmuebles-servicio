@@ -191,8 +191,10 @@ public class InversionController {
 				String nroArmada = String.valueOf(params.get("nroArmada"));
 				String usuarioId = String.valueOf(params.get("usuarioId"));				
 				response = new ResultadoBean();
-				liquidacionBusiness.generarLiquidacionPorInversion(nroInversion, nroArmada, usuarioId);
-				response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+				String resultado = liquidacionBusiness.generarLiquidacionPorInversion(nroInversion, nroArmada, usuarioId);
+				if(resultado.equals("")){
+					response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+				}
 			}			
 		}catch(Exception e){
 			LOG.error("###Error ",e);

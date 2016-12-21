@@ -195,7 +195,7 @@ public class PedidoController {
 		String result="", detail="";
 		try{
 			String nroPedido = String.valueOf(params.get("nroPedido"));
-			List<Contrato> contratosPedido = liquidacionBusiness.obtenerContratosPorPedidoActualizado(nroPedido);
+			List<Contrato> contratosPedido = liquidacionBusiness.obtenerTablaContratosPedidoActualizado(nroPedido);
 			if(contratosPedido!=null){
 				detail = JsonUtil.toJson(contratosPedido);
 			}
@@ -203,12 +203,36 @@ public class PedidoController {
 				result = Constantes.Service.RESULTADO_EXITOSO;
 			}
 		}catch(Exception e){
-			LOG.error("Error pedido/generarOrdenIrrevocable:: ",e);
+			LOG.error("Error pedido/obtenerContratosPedidoActualizado:: ",e);
 			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();
 		}
 			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/actualizarTablaContratosPedido", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> actualizarTablaContratosPedido(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO actualizarTablaContratosPedido");
+		System.out.println("REQUEST: " +  params);		
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String nroPedido = String.valueOf(params.get("nroPedido"));
+			liquidacionBusiness.actualizarTablaContratosPedido(nroPedido);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+		}catch(Exception e){
+			LOG.error("Error pedido/actualizarTablaContratosPedido:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
 		response.put("result",result);
 		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);	
