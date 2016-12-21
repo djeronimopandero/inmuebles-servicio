@@ -1,7 +1,7 @@
 package com.pandero.ws.bean;
 
 public class Contrato{
-	private Integer ContratoId;	
+	private Integer ContratoId;
 	private String NroContrato;
 	private Integer PedidoId;
 	private String NroPedido;
@@ -15,6 +15,7 @@ public class Contrato{
 	private Double TotalDisponible;
 	private Double MontoLiquidacionContrato;
 	private Double MontoLiquidacionDifPrecio;
+	private Integer PedidoContrato_ContratoId;
 	
 	public String getNroContrato() {
 		return NroContrato;
@@ -99,6 +100,12 @@ public class Contrato{
 	}
 	public void setNroPedido(String nroPedido) {
 		NroPedido = nroPedido;
+	}
+	public Integer getPedidoContrato_ContratoId() {
+		return PedidoContrato_ContratoId;
+	}
+	public void setPedidoContrato_ContratoId(Integer pedidoContrato_ContratoId) {
+		PedidoContrato_ContratoId = pedidoContrato_ContratoId;
 	}	
 	
 }

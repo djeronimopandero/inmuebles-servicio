@@ -19,4 +19,6 @@ public interface InversionService {
 	public List<InversionRequisito> obtenerRequisitosPorInversion(String inversionId) throws Exception;
 	public String actualizarEstadoInversionRequisitoCaspio(String inversionId,String estadoInversionReq) throws Exception;
 	
+	public List<Inversion> listarPedidoInversionPorPedidoId(String pedidoId) throws Exception;
+	
 }

@@ -120,8 +120,7 @@ public class InversionServiceImpl implements InversionService {
 	}
 
 	@Override
-	public List<InversionRequisito> obtenerRequisitosPorInversion(
-			String inversionId) throws Exception {
+	public List<InversionRequisito> obtenerRequisitosPorInversion(String inversionId) throws Exception {
 		List<InversionRequisito> listaRequisitos = null;	
 		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + "\"}";	
 		String obtenerRequisitosxInversionURL = tableInversionRequisitoURL+Constantes.Service.URL_WHERE;
@@ -173,6 +172,38 @@ public class InversionServiceImpl implements InversionService {
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableInversionRequisitoURL,Object.class,request,null);	
 		
 		return null;
+	}
+
+	@Override
+	public List<Inversion> listarPedidoInversionPorPedidoId(String pedidoId) throws Exception {
+		LOG.info("###listarPedidoInversionPorPedidoId pedidoId:"+pedidoId);
+		
+		List<Inversion> listaInversiones = null;	
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
+		String obtenerRequisitosxInversionURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
+	        			listaInversiones = new ArrayList<Inversion>();
+	        			for(Object bean : mapRequisitos){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				Inversion inversion =  JsonUtil.fromJson(beanString, Inversion.class);
+	        				listaInversiones.add(inversion);
+	        			}
+	        			System.out.println("listaPedidoInversion:: "+listaInversiones.size());
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return listaInversiones;
 	}
 	
 }

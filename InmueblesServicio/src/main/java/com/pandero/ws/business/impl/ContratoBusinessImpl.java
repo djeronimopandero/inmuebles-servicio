@@ -199,7 +199,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			List<Contrato> listPedidoContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
 			if(null!=listPedidoContrato){
 				for(Contrato pc:listPedidoContrato){
-					Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getContratoId()));
+					Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getPedidoContrato_ContratoId()));
 					sumMontoDisponibleCertificado += contrato.getMontoDisponible();
 				}
 			}
@@ -207,7 +207,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			Double sumImporteTotalInversion=0.00;
 			//2.- Suma de el importe total de las inversiones
 			//Consultar el listado de PedidoInversion por pedidoId y sumar los montos de todas las inversiones
-			List<Inversion> listPedidoInversionCaspio = pedidoService.obtenerInversionesxPedidoCaspio(String.valueOf(pedidoId));
+			List<Inversion> listPedidoInversionCaspio = inversionService.listarPedidoInversionPorPedidoId(String.valueOf(pedidoId));
 			if(null!=listPedidoInversionCaspio){
 				for(Inversion pedidoInversionCaspio:listPedidoInversionCaspio){
 					sumImporteTotalInversion += pedidoInversionCaspio.getImporteInversion()==null?0.00:pedidoInversionCaspio.getImporteInversion();
@@ -236,7 +236,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setMensajeError("No existe una diferencia de precio");
+				resultadoBean.setMensajeError("No existe diferencia de precio");
 			}
 			
 		}

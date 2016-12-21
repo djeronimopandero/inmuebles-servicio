@@ -20,7 +20,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
-import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.LiquidacionDao;
