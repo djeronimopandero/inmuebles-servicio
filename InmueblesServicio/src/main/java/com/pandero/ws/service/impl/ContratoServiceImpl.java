@@ -164,5 +164,20 @@ public class ContratoServiceImpl implements ContratoService{
         
 		return contrato;
 	}
+
+	@Override
+	public Contrato actualizarMontosDisponiblesCaspio(String nroContrato,
+			double certificadoDisponible, double diferenciaPrecio, double difPrecioDisponible) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();	
+		request.put("MontoDisponible", String.valueOf(certificadoDisponible));
+		request.put("DiferenciaPrecio", String.valueOf(diferenciaPrecio));
+		request.put("DiferenciaPrecioDisponible", String.valueOf(difPrecioDisponible));
+		
+		String serviceWhere = "{\"where\":\"NroContrato='" + nroContrato + "'\"}";	
+		String actualizarPedidoURL = tableContratoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
+		return null;
+	}
 	
 }

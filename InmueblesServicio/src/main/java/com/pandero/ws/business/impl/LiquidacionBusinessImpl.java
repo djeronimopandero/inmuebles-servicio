@@ -18,6 +18,7 @@ import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
+import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
@@ -36,13 +37,15 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	@Autowired
 	ConstanteService constanteService;
 	@Autowired
+	ContratoService contratoService;
+	@Autowired
 	ContratoDao contratoDao;
 	@Autowired
 	PedidoDao pedidoDao;
 	@Autowired
 	LiquidacionDao liquidacionDao;
 	
-	public List<Contrato> obtenerContratosPorPedidoActualizado(String nroPedido) throws Exception{		
+	public List<Contrato> obtenerTablaContratosPedidoActualizado(String nroPedido) throws Exception{		
 		// Obtener contratos del pedido
 		System.out.println("NRO PEDIDO: "+nroPedido);
 		List<Contrato> listaContratosPedidoSAF = pedidoDao.obtenerContratosxPedidoSAF(nroPedido);		
@@ -110,7 +113,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 		
 		// Obtener valores pedido-contrato actualizado
-		List<Contrato> listaPedidoContrato = obtenerContratosPorPedidoActualizado(pedidoInversionSAF.getNroPedido());
+		List<Contrato> listaPedidoContrato = obtenerTablaContratosPedidoActualizado(pedidoInversionSAF.getNroPedido());
 		
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
@@ -217,7 +220,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Grabar liquidacion
 		if(listaLiquidaciones.size()>0){
 			// Generar numero de liquidacion
-			String numeroLiquidacion = liquidacionDao.obtenerCorrelativoLiquidacion(pedidoInversionSAF.getPedidoID());
+			String numeroLiquidacion = liquidacionDao.obtenerCorrelativoLiquidacionSAF(pedidoInversionSAF.getPedidoID());
 			// Insertar las liquidaciones
 			for(LiquidacionSAF liquidacion : listaLiquidaciones){
 				liquidacion.setLiquidacionNumero(numeroLiquidacion);
@@ -248,5 +251,22 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		liquidacionSAF.setLiquidacionEstado(Constantes.Liquidacion.LIQUI_ESTADO_CREADO);
 		
 		return liquidacionSAF;
+	}
+
+	@Override
+	public String actualizarTablaContratosPedido(String nroPedido) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		contratoService.setTokenCaspio(tokenCaspio);
+		
+		List<Contrato> contratosPedidoActualizado = obtenerTablaContratosPedidoActualizado(nroPedido);
+		
+		if(contratosPedidoActualizado!=null && contratosPedidoActualizado.size()>0){
+			for(Contrato contrato : contratosPedidoActualizado){
+				contratoService.actualizarMontosDisponiblesCaspio(contrato.getNroContrato(), contrato.getMontoDisponible(),
+						contrato.getDiferenciaPrecio(), contrato.getDiferenciaPrecioDisponible());
+			}
+		}
+		
+		return null;
 	}
 }

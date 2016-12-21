@@ -102,7 +102,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		}
 
 	@Override
-	public String obtenerCorrelativoLiquidacion(String pedidoId) throws Exception{
+	public String obtenerCorrelativoLiquidacionSAF(String pedidoId) throws Exception{
 		String nroCorrelativo = null;
 		
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
@@ -159,6 +159,27 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
         parameters.addValue("@LiquidacionEstado", liquidacionSAF.getLiquidacionEstado());
 		parameters.addValue("@UsuarioID", usuarioId);
 		parameters.addValue("@NroArmada", liquidacionSAF.getNroArmada());
+				
+		call.execute(parameters);
+		
+		return null;
+	}
+
+	@Override
+	public String eliminarLiquidacionInversionSAF(String nroInversion,
+			String nroArmada, String usuarioId) throws Exception {
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarLiquidacionInversion");
+		call.withoutProcedureColumnMetaDataAccess();	
+				
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));		
+		call.addDeclaredParameter(new SqlParameter("@NroArmada", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
+						
+		MapSqlParameterSource parameters = new MapSqlParameterSource();		
+        parameters.addValue("@NumeroInversion", nroInversion);		
+		parameters.addValue("@NroArmada", nroArmada);
+		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);
 		
