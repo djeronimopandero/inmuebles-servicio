@@ -236,7 +236,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setMensajeError("No existe diferencia de precio");
+				resultadoBean.setMensajeError("No existe diferencia de precio, por lo tanto no se podrá registrar la cancelación");
 			}
 			
 		}
