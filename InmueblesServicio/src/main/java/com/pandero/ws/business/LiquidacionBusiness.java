@@ -10,5 +10,6 @@ public interface LiquidacionBusiness {
 	public String actualizarTablaContratosPedido(String nroPedido) throws Exception;
 	
 	public String generarLiquidacionPorInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;	
+	public String eliminarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	
 }

@@ -205,4 +205,27 @@ public class InversionController {
 		return response;
 	}
 	
+	@RequestMapping(value = "/anularLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody ResultadoBean anularLiquidacionInversion(@RequestBody Map<String, Object> params) {		
+		ResultadoBean response = null;
+		try{			
+			if(null!=params){						
+				String nroInversion = String.valueOf(params.get("nroInversion"));
+				String nroArmada = String.valueOf(params.get("nroArmada"));
+				String usuarioId = String.valueOf(params.get("usuarioId"));				
+				response = new ResultadoBean();
+				String resultado = liquidacionBusiness.eliminarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
+				if(resultado.equals("")){
+					response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
+				}
+			}			
+		}catch(Exception e){
+			LOG.error("###Error ",e);
+			response = new ResultadoBean();
+			response.setMensajeError(Constantes.Service.RESULTADO_ERROR_INESPERADO);
+		}
+			
+		return response;
+	}
+	
 }

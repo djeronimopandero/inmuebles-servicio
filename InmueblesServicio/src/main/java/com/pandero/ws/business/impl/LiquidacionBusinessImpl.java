@@ -132,7 +132,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
 			String estadoLiquidacion = Util.obtenerEstadoLiquidacionPorNroArmada(liquidacionInversion, nroArmadaId);
 			if(!estadoLiquidacion.equals("")){
-				resultado = Constantes.Service.EXISTE_LIQUIDACION;
+				resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
 				validacionLiquidacion = false;
 			}
 		}
@@ -268,5 +268,47 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 		
 		return null;
+	}
+
+	@Override
+	public String eliminarLiquidacionInversion(String nroInversion,
+			String nroArmada, String usuarioId) throws Exception {
+		String resultado = "";
+		boolean existeLiquidacionArmada = false;
+		// Obtener liquidaciones
+		List<LiquidacionSAF> liquidacionesInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		
+		// Obtener el estado de la liquidacion
+		if(liquidacionesInversion!=null && liquidacionesInversion.size()>0){
+			// Obtener datos pedido-inversion SAF
+			PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+			
+			// Obtener nroArmadaId
+			String nroArmadaId = "1";
+			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){	
+				nroArmada +=1;
+			}
+			
+			for(LiquidacionSAF liquidacion : liquidacionesInversion){
+				if(liquidacion.getNroArmada()==Integer.parseInt(nroArmadaId)){
+					existeLiquidacionArmada = true;
+					if(!liquidacion.getLiquidacionEstado().equals("1")){
+						resultado = Constantes.Service.RESULTADO_PASO_LIQUIDACION;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(existeLiquidacionArmada==false){
+			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+		}
+		
+		if(!resultado.equals("")){
+			// Eliminar liquidacion
+			liquidacionDao.eliminarLiquidacionInversionSAF(nroInversion, nroArmada, usuarioId);
+		}
+		
+		return resultado;
 	}
 }

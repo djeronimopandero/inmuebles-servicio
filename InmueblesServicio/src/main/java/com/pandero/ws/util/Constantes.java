@@ -13,7 +13,9 @@ public class Constantes {
 		public final static String RESULTADO_PENDIENTE_REQUISITOS = "PENDIENTE_REQUISITOS";
 		public final static String RESULTADO_TIENE_REQUISITOS = "TIENE_REQUISITOS";
 		public final static String NO_MONTO_DISPONIBLE_LIQUIDAR = "NO_MONTO_DISPONIBLE_LIQUIDAR";
-		public final static String EXISTE_LIQUIDACION = "EXISTE_LIQUIDACION";
+		public final static String RESULTADO_EXISTE_LIQUIDACION = "EXISTE_LIQUIDACION";
+		public final static String RESULTADO_NO_EXISTE_LIQUIDACION = "NO_EXISTE_LIQUIDACION";
+		public final static String RESULTADO_PASO_LIQUIDACION = "PASO_LIQUIDACION";
 	}
 	
 	public class Pedido {
