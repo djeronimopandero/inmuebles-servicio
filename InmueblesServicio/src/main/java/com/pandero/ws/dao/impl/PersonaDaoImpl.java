@@ -97,7 +97,7 @@ public class PersonaDaoImpl implements PersonaDao {
 		.addValue("@ProveedorID", proveedorId)
 		.addValue("@TipoProveedorID", Integer.parseInt(tipoProveedor))
 		.addValue("@PersonaID", personaID)
-		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento))
+		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento.equals("")?"0":tipoDocumento))
 		.addValue("@NroDocumento", nroDocumento);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		

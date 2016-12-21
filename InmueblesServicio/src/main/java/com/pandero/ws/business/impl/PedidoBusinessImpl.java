@@ -161,12 +161,12 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 
-	public ResultadoBean agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
+	public String agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
-		ResultadoBean resultado = new ResultadoBean();
+		String resultado = "";
 		// Caspio - obtener datos pedido
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
 		String nroPedido = pedido.getNroPedido();
@@ -187,28 +187,49 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 	
-	public ResultadoBean eliminarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
+	public String eliminarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
-		ResultadoBean resultado = new ResultadoBean();
-		// Caspio - obtener datos pedido
-		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
-		String nroPedido = pedido.getNroPedido();
+		String resultado = "";
+		boolean permiteEliminar = true;
 		
-		// SAF - eliminar contrato pedido
-		pedidoDao.eliminarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
-		
-		// Caspio - Obtener datos contrato
-		Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
+		// Obtener las inversiones del pedido
+		List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoCaspioId);
 				
-		// Caspio - eliminar contrato pedido
-		String contratoCaspioId = String.valueOf(contrato.getContratoId().intValue());
-		pedidoService.eliminarContratoPedidoCaspio(pedidoCaspioId, contratoCaspioId);
+		// Verificar si existe alguna inversion confirmada
+		if(listaInversiones!=null && listaInversiones.size()>0){
+			for(Inversion inversion : listaInversiones){
+				if(inversion.getConfirmado().equals(Constantes.Inversion.SITUACION_CONFIRMADO)){
+					permiteEliminar = false;
+					break;
+				}
+			}
+		}
 		
-		// Caspio: Desasociar contrato a pedido
-		contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_NO_ASOCIADO);
+		if(permiteEliminar==false){
+			resultado=Constantes.Service.RESULTADO_INVERSIONES_CONFIRMADAS;
+		}
+		
+		if(permiteEliminar){
+			// Caspio - obtener datos pedido
+			Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
+			String nroPedido = pedido.getNroPedido();
+			
+			// SAF - eliminar contrato pedido
+			pedidoDao.eliminarContratoPedidoSAF(nroPedido, nroContrato, usuarioSAFId);
+			
+			// Caspio - Obtener datos contrato
+			Contrato contrato = contratoService.obtenerContratoCaspio(nroContrato);
+					
+			// Caspio - eliminar contrato pedido
+			String contratoCaspioId = String.valueOf(contrato.getContratoId().intValue());
+			pedidoService.eliminarContratoPedidoCaspio(pedidoCaspioId, contratoCaspioId);
+			
+			// Caspio: Desasociar contrato a pedido
+			contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_NO_ASOCIADO);
+		}
 		
 		return resultado;
 	}

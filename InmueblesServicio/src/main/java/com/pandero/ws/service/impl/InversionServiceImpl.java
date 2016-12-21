@@ -71,7 +71,7 @@ public class InversionServiceImpl implements InversionService {
 	
 	public Inversion obtenerInversionCaspioPorNro(String nroInversion) throws Exception {
 		Inversion inversion = null;
-		String serviceWhere = "{\"where\":\"NroInversion=" + nroInversion + "\"}";		
+		String serviceWhere = "{\"where\":\"NroInversion='" + nroInversion + "'\"}";		
 		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);

@@ -12,6 +12,8 @@ public class Constantes {
 		public final static String RESULTADO_NO_INVERSIONES_CONFIRMADAS = "NO_INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_REQUISITOS = "PENDIENTE_REQUISITOS";
 		public final static String RESULTADO_TIENE_REQUISITOS = "TIENE_REQUISITOS";
+		public final static String NO_MONTO_DISPONIBLE_LIQUIDAR = "NO_MONTO_DISPONIBLE_LIQUIDAR";
+		public final static String EXISTE_LIQUIDACION = "EXISTE_LIQUIDACION";
 	}
 	
 	public class Pedido {
@@ -93,7 +95,7 @@ public class Constantes {
 	}
 	
 	public class Liquidacion{
-		public final static String TIPO_LIQUI_COMPRAS="1";
+		public final static String LIQUI_TIPO_COMPRAS="1";
 		public final static String TIPO_DOCU_CONTRATO="1";
 		public final static String TIPO_DOCU_DIF_PRECIO="2";
 		public final static String MONEDA_DORALES_ID="2";

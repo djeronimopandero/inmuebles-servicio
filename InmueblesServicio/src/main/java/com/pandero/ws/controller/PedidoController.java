@@ -1,6 +1,7 @@
 package com.pandero.ws.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -12,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ResultadoBean;
+import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.Util;
 
 @Controller
@@ -28,6 +32,8 @@ public class PedidoController {
 	PedidoDao pedidoDao;
 	@Autowired
 	PedidoBusiness pedidoBusiness;
+	@Autowired
+	LiquidacionBusiness liquidacionBusiness;
 	
 	@RequestMapping(value = "/crearPedido", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
@@ -133,9 +139,10 @@ public class PedidoController {
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			pedidoBusiness.eliminarContratoPedido(pedidoId, nroContrato, usuarioId);
-			result = Constantes.Service.RESULTADO_EXITOSO;
-			
+			result = pedidoBusiness.eliminarContratoPedido(pedidoId, nroContrato, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
 		}catch(Exception e){
 			LOG.error("Error pedido/eliminarContratoPedido:: ",e);
 			e.printStackTrace();
@@ -162,6 +169,36 @@ public class PedidoController {
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			String pedidoNumero = String.valueOf(params.get("pedidoNumero"));
 			result = pedidoBusiness.generarOrdenIrrevocablePedido(pedidoId, usuarioId, pedidoNumero);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error pedido/generarOrdenIrrevocable:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/obtenerContratosPedidoActualizado", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> obtenerContratosPedidoActualizado(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO obtenerContratosPedidoActualizado");
+		System.out.println("REQUEST: " +  params);		
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String nroPedido = String.valueOf(params.get("nroPedido"));
+			List<Contrato> contratosPedido = liquidacionBusiness.obtenerContratosPorPedidoActualizado(nroPedido);
+			if(contratosPedido!=null){
+				detail = JsonUtil.toJson(contratosPedido);
+			}
 			if(result.equals("")){
 				result = Constantes.Service.RESULTADO_EXITOSO;
 			}
