@@ -12,6 +12,7 @@ import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
@@ -50,9 +51,9 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		System.out.println("NRO PEDIDO: "+nroPedido);
 		List<Contrato> listaContratosPedidoSAF = pedidoDao.obtenerContratosxPedidoSAF(nroPedido);		
 		if(listaContratosPedidoSAF==null){
-			System.out.println("listaContratosPedidoSAF:: NULL");
+			LOG.info("listaContratosPedidoSAF:: NULL");
 		}else{
-			System.out.println("listaContratosPedidoSAF: "+listaContratosPedidoSAF.size());
+			LOG.info("listaContratosPedidoSAF: "+listaContratosPedidoSAF.size());
 		}
 		
 		// Obtener diferencia precio x contrato
@@ -70,6 +71,11 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				
 		// Obtener liquidaciones del pedido
 		List<LiquidacionSAF> liquidacionPedido = liquidacionDao.obtenerLiquidacionPorPedidoSAF(nroPedido);
+		if(liquidacionPedido==null){
+			LOG.info("liquidacionPedido:: NULL");
+		}else{
+			LOG.info("liquidacionPedido: "+liquidacionPedido.size());
+		}
 		
 		// Obtener monto liquidado x contrato
 		if(liquidacionPedido!=null && liquidacionPedido.size()>0){			
@@ -87,6 +93,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				}
 			}		
 		}
+		LOG.info("LUEGO - Obtener monto liquidado x contrato");
 		
 		// Obtener montos diponibles
 		for(Contrato contrato : listaContratosPedidoSAF){
@@ -94,6 +101,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			contrato.setDiferenciaPrecioDisponible(contrato.getDiferenciaPrecio().doubleValue()-contrato.getMontoLiquidacionDifPrecio().doubleValue());
 			contrato.setTotalDisponible(contrato.getMontoDisponible().doubleValue()+contrato.getDiferenciaPrecioDisponible());
 		}
+		LOG.info("LUEGO - Obtener montos diponibles");
 		
 		return listaContratosPedidoSAF;
 	}
@@ -124,22 +132,33 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Obtener nroArmadaId
 		String nroArmadaId = "1";
 		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){	
-			nroArmada +=1;
+			nroArmadaId = nroArmada+1;
 		}
+		LOG.info("nroArmadaId: "+nroArmadaId);
 				
 		if(validacionLiquidacion){
 			// Obtener liquidaciones del pedido
 			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+			
+			if(liquidacionInversion==null){
+				LOG.info("obtenerLiquidacionPorInversionSAF:: NULL");
+			}else{
+				LOG.info("obtenerLiquidacionPorInversionSAF:: "+liquidacionInversion.size());
+			}
+			
 			String estadoLiquidacion = Util.obtenerEstadoLiquidacionPorNroArmada(liquidacionInversion, nroArmadaId);
+			LOG.info("ESTADO LIQUIDACION:: "+estadoLiquidacion);
 			if(!estadoLiquidacion.equals("")){
 				resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
 				validacionLiquidacion = false;
 			}
 		}
 		
-		if(totalDisponible<inversion.getImporteInversion().doubleValue()){
-			resultado = Constantes.Service.NO_MONTO_DISPONIBLE_LIQUIDAR;
-			validacionLiquidacion = false;
+		if(validacionLiquidacion){
+			if(totalDisponible<inversion.getImporteInversion().doubleValue()){
+				resultado = Constantes.Service.NO_MONTO_DISPONIBLE_LIQUIDAR;
+				validacionLiquidacion = false;
+			}
 		}
 				
 		if(validacionLiquidacion){
@@ -157,8 +176,12 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			System.out.println("montoALiquidar: "+montoALiquidar);
 			
 			// Generar liquidacion por monto
-			generarLiquidacionPorMonto(pedidoInversionSAF, montoALiquidar, nroArmada, listaPedidoContrato, usuarioId);
+			generarLiquidacionPorMonto(pedidoInversionSAF, montoALiquidar, nroArmadaId, listaPedidoContrato, usuarioId);
+						
+			// Actualizar montos de los contratos del pedido
+			actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
 		}
+		LOG.info("TERMINO LIQUIDACION");		
 		
 		return resultado;
 	}
@@ -173,7 +196,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		return totalDisponible;
 	}
 	
-	private String generarLiquidacionPorMonto(PedidoInversionSAF pedidoInversionSAF, double montoALiquidar, String nroArmada,
+	private String generarLiquidacionPorMonto(PedidoInversionSAF pedidoInversionSAF, double montoALiquidar, String nroArmadaId,
 			List<Contrato> listaPedidoContrato, String usuarioId) throws Exception{
 		LiquidacionSAF liquidacionSAF = null;
 		List<LiquidacionSAF> listaLiquidaciones = new ArrayList<>();
@@ -224,7 +247,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			// Insertar las liquidaciones
 			for(LiquidacionSAF liquidacion : listaLiquidaciones){
 				liquidacion.setLiquidacionNumero(numeroLiquidacion);
-				liquidacion.setNroArmada(Integer.parseInt(nroArmada));
+				liquidacion.setNroArmada(Integer.parseInt(nroArmadaId));
 				liquidacionDao.registrarLiquidacionInversionSAF(liquidacion,usuarioId);
 			}
 		}		
@@ -279,14 +302,15 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		List<LiquidacionSAF> liquidacionesInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
 		
 		// Obtener el estado de la liquidacion
+		String nroArmadaId = "1";
+		PedidoInversionSAF pedidoInversionSAF = null;
 		if(liquidacionesInversion!=null && liquidacionesInversion.size()>0){
 			// Obtener datos pedido-inversion SAF
-			PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+			pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 			
-			// Obtener nroArmadaId
-			String nroArmadaId = "1";
+			// Obtener nroArmadaId			
 			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){	
-				nroArmada +=1;
+				nroArmadaId = nroArmada+1;
 			}
 			
 			for(LiquidacionSAF liquidacion : liquidacionesInversion){
@@ -304,9 +328,12 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
 		}
 		
-		if(!resultado.equals("")){
+		if(resultado.equals("")){
 			// Eliminar liquidacion
-			liquidacionDao.eliminarLiquidacionInversionSAF(nroInversion, nroArmada, usuarioId);
+			liquidacionDao.eliminarLiquidacionInversionSAF(nroInversion, nroArmadaId, usuarioId);
+						
+			// Actualizar montos de los contratos del pedido
+			actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
 		}
 		
 		return resultado;

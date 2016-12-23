@@ -2,6 +2,7 @@ package com.pandero.ws.util;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +46,8 @@ public class Util {
 		return format;
 	}
 	
+	
+	
 	public static String formatearFechaYYYYMMDD(Date fecha){
 		String fechaText = null;
 		if(fecha!=null){
@@ -64,6 +67,17 @@ public class Util {
 		SimpleDateFormat sdf=new SimpleDateFormat(format);
 		String fecha=sdf.format(date);
 		return fecha;
+	}
+	
+	public static Date convertirFechaStrADate(String fecha, String formato){
+		SimpleDateFormat sdf=new SimpleDateFormat(formato);
+		Date fechaDate = null;
+		try {
+			fechaDate = sdf.parse(fecha);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return fechaDate;
 	}
 	
 	public static String getDocuIdentidadNombre(List<Constante> listaDocuIdentidad, String docuIdentidadId){
@@ -236,6 +250,7 @@ public class Util {
 		String estadoLiquidacion = "";
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
 			for(LiquidacionSAF liquidacion : liquidacionInversion){
+				System.out.println("liquidacion.getNroArmada(): "+liquidacion.getNroArmada()+" - nroArmada: "+nroArmada);
 				if(String.valueOf(liquidacion.getNroArmada()).equals(nroArmada)){
 					estadoLiquidacion = liquidacion.getLiquidacionEstado();
 					break;
