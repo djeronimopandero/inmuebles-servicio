@@ -63,17 +63,25 @@ public class PersonaDaoImpl implements PersonaDao {
 	private static final class PersonaMapper implements RowMapper<PersonaSAF>{
 		public PersonaSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
 			PersonaSAF p = new PersonaSAF();
-			p.setTipoDocumentoID(rs.getString("TipoDocumentoID"));
-			p.setPersonaCodigoDocumento(rs.getString("PersonaCodigoDocumento"));
-			p.setNombre(rs.getString("PersonaNombre"));
-			p.setApellidoPaterno(rs.getString("PersonaApellidoPaterno"));
-			p.setApellidoMaterno(rs.getString("PersonaApellidoMaterno"));
-			p.setRazonSocial(rs.getString("PersonaRazonSocial"));
-			p.setTipoPersona(rs.getString("PersonaTipoID"));
-			p.setNombreCompleto(rs.getString("PersonaNombreCompleto"));
+			p.setTipoDocumentoID(null!=rs.getString("TipoDocumentoID")?"":rs.getString("TipoDocumentoID"));
+			p.setPersonaCodigoDocumento(null!=rs.getString("PersonaCodigoDocumento")?rs.getString("PersonaCodigoDocumento"):"");
+			p.setNombre(null!=rs.getString("PersonaNombre")?rs.getString("PersonaNombre"):"");
+			p.setApellidoPaterno(null!=rs.getString("PersonaApellidoPaterno")?rs.getString("PersonaApellidoPaterno"):"");
+			p.setApellidoMaterno(null!=rs.getString("PersonaApellidoMaterno")?rs.getString("PersonaApellidoMaterno"):"");
+			p.setRazonSocial(null!=rs.getString("PersonaRazonSocial")?rs.getString("PersonaRazonSocial"):"");
+			p.setTipoPersona(null!=rs.getString("PersonaTipoID")?rs.getString("PersonaTipoID"):"");
+			p.setNombreCompleto(null!=rs.getString("PersonaNombreCompleto")?rs.getString("PersonaNombreCompleto"):"");
 			p.setPersonaID(rs.getInt("PersonaID"));
 			p.setPersonaRelacionadaID(rs.getInt("PersonaRelacionadaID"));
-			
+			return p;		    
+		}
+	}
+	
+	private static final class PersonaPorDocMapper implements RowMapper<PersonaSAF>{
+		public PersonaSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			PersonaSAF p = new PersonaSAF();
+			p.setNombreCompleto(null!=rs.getString("PersonaNombreCompleto")?rs.getString("PersonaNombreCompleto"):"");
+			p.setPersonaID(rs.getInt("PersonaID"));
 			return p;		    
 		}
 	}
@@ -150,6 +158,39 @@ public class PersonaDaoImpl implements PersonaDao {
 		.addValue("@PersonaApellidoPaterno", personaSAF.getApellidoPaterno())
 		.addValue("@PersonaApellidoMaterno", personaSAF.getApellidoMaterno())
 		.addValue("@PersonaRazonSocial", personaSAF.getRazonSocial());		
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		PersonaSAF persona=null;
+		List resultado = (List) mapResultado.get("proveedor");
+		if (resultado != null && resultado.size() > 0) {
+			listPersonas = (List<PersonaSAF>) resultado;
+			persona = listPersonas.get(0);
+		}
+
+		return persona;
+	}
+
+	/**
+	 * @method	: obtenerPersonaPorDoc
+	 * @date	: 26 de dic. de 2016
+	 * @time	: 10:57:01 a. m.
+	 * @author	: Arly Fernandez.
+	 * @descripcion : Obtener persona de la tabla PER_Persona por tipo y numero de documento	
+	 */
+	@Override
+	public PersonaSAF obtenerPersonaPorDoc(Integer tipoDoc, String nroDoc) throws Exception {
+		List<PersonaSAF> listPersonas = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_PER_ObtenerProveedorPorDocumento");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@TipoDocumento", Types.INTEGER));	
+		call.addDeclaredParameter(new SqlParameter("@NroDocumento", Types.VARCHAR));
+		call.returningResultSet("persona", new PersonaPorDocMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@TipoDocumento", tipoDoc)
+		.addValue("@NroDocumento", nroDoc);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
 		PersonaSAF persona=null;

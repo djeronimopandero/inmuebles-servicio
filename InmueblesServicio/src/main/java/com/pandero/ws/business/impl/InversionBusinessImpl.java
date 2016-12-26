@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
@@ -24,6 +25,7 @@ import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.bean.PersonaSAF;
+import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.dao.ContratoDao;
@@ -39,6 +41,7 @@ import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
+import com.pandero.ws.util.UtilEnum;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -506,6 +509,33 @@ public class InversionBusinessImpl implements InversionBusiness{
 			 }
 		}
 		return msg;
+	}
+
+	@Override
+	public ResultadoBean getImporteComprobante(String inversionNumero, Integer nroArmada) throws Exception {
+		LOG.info("###InversionBusinessImpl.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double importe=0.00;
+		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(inversionNumero);
+		
+		
+		if(null!=inversion){
+			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
+			if(null!=listComprobante){
+				for(ComprobanteCaspio comprobante:listComprobante){
+					importe += (null!=comprobante.getImporte()?Double.parseDouble(comprobante.getImporte()):0);
+				}
+			}
+		}
+		
+		ResultadoBean rb=new ResultadoBean();
+		rb.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		rb.setResultado(importe);
+		
+		return rb;
 	}
 
 	

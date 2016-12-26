@@ -7,13 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
-import com.pandero.ws.bean.ObservacionInversion;
 import com.pandero.ws.util.Constantes.Persona;
 
 public class Util {
@@ -210,8 +207,9 @@ public class Util {
 				Contrato contrato=listContratos.get(i);
 				if(i==listContratos.size()-1){
 					sb.append(contrato.getNroContrato());
+				}else{
+					sb.append(contrato.getNroContrato()).append("/");
 				}
-				sb.append(contrato.getNroContrato()).append(",");
 			}
 			strContratos=sb.toString();
 		}
