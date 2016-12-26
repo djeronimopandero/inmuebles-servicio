@@ -33,8 +33,7 @@ public class InversionController {
 	@RequestMapping(value = "/obtenerInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> obtenerInversion(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO obtenerDatosInversion");
-		System.out.println("REQUEST: " +  params);		
+		LOG.info("###obtenerInversion params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
@@ -61,8 +60,7 @@ public class InversionController {
 	@RequestMapping(value = "/confirmarInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> confirmarInversion(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO confirmarInversion");
-		System.out.println("REQUEST: " +  params);		
+		LOG.info("###confirmarInversion params:"+params);	
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="1", detail="";
 		try{
@@ -87,8 +85,7 @@ public class InversionController {
 	@RequestMapping(value = "/eliminarInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> eliminarInversion(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO eliminarInversion");
-		System.out.println("REQUEST: " +  params);		
+		LOG.info("###eliminarInversion params:"+params);		
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="1", detail="";
 		try{
@@ -112,8 +109,7 @@ public class InversionController {
 	@RequestMapping(value = "/registrarInversionRequisitos", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> registrarInversionRequisitos(@RequestBody Map<String, Object> params) {
-		System.out.println("EN METODO registrarInversionRequisitos");
-		System.out.println("REQUEST: " +  params);		
+		LOG.info("###registrarInversionRequisitos params:"+params);			
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="1", detail="";
 		try{
@@ -135,28 +131,27 @@ public class InversionController {
 	}
 	
 	@RequestMapping(value = "/anularVerificacion", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody ResultadoBean anularVerificacion(@RequestBody Map<String, Object> params) {
-		System.out.println("###anularVerificacion params:"+params);
-		
-		ResultadoBean response = null;
+	@ResponseBody
+	public Map<String, Object> anularVerificacion(@RequestBody Map<String, Object> params) {
+		LOG.info("###anularVerificacion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
 		try{			
 			if(null!=params){
 				if(null!=params.get("inversionId")){					
 					String inversionId = String.valueOf(params.get("inversionId"));
-					String resultado = inversionBusiness.anularVerificacion(inversionId);					
-					response = new ResultadoBean();
-					if(!resultado.equals("")){
-						response.setResultado(resultado);
-					}else{
-						response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
-					}
+					result = inversionBusiness.anularVerificacion(inversionId);
 				}
 			}			
 		}catch(Exception e){
-			LOG.error("###Error ",e);
-			response = new ResultadoBean();
-			response.setMensajeError(Constantes.Service.RESULTADO_ERROR_INESPERADO);
+			LOG.error("Error inversion/anularVerificacion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
 			
 		return response;
 	}
@@ -166,43 +161,78 @@ public class InversionController {
 	public Map<String, Object> generarCartaObservacion(@RequestBody Map<String, Object> params) {
 		LOG.info("###generarCartaObservacion params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="";
+		String result="", detail="";
 		try{
 			
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			String inversionId = String.valueOf(params.get("inversionId"));
-			String resultado = inversionBusiness.generarCartaObservacion(inversionId, usuarioId);
-			result = resultado;
+			result = inversionBusiness.generarCartaObservacion(inversionId, usuarioId);
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/generarCartaObservacion:: ",e);
+			LOG.error("Error inversion/generarCartaObservacion:: ",e);
+			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
 			
 		response.put("result",result);
+		response.put("detail",detail);
 		
 		return response;
 	}
 	
 	@RequestMapping(value = "/generarLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody ResultadoBean generarLiquidacionInversion(@RequestBody Map<String, Object> params) {		
-		ResultadoBean response = null;
-		try{			
-			if(null!=params){						
-				String nroInversion = String.valueOf(params.get("nroInversion"));
-				String nroArmada = String.valueOf(params.get("nroArmada"));
-				String usuarioId = String.valueOf(params.get("usuarioId"));				
-				response = new ResultadoBean();
-				String resultado = liquidacionBusiness.generarLiquidacionPorInversion(nroInversion, nroArmada, usuarioId);
-				if(resultado.equals("")){
-					response.setResultado(Constantes.Service.RESULTADO_EXITOSO);
-				}
-			}			
+	@ResponseBody
+	public Map<String, Object> generarLiquidacionInversion(@RequestBody Map<String, Object> params) {
+		LOG.info("###generarLiquidacionInversion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));	
+			result = liquidacionBusiness.generarLiquidacionPorInversion(nroInversion, nroArmada, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
 		}catch(Exception e){
-			LOG.error("###Error ",e);
-			response = new ResultadoBean();
-			response.setMensajeError(Constantes.Service.RESULTADO_ERROR_INESPERADO);
+			LOG.error("Error inversion/generarLiquidacionInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
 		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);
+					
+		return response;
+	}
+	
+	@RequestMapping(value = "/anularLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> anularLiquidacionInversion(@RequestBody Map<String, Object> params) {	
+		LOG.info("###anularLiquidacionInversion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));	
+			result = liquidacionBusiness.eliminarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/generarLiquidacionInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);
 			
 		return response;
 	}
