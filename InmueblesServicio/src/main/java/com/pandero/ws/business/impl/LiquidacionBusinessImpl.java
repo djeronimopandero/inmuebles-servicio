@@ -156,14 +156,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Validar el estado de la liquidacion
 		if(validacionLiquidacion){
 			// Obtener liquidaciones del pedido
-			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
-			
-			if(liquidacionInversion==null){
-				LOG.info("obtenerLiquidacionPorInversionSAF:: NULL");
-			}else{
-				LOG.info("obtenerLiquidacionPorInversionSAF:: "+liquidacionInversion.size());
-			}
-			
+			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);						
 			String estadoLiquidacion = Util.obtenerEstadoLiquidacionPorNroArmada(liquidacionInversion, nroArmadaId);
 			LOG.info("ESTADO LIQUIDACION:: "+estadoLiquidacion);
 			if(!estadoLiquidacion.equals("")){
@@ -329,7 +322,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		String resultado = "";
 		boolean existeLiquidacionArmada = false;
 		// Obtener liquidaciones
-		List<LiquidacionSAF> liquidacionesInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
+		List<LiquidacionSAF> liquidacionesInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
 		
 		// Obtener el estado de la liquidacion
 		String nroArmadaId = "1";
@@ -376,40 +369,33 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	}
 
 	@Override
-	public String confirmarLiquidacionInversion(String nroLiquidacion,
+	public String confirmarLiquidacionInversion(
 			String nroInversion, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
-		if(Util.esVacio(nroLiquidacion)){
-			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
-		}else{
-			// Obtener liquidaciones de la inversion
-			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
-			if(liquidacionInversion!=null && liquidacionInversion.size()>0){
-				String estadoLiquidacion="";
-				for(LiquidacionSAF liquidacion : liquidacionInversion){
-					if(liquidacion.getLiquidacionNumero().equals(nroLiquidacion)){
-						estadoLiquidacion=liquidacion.getLiquidacionEstado();
-						break;
-					}
-				}
-				if(Util.esVacio(estadoLiquidacion)){
-					resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
-				}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-					resultado = Constantes.Service.RESULTADO_INVERSION_VB_CONTABLE;
-				}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
-					resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
-				}
-			}else{
-				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+		// Obtener liquidaciones de la inversion
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
+			String estadoLiquidacion="";
+			for(LiquidacionSAF liquidacion : liquidacionInversion){
+				estadoLiquidacion=liquidacion.getLiquidacionEstado();
 			}
+			if(Util.esVacio(estadoLiquidacion)){
+				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
+				resultado = Constantes.Service.RESULTADO_INVERSION_VB_CONTABLE;
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
+				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
+			}
+		}else{
+			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
 		}
 		
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.confirmarLiquidacionInversion(nroLiquidacion, usuarioId);
+			liquidacionDao.confirmarLiquidacionInversion(nroInversion, usuarioId);
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);

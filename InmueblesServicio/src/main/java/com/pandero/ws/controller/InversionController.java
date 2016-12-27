@@ -275,9 +275,8 @@ public class InversionController {
 		String result="1", detail="";
 		try{
 			String nroInversion = String.valueOf(params.get("nroInversion"));
-			String nroLiquidacion = String.valueOf(params.get("nroLiquidacion"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
-			result = liquidacionBusiness.confirmarLiquidacionInversion(nroLiquidacion, nroInversion, usuarioId);
+			result = liquidacionBusiness.confirmarLiquidacionInversion(nroInversion, usuarioId);
 			if(result.equals("")){
 				result = Constantes.Service.RESULTADO_EXITOSO;
 			}

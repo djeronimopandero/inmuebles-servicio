@@ -350,7 +350,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 				
 		// Validar si existe liquidacion
-		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
 		
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
 			resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
