@@ -33,6 +33,10 @@ public class Util {
 	public static String getMontoFormateado(Double monto){
 		String format ="0.00";
 		if(null!=monto){
+			if(monto<0){
+				monto = monto * -1;
+			}
+			
 			Locale locale  = new Locale("en", "UK");
 			String pattern = "####,###,###.00";
 			DecimalFormat decimalFormat = (DecimalFormat)
