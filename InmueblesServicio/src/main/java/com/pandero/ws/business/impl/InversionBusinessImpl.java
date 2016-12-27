@@ -347,7 +347,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 				
 		// Validar si existe liquidacion
-		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
 		
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
 			resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
@@ -506,6 +506,17 @@ public class InversionBusinessImpl implements InversionBusiness{
 			 }
 		}
 		return msg;
+	}
+
+	@Override
+	public String actualizarEstadoInversionCaspioPorNro(String nroInversion,
+			String estadoInversion) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, estadoInversion);
+		
+		return "";
 	}
 
 	

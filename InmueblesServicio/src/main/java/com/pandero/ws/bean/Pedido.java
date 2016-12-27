@@ -8,6 +8,8 @@ public class Pedido {
 	private String Estado;
 	private String NroPedido;
 	private String Producto;
+	private Double CancelacionDiferenciaPrecioMonto;
+		
 	public Integer getPedidoId() {
 		return PedidoId;
 	}
@@ -43,6 +45,13 @@ public class Pedido {
 	}
 	public void setProducto(String producto) {
 		Producto = producto;
+	}
+	public Double getCancelacionDiferenciaPrecioMonto() {
+		return CancelacionDiferenciaPrecioMonto;
+	}
+	public void setCancelacionDiferenciaPrecioMonto(
+			Double cancelacionDiferenciaPrecioMonto) {
+		CancelacionDiferenciaPrecioMonto = cancelacionDiferenciaPrecioMonto;
 	}
 	
 }

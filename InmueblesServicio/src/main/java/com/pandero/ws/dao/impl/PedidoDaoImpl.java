@@ -241,6 +241,7 @@ public class PedidoDaoImpl implements PedidoDao {
 			p.setPedidoID(rs.getString("PedidoID"));
 			p.setNroPedido(rs.getString("NumeroPedido"));
 			p.setPedidoInversionID(rs.getString("PedidoInversionID"));
+			p.setPedidoInversionNumero(rs.getString("PedidoInversionNumero"));
 			p.setProveedorID(rs.getString("ProveedorID"));
 			p.setPedidoTipoInversionID(rs.getString("PedidoTipoInversionID"));
 			

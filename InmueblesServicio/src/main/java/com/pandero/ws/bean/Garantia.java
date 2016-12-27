@@ -3,7 +3,7 @@ package com.pandero.ws.bean;
 public class Garantia {
 	
 	private Integer IdGarantia;
-	private Integer GarantiaSAFId;
+	private Integer garantiaSAFId;
 	private Integer PedidoID;
 	private String PartidaRegistral;
 	private String FichaConstitucion;
@@ -18,11 +18,12 @@ public class Garantia {
 	public void setIdGarantia(Integer idGarantia) {
 		IdGarantia = idGarantia;
 	}
+	
 	public Integer getGarantiaSAFId() {
-		return GarantiaSAFId;
+		return garantiaSAFId;
 	}
 	public void setGarantiaSAFId(Integer garantiaSAFId) {
-		GarantiaSAFId = garantiaSAFId;
+		this.garantiaSAFId = garantiaSAFId;
 	}
 	public Integer getPedidoID() {
 		return PedidoID;

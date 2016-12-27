@@ -10,4 +10,5 @@ public interface InversionBusiness {
 	public String anularVerificacion(String inversionId) throws Exception;
 	public String generarCartaObservacion(String inversionId, String usuarioSAFId)throws Exception;
 	
+	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
 }

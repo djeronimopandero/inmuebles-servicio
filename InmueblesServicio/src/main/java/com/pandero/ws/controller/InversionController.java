@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
+import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 
 @Controller
@@ -27,6 +27,8 @@ public class InversionController {
 	InversionBusiness inversionBusiness;
 	@Autowired
 	LiquidacionBusiness liquidacionBusiness;
+	@Autowired
+	InversionService inversionService;
 	
 	@RequestMapping(value = "/obtenerInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
@@ -223,6 +225,61 @@ public class InversionController {
 			}
 		}catch(Exception e){
 			LOG.error("Error inversion/generarLiquidacionInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);
+			
+		return response;
+	}
+	
+	@RequestMapping(value = "/actualizarEstadoInversion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> actualizarEstadoInversion(@RequestBody Map<String, Object> params) {	
+		LOG.info("###actualizarEstadoInversion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String estadoInversion = String.valueOf(params.get("estadoInversion"));
+			result = inversionBusiness.actualizarEstadoInversionCaspioPorNro(nroInversion, estadoInversion);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/actualizarEstadoInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);
+			
+		return response;
+	}
+	
+	@RequestMapping(value = "/confirmarLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> confirmarLiquidacionInversion(@RequestBody Map<String, Object> params) {	
+		LOG.info("###confirmarLiquidacionInversion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroLiquidacion = String.valueOf(params.get("nroLiquidacion"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			result = liquidacionBusiness.confirmarLiquidacionInversion(nroLiquidacion, nroInversion, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/confirmarLiquidacionInversion:: ",e);
 			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();

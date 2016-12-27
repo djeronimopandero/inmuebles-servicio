@@ -57,26 +57,32 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	}
 
 	@Override
-	public String editarGarantiaSAF(String garantiaSAFId,String partidaRegistral,String fichaConstitucion,
+	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
 			String fechaConstitucion, String montoPrima, String usuarioId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
+		
+		// Obtener garantia por Id
+		Garantia garantiaCaspio = garantiaService.obtenerGarantiaPorId(garantiaId);
+		
+		if(garantiaCaspio!=null){
+			System.out.println("garantiaCaspio.getGarantiaSAFId():: "+garantiaCaspio.getGarantiaSAFId());
+		}		
 				
 		// Completar objeto garantia SAF
 		Garantia garantia = new Garantia();
-		garantia.setGarantiaSAFId(Integer.parseInt(garantiaSAFId));
-		garantia.setPartidaRegistral(partidaRegistral.equals("")?null:partidaRegistral);		
-		garantia.setFichaConstitucion(fichaConstitucion.equals("")?null:fichaConstitucion);
-		garantia.setFechaConstitucion(fechaConstitucion.equals("")?null:fechaConstitucion);
+		garantia.setGarantiaSAFId(garantiaCaspio.getGarantiaSAFId());
+		garantia.setPartidaRegistral((partidaRegistral.equals("")||partidaRegistral.equals("null"))?null:partidaRegistral);		
+		garantia.setFichaConstitucion((fichaConstitucion.equals("")||fichaConstitucion.equals("null"))?null:fichaConstitucion);
+		garantia.setFechaConstitucion((fechaConstitucion.equals("")||fechaConstitucion.equals("null"))?null:fechaConstitucion);
 		if(garantia.getFechaConstitucion()!=null){
 			Date fechaConst = Util.convertirFechaStrADate(garantia.getFechaConstitucion(), "dd/MM/yyyy");
 			String nuevaFecha = Util.getDateFormat(fechaConst, "yyyy-MM-dd");
 			garantia.setFechaConstitucion(nuevaFecha);
-			System.out.println("nuevaFecha:: "+nuevaFecha);
 		}
-		garantia.setMontoPrima(montoPrima.equals("")?null:montoPrima);
-		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion());
+		garantia.setMontoPrima((montoPrima.equals("") || montoPrima.equals("null"))?null:montoPrima);
+		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion()+" -"+montoPrima+"-");
 		// Actualizar garantia en SAF
 		garantiaDao.editarGarantiaSAF(garantia, usuarioId);
 		

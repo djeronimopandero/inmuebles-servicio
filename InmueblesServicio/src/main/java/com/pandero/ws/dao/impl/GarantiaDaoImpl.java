@@ -74,13 +74,15 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
-		parameters.addValue("@GarantiaInmbID", garantia.getGarantiaSAFId());
+		parameters.addValue("@GarantiaInmbID", String.valueOf(garantia.getGarantiaSAFId().intValue()));
 		parameters.addValue("@PartidaRegistral", garantia.getPartidaRegistral());
 		parameters.addValue("@FichaConstitucion", garantia.getFichaConstitucion());
 		parameters.addValue("@FechaConstitucion", garantia.getFechaConstitucion());
 		parameters.addValue("@MontoPrima", garantia.getMontoPrima());
 		parameters.addValue("@UsuarioID", usuarioId);
 				
+		System.out.println("garantia.getMontoPrima()>"+garantia.getMontoPrima()+"<");
+		System.out.println("garantia.getGarantiaSAFId()>"+String.valueOf(garantia.getGarantiaSAFId().intValue())+"<");
 		call.execute(parameters);
 		return null;
 	}

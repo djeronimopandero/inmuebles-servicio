@@ -15,7 +15,11 @@ public class Constantes {
 		public final static String NO_MONTO_DISPONIBLE_LIQUIDAR = "NO_MONTO_DISPONIBLE_LIQUIDAR";
 		public final static String RESULTADO_EXISTE_LIQUIDACION = "EXISTE_LIQUIDACION";
 		public final static String RESULTADO_NO_EXISTE_LIQUIDACION = "NO_EXISTE_LIQUIDACION";
-		public final static String RESULTADO_PASO_LIQUIDACION = "PASO_LIQUIDACION";
+		public final static String RESULTADO_INVERSION_LIQUIDADA = "INVERSION_LIQUIDADA";
+		public final static String RESULTADO_INVERSION_VB_CONTABLE = "INVERSION_VB_CONTABLE";
+		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "INVERSION_DESEMBOLSADA";
+		//public final static String RESULTADO_PASO_LIQUIDACION = "PASO_LIQUIDACION";
+		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
 	}
 	
 	public class Pedido {
@@ -67,6 +71,10 @@ public class Constantes {
 		public final static String ESTADO_ANULADO="ANULADO";
 		public final static String DIFERENCIA_PRECIO="DIFERENCIA_PRECIO";
 		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
+		public final static String ESTADO_EN_PROCESO="EN-PROCESO";
+		public final static String ESTADO_LIQUIDADO="LIQUIDADO";
+		public final static String ESTADO_VB_CONTABLE="VB-CONT";
+		public final static String ESTADO_DESEMBOLSADO="DESEMBOLSADO";
 	}
 		
 	public class Persona{

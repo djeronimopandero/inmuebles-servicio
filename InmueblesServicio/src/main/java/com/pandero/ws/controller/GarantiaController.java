@@ -62,14 +62,14 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
-			String garantiaSAFId = String.valueOf(params.get("garantiaSAFId"));
+			String garantiaId = String.valueOf(params.get("garantiaId"));
 			String partidaRegistral = String.valueOf(params.get("partidaRegistral"));
 			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
 			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
 			String montoPrima = String.valueOf(params.get("montoPrima"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			result = garantiaBusiness.editarGarantiaSAF(garantiaSAFId, partidaRegistral, fichaConstitucion, 
+			result = garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
 					fechaConstitucion, montoPrima, usuarioId);
 					
 		}catch(Exception e){

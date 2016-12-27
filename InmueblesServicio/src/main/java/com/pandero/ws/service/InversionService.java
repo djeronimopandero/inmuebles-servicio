@@ -12,7 +12,9 @@ public interface InversionService {
 	public Inversion obtenerInversionCaspioPorId(String inversionId) throws Exception;
 	public Inversion obtenerInversionCaspioPorNro(String nroInversion) throws Exception;
 	
-	public String actualizarEstadoInversionCaspio(String inversionId, String estadoInversion) throws Exception;
+	public String actualizarEstadoInversionCaspio(String inversionId, String estadoInversion) throws Exception;	
+	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
+	public String actualizarEstadoInversionLiquidadoPorNro(String nroInversion, String nroLiquidacion, String estadoInversion) throws Exception;
 	public String actualizarSituacionConfirmadoInversionCaspio(String inversionId, String situacionConfirmado) throws Exception;
 
 	public String crearRequisitoInversion(String inversionId, String requisitoId) throws Exception;
