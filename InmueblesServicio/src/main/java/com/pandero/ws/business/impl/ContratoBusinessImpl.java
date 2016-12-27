@@ -222,7 +222,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			Double sumImporteDiferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
 			
 			//5.- Restar (3) - (4) = saldoDiferencia
-			Double saldoDiferencia = diferenciaPrecio - sumImporteDiferenciaPrecio;
+			Double saldoDiferencia = (diferenciaPrecio<0?diferenciaPrecio*-1:diferenciaPrecio) - sumImporteDiferenciaPrecio;
 			
 			DetalleDiferenciaPrecio ddp=new DetalleDiferenciaPrecio();
 			ddp.setPedidoId(pedidoId);
@@ -232,7 +232,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			
 			resultadoBean.setResultado(ddp);
 			
-			if(diferenciaPrecio>0){
+			if(diferenciaPrecio<0){
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
