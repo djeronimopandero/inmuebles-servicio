@@ -2,6 +2,7 @@ package com.pandero.ws.service;
 
 import java.util.List;
 
+import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 
@@ -23,4 +24,5 @@ public interface InversionService {
 	
 	public List<Inversion> listarPedidoInversionPorPedidoId(String pedidoId) throws Exception;
 	
+	public List<ComprobanteCaspio> getComprobantes(Integer inversionId, Integer nroArmada) throws Exception;
 }

@@ -10,4 +10,6 @@ public interface PersonaDao {
 			String tipoDocumento, String nroDocumento) throws Exception; // nuevo sp
 	public PersonaSAF registrarProveedorSAF(PersonaSAF personaSAF) throws Exception; // nuevo sp
 	
+	public PersonaSAF obtenerPersonaPorDoc(Integer tipoDoc, String nroDoc)throws Exception;
+	
 }

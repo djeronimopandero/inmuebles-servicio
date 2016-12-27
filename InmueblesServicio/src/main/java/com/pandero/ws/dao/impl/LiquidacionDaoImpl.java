@@ -23,7 +23,6 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.PersonaSAF;
-import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.LiquidacionDao;
 
 @Repository

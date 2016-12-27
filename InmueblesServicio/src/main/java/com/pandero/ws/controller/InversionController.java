@@ -7,15 +7,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.UtilEnum;
 
 @Controller
 @RequestMapping("/inversionPedido")
@@ -290,6 +293,43 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);
 			
 		return response;
+	}
+	
+
+//	@RequestMapping(value = "obtenerImporteComprobante", method = RequestMethod.GET)
+//	public @ResponseBody ResultadoBean getImporteComprobante(@RequestParam(value="inversionNumero") String inversionNumero,@RequestParam(value="nroArmada") Integer nroArmada){
+//		LOG.info("###ContratoController.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);
+//		ResultadoBean resultadoBean = null;
+//		//Obtener el id de inversion y con eso llamar a los comprbantes y por armada
+//		if(null!=inversionNumero && null!=nroArmada){
+//			try {
+//				resultadoBean=inversionBusiness.getImporteComprobante(inversionNumero,nroArmada);
+//			} catch (Exception e) {
+//				resultadoBean = new ResultadoBean();
+//				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+//				resultadoBean.setResultado("Ocurrio un error al obtener el importe de comprobante");
+//				LOG.error("###obtenerImporteComprobante:",e);
+//			}
+//		}
+//		return resultadoBean;
+//	}
+	
+	@RequestMapping(value = "obtenerImporteComprobante/{inversionNumero}/{nroArmada}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean getImporteComprobantePath(@PathVariable(value="inversionNumero") String inversionNumero,@PathVariable(value="nroArmada") Integer nroArmada){
+		LOG.info("###ContratoController.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);
+		ResultadoBean resultadoBean = null;
+		//Obtener el id de inversion y con eso llamar a los comprbantes y por armada
+		if(null!=inversionNumero && null!=nroArmada){
+			try {
+				resultadoBean=inversionBusiness.getImporteComprobante(inversionNumero,nroArmada);
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al obtener el importe de comprobante");
+				LOG.error("###obtenerImporteComprobante:",e);
+			}
+		}
+		return resultadoBean;
 	}
 	
 }

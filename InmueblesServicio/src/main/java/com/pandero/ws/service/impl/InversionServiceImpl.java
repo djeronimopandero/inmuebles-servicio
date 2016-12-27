@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.service.InversionService;
@@ -37,6 +38,9 @@ public class InversionServiceImpl implements InversionService {
 	
 	@Value("${url.service.table.inversionRequisito}")
 	private String tableInversionRequisitoURL;
+	
+	@Value("${url.service.table.comprobante}")
+	private String tableComprobanteURL;
 	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
@@ -229,6 +233,36 @@ public class InversionServiceImpl implements InversionService {
         }
         
 		return listaInversiones;
+	}
+
+	@Override
+	public List<ComprobanteCaspio> getComprobantes(Integer inversionId, Integer nroArmada) throws Exception {
+		List<ComprobanteCaspio> listaComprobantes = null;	
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";	
+		String obtenerRequisitosxInversionURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
+	        			listaComprobantes = new ArrayList<ComprobanteCaspio>();
+	        			for(Object bean : mapRequisitos){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				ComprobanteCaspio comprobante =  JsonUtil.fromJson(beanString, ComprobanteCaspio.class);
+	        				listaComprobantes.add(comprobante);
+	        			}
+	        			System.out.println("listaComprobantes:: "+listaComprobantes.size());
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return listaComprobantes;
 	}
 	
 }
