@@ -7,7 +7,7 @@ public class UtilEnum {
 		DNI(4, "DNI", 59),
 		CE(4, "C.E.", 57),
 		PSP(4, "PSP", 58),
-		PASAPORTE (8, "RUC", 60);
+		RUC (8, "RUC", 60);
 		
 		private final Integer codigo;
 		private final String texto;

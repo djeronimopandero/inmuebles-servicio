@@ -549,5 +549,34 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return rb;
 	}
 
+	@Override
+	public String getURLCancelarComprobante(String inversionId) throws Exception {
+	LOG.info("###InversionBusinessImpl.getURLCancelarComprobante inversionId:"+inversionId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		String locationHref="";
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			
+			if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.CONSTRUCCION_COD)){
+			    if(!inversion.getServicioConstructora()){//No
+			      locationHref = "registrar-factura-proveedor.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			    }else{
+			    	locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			    }
+			 }else if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.CANCELACION_COD)){
+				 locationHref = "registrar-actualizacion-saldo.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }else if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.ADQUISICION_COD) && inversion.getPropietarioTipoDocId().equals(String.valueOf(UtilEnum.TIPO_DOCUMENTO.RUC.getCodigoCaspio()))){
+				 locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }else{
+				 locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }
+			
+		}	
+		return locationHref;
+	}
+
 	
 }
