@@ -295,7 +295,7 @@ public class InversionController {
 			
 		return response;
 	}
-		
+
 	@RequestMapping(value = "obtenerImporteComprobante/{inversionNumero}/{nroArmada}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean getImporteComprobantePath(@PathVariable(value="inversionNumero") String inversionNumero,@PathVariable(value="nroArmada") Integer nroArmada){
 		LOG.info("###ContratoController.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);
@@ -314,26 +314,28 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
-	@RequestMapping(value = "/obtenerMontosDifPrecioInversion/{nroInversion}", method = RequestMethod.GET)
+	@RequestMapping(value = "obtenerMontosDifPrecioInversion/{nroInversion}", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> obtenerMontosDifPrecioInversion(@PathVariable(value="nroInversion") String nroInversion) {	
 		LOG.info("###obtenerMontosDifPrecioInversion params: "+nroInversion);
 		Map<String, Object> response = new HashMap<String, Object>();
-		String result="1", detail="";
 		try{
 			DetalleDiferenciaPrecio detalleDifPrecio = liquidacionBusiness.obtenerMontosDifPrecioInversion(nroInversion);
-			if(detalleDifPrecio!=null){
-				detail = JsonUtil.toJson(detalleDifPrecio);
+			if(detalleDifPrecio!=null){	
+				response.put("result","1");
+				response.put("diferenciaPrecio",detalleDifPrecio.getDiferenciaPrecio()==null?"0.00":detalleDifPrecio.getDiferenciaPrecio().replace(",", ""));
+				response.put("importeFinanciado",detalleDifPrecio.getImporteFinanciado()==null?"0.00":detalleDifPrecio.getImporteFinanciado().replace(",", ""));
+				response.put("saldoDiferencia",detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
+				response.put("montoDifPrecioPagado",detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
+				response.put("tipoInversion",detalleDifPrecio.getTipoInversion());
 			}
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerMontosDifPrecioInversion:: ",e);
 			e.printStackTrace();
-			result="0";
-			detail=e.getMessage();
+			response.put("result","0");
+			response.put("detail",e.getMessage());
 		}
 			
-		response.put("result",result);
-		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);
 			
 		return response;

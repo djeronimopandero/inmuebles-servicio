@@ -208,7 +208,7 @@ public class InversionServiceImpl implements InversionService {
 		LOG.info("###listarPedidoInversionPorPedidoId pedidoId:"+pedidoId);
 		
 		List<Inversion> listaInversiones = null;	
-		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\" and Estado!=\"ANULADO\"}";	
 		String obtenerRequisitosxInversionURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);

@@ -5,6 +5,8 @@ public class UtilEnum {
 	public static enum TIPO_DOCUMENTO {
 		
 		DNI(4, "DNI", 59),
+		CE(4, "C.E.", 57),
+		PSP(4, "PSP", 58),
 		PASAPORTE (8, "RUC", 60);
 		
 		private final Integer codigo;
@@ -36,7 +38,7 @@ public class UtilEnum {
 						return  valores[i];
 				  }
 			  }
-			  return null;
+			  return TIPO_DOCUMENTO.DNI;//si es nulo
 		}
 		
 		public static TIPO_DOCUMENTO obtenerTipoDocumentoByCodigoCaspio(Integer codigoCaspio){
@@ -46,7 +48,7 @@ public class UtilEnum {
 					return  valores[i];
 				}
 			}
-			return null;
+			return TIPO_DOCUMENTO.DNI;//si es nulo
 		}
 		
 	}

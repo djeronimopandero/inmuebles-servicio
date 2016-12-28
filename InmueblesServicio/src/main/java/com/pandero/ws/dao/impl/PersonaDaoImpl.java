@@ -200,7 +200,7 @@ public class PersonaDaoImpl implements PersonaDao {
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
 		PersonaSAF persona=null;
-		List resultado = (List) mapResultado.get("proveedor");
+		List resultado = (List) mapResultado.get("persona");
 		if (resultado != null && resultado.size() > 0) {
 			listPersonas = (List<PersonaSAF>) resultado;
 			persona = listPersonas.get(0);

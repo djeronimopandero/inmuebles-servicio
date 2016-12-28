@@ -193,7 +193,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			resultadoBean=new ResultadoBean();
 			
 			DetalleDiferenciaPrecio ddp = obtenerMontoDiferenciaPrecio(pedidoId);
-			double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+			double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio().replace(",", ""));
 			
 			resultadoBean.setResultado(ddp);
 			
@@ -209,7 +209,6 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	}
 	
 	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {
-		DetalleDiferenciaPrecio difPrecio = new DetalleDiferenciaPrecio();
 		
 		Double sumMontoCertificado=0.00;
 		//1.- Suma de los certificados
@@ -235,13 +234,16 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		
 		//3.- Restar (1) - (2) = diferenciaPrecio
 		Double diferenciaPrecio = sumMontoCertificado - sumImporteTotalInversion;
+		System.out.println("DIFERENCIA: "+diferenciaPrecio+"= "+sumMontoCertificado+" - "+sumImporteTotalInversion);
 		
 		//4.- Con la lista de contratos de la tabla PedidoContrato consultar la diferencia de precio en el SAF y sumarlas = importeFinanciado
 		List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
 		Double sumImporteDiferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
+		System.out.println("sumImporteDiferenciaPrecio:: "+sumImporteDiferenciaPrecio);
 		
 		//5.- Restar (3) - (4) = saldoDiferencia
 		Double saldoDiferencia = (diferenciaPrecio<0?diferenciaPrecio*-1:diferenciaPrecio) - sumImporteDiferenciaPrecio;
+		System.out.println("saldoDiferencia:: "+saldoDiferencia);
 		
 		DetalleDiferenciaPrecio ddp=new DetalleDiferenciaPrecio();
 		ddp.setPedidoId(pedidoId);
@@ -249,7 +251,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		ddp.setImporteFinanciado(Util.getMontoFormateado(sumImporteDiferenciaPrecio));
 		ddp.setSaldoDiferencia(Util.getMontoFormateado(saldoDiferencia));
 		
-		return difPrecio;
+		return ddp;
 	}
 	
 	private double getSumaDiferenciaPrecioxPedido(List<Contrato> listaContratos){
