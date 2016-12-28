@@ -340,5 +340,35 @@ public class InversionController {
 			
 		return response;
 	}
-	
+		
+	//Serice recibe parametro InversionId y retorne la url
+	@RequestMapping(value = "obtenerUrlCancelarComprobante/{inversionId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean getURLCancelarComprobante(@PathVariable(value="inversionId") String inversionId){
+		LOG.info("###ContratoController.getURLCancelarComprobante inversionId:"+inversionId);
+		
+		ResultadoBean resultadoBean = null;
+		//Obtener el id de inversion y con eso llamar a los comprbantes y por armada
+		if(null!=inversionId){
+			try {
+				
+				String locationHref = inversionBusiness.getURLCancelarComprobante(inversionId);
+				
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				resultadoBean.setResultado(locationHref);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al obtener la url de cancelar comprobante");
+				LOG.error("###getURLCancelarComprobante:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, el InversionId es null");
+		}
+		return resultadoBean;
+	}
+
 }

@@ -14,5 +14,6 @@ public interface InversionBusiness {
 	public ResultadoBean getImporteComprobante(String inversionNumero, Integer nroArmada)throws Exception;
 	
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
-		
+	public String getURLCancelarComprobante(String inversionId)throws Exception;
+
 }
