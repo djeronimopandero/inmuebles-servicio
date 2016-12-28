@@ -295,25 +295,6 @@ public class InversionController {
 		return response;
 	}
 	
-
-//	@RequestMapping(value = "obtenerImporteComprobante", method = RequestMethod.GET)
-//	public @ResponseBody ResultadoBean getImporteComprobante(@RequestParam(value="inversionNumero") String inversionNumero,@RequestParam(value="nroArmada") Integer nroArmada){
-//		LOG.info("###ContratoController.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);
-//		ResultadoBean resultadoBean = null;
-//		//Obtener el id de inversion y con eso llamar a los comprbantes y por armada
-//		if(null!=inversionNumero && null!=nroArmada){
-//			try {
-//				resultadoBean=inversionBusiness.getImporteComprobante(inversionNumero,nroArmada);
-//			} catch (Exception e) {
-//				resultadoBean = new ResultadoBean();
-//				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-//				resultadoBean.setResultado("Ocurrio un error al obtener el importe de comprobante");
-//				LOG.error("###obtenerImporteComprobante:",e);
-//			}
-//		}
-//		return resultadoBean;
-//	}
-	
 	@RequestMapping(value = "obtenerImporteComprobante/{inversionNumero}/{nroArmada}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean getImporteComprobantePath(@PathVariable(value="inversionNumero") String inversionNumero,@PathVariable(value="nroArmada") Integer nroArmada){
 		LOG.info("###ContratoController.getImporteComprobante inversionNumero:"+inversionNumero+", nroArmada:"+nroArmada);

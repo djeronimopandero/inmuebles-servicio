@@ -73,7 +73,10 @@ public class PersonaController {
 		if(null!=tipoDoc && null!=nroDoc){
 			try {
 				resultadoBean = new ResultadoBean();
-				PersonaSAF personaSAF=personaDAO.obtenerPersonaPorDoc(tipoDoc, nroDoc);
+				
+				UtilEnum.TIPO_DOCUMENTO tipoDocEnum= UtilEnum.TIPO_DOCUMENTO.obtenerTipoDocumentoByCodigoCaspio(tipoDoc);
+				
+				PersonaSAF personaSAF=personaDAO.obtenerPersonaPorDoc(tipoDocEnum.getCodigo(), nroDoc);
 				
 				if(null!=personaSAF){
 					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
@@ -99,7 +102,7 @@ public class PersonaController {
 		LOG.info("###crearProveedor params:"+params);
 		ResultadoBean response = new ResultadoBean();
 		try{
-			if(null!=params.get("tipoProveedor") && null!=params.get("personaID") && 
+			if(null!=params.get("tipoProveedor") && 
 			   null!=params.get("tipoDocumento") && null!=params.get("nroDocumento")&&
 			   null!=params.get("personaNombre") && null!=params.get("personaApellidoPaterno") && 
 			   null!=params.get("personaApellidoMaterno") && null!=params.get("personaRazonSocial")
@@ -107,7 +110,11 @@ public class PersonaController {
 				PersonaSAF personaSAF=new PersonaSAF();
 				personaSAF.setTipoProveedor(String.valueOf(params.get("tipoProveedor")));
 				personaSAF.setPersonaID(null);
-				personaSAF.setTipoDocumentoID(String.valueOf(params.get("tipoDocumento")));
+				
+				
+				UtilEnum.TIPO_DOCUMENTO tipoDocEnum = UtilEnum.TIPO_DOCUMENTO.obtenerTipoDocumentoByCodigoCaspio(Integer.parseInt(String.valueOf(params.get("tipoDocumento"))));
+				personaSAF.setTipoDocumentoID(String.valueOf(tipoDocEnum.getCodigo()));
+				
 				personaSAF.setPersonaCodigoDocumento(String.valueOf(params.get("nroDocumento")));
 				personaSAF.setNombre(String.valueOf(params.get("personaNombre")));
 				personaSAF.setApellidoPaterno(String.valueOf(params.get("personaApellidoPaterno")));
