@@ -192,43 +192,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			
 			resultadoBean=new ResultadoBean();
 			
-			Double sumMontoDisponibleCertificado=0.00;
-			//1.- Suma de los certificados
-			//Consultar listado de PedidoContrato por pedidoId y obtener los contratos, capturar cada contratoId
-			//Sumar el monto disponible del certificado de cada contrato MontoDisponible
-			List<Contrato> listPedidoContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
-			if(null!=listPedidoContrato){
-				for(Contrato pc:listPedidoContrato){
-					Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getPedidoContrato_ContratoId()));
-					sumMontoDisponibleCertificado += contrato.getMontoDisponible();
-				}
-			}
-			
-			Double sumImporteTotalInversion=0.00;
-			//2.- Suma de el importe total de las inversiones
-			//Consultar el listado de PedidoInversion por pedidoId y sumar los montos de todas las inversiones
-			List<Inversion> listPedidoInversionCaspio = inversionService.listarPedidoInversionPorPedidoId(String.valueOf(pedidoId));
-			if(null!=listPedidoInversionCaspio){
-				for(Inversion pedidoInversionCaspio:listPedidoInversionCaspio){
-					sumImporteTotalInversion += pedidoInversionCaspio.getImporteInversion()==null?0.00:pedidoInversionCaspio.getImporteInversion();
-				}
-			}
-			
-			//3.- Restar (1) - (2) = diferenciaPrecio
-			Double diferenciaPrecio = sumMontoDisponibleCertificado - sumImporteTotalInversion;
-			
-			//4.- Con la lista de contratos de la tabla PedidoContrato consultar la diferencia de precio en el SAF y sumarlas = importeFinanciado
-			List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
-			Double sumImporteDiferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
-			
-			//5.- Restar (3) - (4) = saldoDiferencia
-			Double saldoDiferencia = (diferenciaPrecio<0?diferenciaPrecio*-1:diferenciaPrecio) - sumImporteDiferenciaPrecio;
-			
-			DetalleDiferenciaPrecio ddp=new DetalleDiferenciaPrecio();
-			ddp.setPedidoId(pedidoId);
-			ddp.setDiferenciaPrecio(Util.getMontoFormateado(diferenciaPrecio));
-			ddp.setImporteFinanciado(Util.getMontoFormateado(sumImporteDiferenciaPrecio));
-			ddp.setSaldoDiferencia(Util.getMontoFormateado(saldoDiferencia));
+			DetalleDiferenciaPrecio ddp = obtenerMontoDiferenciaPrecio(pedidoId);
+			double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
 			
 			resultadoBean.setResultado(ddp);
 			
@@ -241,6 +206,50 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			
 		}
 		return resultadoBean;
+	}
+	
+	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {
+		DetalleDiferenciaPrecio difPrecio = new DetalleDiferenciaPrecio();
+		
+		Double sumMontoCertificado=0.00;
+		//1.- Suma de los certificados
+		//Consultar listado de PedidoContrato por pedidoId y obtener los contratos, capturar cada contratoId
+		//Sumar el monto disponible del certificado de cada contrato MontoDisponible
+		List<Contrato> listPedidoContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
+		if(null!=listPedidoContrato){
+			for(Contrato pc:listPedidoContrato){
+				Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getPedidoContrato_ContratoId()));
+				sumMontoCertificado += contrato.getMontoCertificado();
+			}
+		}
+		
+		Double sumImporteTotalInversion=0.00;
+		//2.- Suma de el importe total de las inversiones
+		//Consultar el listado de PedidoInversion por pedidoId y sumar los montos de todas las inversiones
+		List<Inversion> listPedidoInversionCaspio = inversionService.listarPedidoInversionPorPedidoId(String.valueOf(pedidoId));
+		if(null!=listPedidoInversionCaspio){
+			for(Inversion pedidoInversionCaspio:listPedidoInversionCaspio){
+				sumImporteTotalInversion += pedidoInversionCaspio.getImporteInversion()==null?0.00:pedidoInversionCaspio.getImporteInversion();
+			}
+		}
+		
+		//3.- Restar (1) - (2) = diferenciaPrecio
+		Double diferenciaPrecio = sumMontoCertificado - sumImporteTotalInversion;
+		
+		//4.- Con la lista de contratos de la tabla PedidoContrato consultar la diferencia de precio en el SAF y sumarlas = importeFinanciado
+		List<Contrato> listaContratos= pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
+		Double sumImporteDiferenciaPrecio = getSumaDiferenciaPrecioxPedido(listaContratos);
+		
+		//5.- Restar (3) - (4) = saldoDiferencia
+		Double saldoDiferencia = (diferenciaPrecio<0?diferenciaPrecio*-1:diferenciaPrecio) - sumImporteDiferenciaPrecio;
+		
+		DetalleDiferenciaPrecio ddp=new DetalleDiferenciaPrecio();
+		ddp.setPedidoId(pedidoId);
+		ddp.setDiferenciaPrecio(Util.getMontoFormateado(diferenciaPrecio));
+		ddp.setImporteFinanciado(Util.getMontoFormateado(sumImporteDiferenciaPrecio));
+		ddp.setSaldoDiferencia(Util.getMontoFormateado(saldoDiferencia));
+		
+		return difPrecio;
 	}
 	
 	private double getSumaDiferenciaPrecioxPedido(List<Contrato> listaContratos){

@@ -1,6 +1,8 @@
 package com.pandero.ws.bean;
 
-public class Garantia {
+public class Garantia implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Integer idGarantia;
 	private Integer garantiaSAFId;
@@ -11,6 +13,7 @@ public class Garantia {
 	private String montoPrima;
 	private String estadoGarantia;
 	private String pedidoNumero;
+	
 	public Integer getIdGarantia() {
 		return idGarantia;
 	}

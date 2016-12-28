@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class Usuario {
-
+public class Usuario implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer UsuarioId;
 	private String UsuarioNombre;
 	private String EmpleadoCorreo;

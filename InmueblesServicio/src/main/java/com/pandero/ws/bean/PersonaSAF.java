@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class PersonaSAF {
-
+public class PersonaSAF implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer personaID;
 	private String tipoDocumentoID;
 	private String personaCodigoDocumento;

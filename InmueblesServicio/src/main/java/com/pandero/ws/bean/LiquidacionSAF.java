@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class LiquidacionSAF {
-
+public class LiquidacionSAF implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer PedidoID;
 	private Integer PedidoInversionID;
 	private String LiquidacionNumero;

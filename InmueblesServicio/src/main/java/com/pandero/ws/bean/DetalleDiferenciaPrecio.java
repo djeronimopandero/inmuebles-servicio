@@ -1,11 +1,15 @@
 package com.pandero.ws.bean;
 
-public class DetalleDiferenciaPrecio {
+public class DetalleDiferenciaPrecio implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1L;
+		
 	private Integer pedidoId;
 	private String diferenciaPrecio; 
 	private String importeFinanciado; 
 	private String saldoDiferencia;
+	private String montoDifPrecioPagado;
+	private String tipoInversion;
 	
 	public Integer getPedidoId() {
 		return pedidoId;
@@ -53,8 +57,19 @@ public class DetalleDiferenciaPrecio {
 	}
 	public void setSaldoDiferencia(String saldoDiferencia) {
 		this.saldoDiferencia = saldoDiferencia;
+	}
+	
+	public String getMontoDifPrecioPagado() {
+		return montoDifPrecioPagado;
+	}
+	public void setMontoDifPrecioPagado(String montoDifPrecioPagado) {
+		this.montoDifPrecioPagado = montoDifPrecioPagado;
+	}
+	public String getTipoInversion() {
+		return tipoInversion;
+	}
+	public void setTipoInversion(String tipoInversion) {
+		this.tipoInversion = tipoInversion;
 	} 
-	
-	
 	
 }

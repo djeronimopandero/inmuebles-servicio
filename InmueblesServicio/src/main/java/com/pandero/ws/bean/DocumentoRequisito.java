@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class DocumentoRequisito {
-
+public class DocumentoRequisito implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer RequisitoId;
 	private String Descripcion;
 	private String TipoInversion;

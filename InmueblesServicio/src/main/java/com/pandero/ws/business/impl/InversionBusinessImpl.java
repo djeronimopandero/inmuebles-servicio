@@ -156,12 +156,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		// Actualizar situacion confirmacion inversion en Caspio
-		if(Util.esVacio(resultado)){				
-			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
+		if(Util.esVacio(resultado)){		
 			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
 				// Verificar si existe excedente certificado o diferencia de precio
 				resultado=validarDiferenciaPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
 			}
+			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
 		}
 							
 		return resultado;

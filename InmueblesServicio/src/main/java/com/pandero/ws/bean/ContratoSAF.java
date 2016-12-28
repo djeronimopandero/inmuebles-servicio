@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class ContratoSAF {
-
+public class ContratoSAF implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer contratoId;
 	private Integer pedidoId;
 	private String nroContrato;

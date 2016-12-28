@@ -1,6 +1,9 @@
 package com.pandero.ws.bean;
 
-public class Constante {
+public class Constante implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 
 	private Integer ConstanteId;
 	private String TipoConstante;

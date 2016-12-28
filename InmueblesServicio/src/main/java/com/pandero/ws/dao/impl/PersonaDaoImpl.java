@@ -90,6 +90,8 @@ public class PersonaDaoImpl implements PersonaDao {
 	public PersonaSAF obtenerProveedorSAF(Integer proveedorId, String tipoProveedor, Integer personaID, 
 			String tipoDocumento, String nroDocumento) throws Exception {
 		List<PersonaSAF> listPersonas = null;
+		LOG.info("obtenerProveedorSAF:::  proveedorId="+proveedorId+", tipoProveedor="+tipoProveedor+", personaID="+personaID
+				+", tipoDocumento="+tipoDocumento+", nroDocumento="+nroDocumento);
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
@@ -135,6 +137,10 @@ public class PersonaDaoImpl implements PersonaDao {
 	@Override
 	public PersonaSAF registrarProveedorSAF(PersonaSAF personaSAF) throws Exception {
 		List<PersonaSAF> listPersonas = null;
+		if(personaSAF!=null){
+			LOG.info("registrarProveedorSAF:::  tipoProveedor="+personaSAF.getTipoProveedor()+", personaID="+personaSAF.getPersonaID()
+					+", tipoDocumento="+personaSAF.getTipoDocumentoID()+", nroDocumento="+personaSAF.getPersonaCodigoDocumento());
+		}
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");

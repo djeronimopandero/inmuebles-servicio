@@ -3,6 +3,7 @@ package com.pandero.ws.bean;
 public class Inversion implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
 	private Integer InversionId;
 	private String NroInversion;
 	private Integer PedidoId;

@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class Pedido {
-
+public class Pedido implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer PedidoId;
 	private Integer AsociadoId;
 	private String Fecha;

@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class InversionRequisito {
-
+public class InversionRequisito implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer InversionId;
 	private Integer RequisitoId;
 	private String EstadoRequisito;

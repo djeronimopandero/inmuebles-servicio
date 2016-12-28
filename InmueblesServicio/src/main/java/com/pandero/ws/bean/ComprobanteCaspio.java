@@ -6,7 +6,9 @@ package com.pandero.ws.bean;
   * @time	: 11:06:55 a. m.
   * @author	: Arly Fernandez.
  */
-public class ComprobanteCaspio {
+public class ComprobanteCaspio implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private String Documento;
 	private String FechaEmision;
