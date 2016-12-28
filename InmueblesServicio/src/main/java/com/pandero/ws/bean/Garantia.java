@@ -2,23 +2,21 @@ package com.pandero.ws.bean;
 
 public class Garantia {
 	
-	private Integer IdGarantia;
+	private Integer idGarantia;
 	private Integer garantiaSAFId;
-	private Integer PedidoID;
-	private String PartidaRegistral;
-	private String FichaConstitucion;
-	private String FechaConstitucion;
-	private String MontoPrima;
-	private String EstadoGarantia;
-	private String PedidoNumero;
-						
+	private Integer pedidoID;
+	private String partidaRegistral;
+	private String fichaConstitucion;
+	private String fechaConstitucion;
+	private String montoPrima;
+	private String estadoGarantia;
+	private String pedidoNumero;
 	public Integer getIdGarantia() {
-		return IdGarantia;
+		return idGarantia;
 	}
 	public void setIdGarantia(Integer idGarantia) {
-		IdGarantia = idGarantia;
+		this.idGarantia = idGarantia;
 	}
-	
 	public Integer getGarantiaSAFId() {
 		return garantiaSAFId;
 	}
@@ -26,46 +24,46 @@ public class Garantia {
 		this.garantiaSAFId = garantiaSAFId;
 	}
 	public Integer getPedidoID() {
-		return PedidoID;
+		return pedidoID;
 	}
 	public void setPedidoID(Integer pedidoID) {
-		PedidoID = pedidoID;
+		this.pedidoID = pedidoID;
 	}
 	public String getPartidaRegistral() {
-		return PartidaRegistral;
+		return partidaRegistral;
 	}
 	public void setPartidaRegistral(String partidaRegistral) {
-		PartidaRegistral = partidaRegistral;
+		this.partidaRegistral = partidaRegistral;
 	}
 	public String getFichaConstitucion() {
-		return FichaConstitucion;
+		return fichaConstitucion;
 	}
 	public void setFichaConstitucion(String fichaConstitucion) {
-		FichaConstitucion = fichaConstitucion;
+		this.fichaConstitucion = fichaConstitucion;
 	}
 	public String getFechaConstitucion() {
-		return FechaConstitucion;
+		return fechaConstitucion;
 	}
 	public void setFechaConstitucion(String fechaConstitucion) {
-		FechaConstitucion = fechaConstitucion;
+		this.fechaConstitucion = fechaConstitucion;
 	}
 	public String getMontoPrima() {
-		return MontoPrima;
+		return montoPrima;
 	}
 	public void setMontoPrima(String montoPrima) {
-		MontoPrima = montoPrima;
+		this.montoPrima = montoPrima;
 	}
 	public String getEstadoGarantia() {
-		return EstadoGarantia;
+		return estadoGarantia;
 	}
 	public void setEstadoGarantia(String estadoGarantia) {
-		EstadoGarantia = estadoGarantia;
+		this.estadoGarantia = estadoGarantia;
 	}
 	public String getPedidoNumero() {
-		return PedidoNumero;
+		return pedidoNumero;
 	}
 	public void setPedidoNumero(String pedidoNumero) {
-		PedidoNumero = pedidoNumero;
+		this.pedidoNumero = pedidoNumero;
 	}
 		
 }
