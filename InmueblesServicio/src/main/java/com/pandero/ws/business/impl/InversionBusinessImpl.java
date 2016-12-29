@@ -629,11 +629,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public String envioCargoContabilidadActualizSaldo(String inversionId,
-			String fechaEnvio, String usuarioEnvio) throws Exception {
+	public String envioCargoContabilidadActualizSaldo(String inversionId, String usuarioEnvio) throws Exception {
+		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuarioEnvio:"+usuarioEnvio);
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.envioCargoContabilidadActualizSaldo(inversionId, fechaEnvio, usuarioEnvio);
+		
+		Date date=Util.getFechaActual();
+		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+		LOG.info("##strFecha:"+strFecha);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, strFecha, usuarioEnvio);
 		return "";
 	}
 
