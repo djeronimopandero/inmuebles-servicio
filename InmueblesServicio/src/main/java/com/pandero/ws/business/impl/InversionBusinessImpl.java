@@ -619,5 +619,40 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultadoBean;
 	}
 
+	@Override
+	public ResultadoBean verificarRegistrarFacturas(String inversionId, String nroArmada) throws Exception {
+		LOG.info("###InversionBusinessImpl.verificarRegistrarFacturas inversionId:"+inversionId+", nroArmada:"+nroArmada);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+	
+		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+		
+		if(null!=listComprobantes){
+			
+			ComprobanteCaspio comprobanteCaspio = listComprobantes.get(0);
+			
+			if(comprobanteCaspio.getEstadoContabilidad().equalsIgnoreCase(UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto())){
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setResultado("El desembolso fue enviado a cargo de contabilidad.");
+			}else{
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				resultadoBean.setResultado("Proceder al registro de facturas");
+			}
+			
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Proceder al registro de facturas");
+		}
+		
+		
+		return resultadoBean;
+	}
+
 	
 }
