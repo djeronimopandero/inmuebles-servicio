@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.business.GarantiaBusiness;
-import com.pandero.ws.util.Constantes;
 
 @Controller
 @RequestMapping("/garantia")

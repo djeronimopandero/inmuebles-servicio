@@ -30,7 +30,7 @@ public class MailServiceImpl implements MailService{
 	
 //	public void sendMail(String emailFrom, String emailTo, String asunto, String documento, String textoEmail,boolean isFormatHtml) {
 	public void sendMail(EmailBean email) {
-		LOGGER.info("##sendMail...");
+		LOGGER.info("##sendMail... email:"+email);
 	   MimeMessage message = mailSender.createMimeMessage();
 
 	   try{
