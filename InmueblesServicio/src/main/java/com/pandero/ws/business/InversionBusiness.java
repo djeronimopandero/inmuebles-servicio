@@ -1,6 +1,5 @@
 package com.pandero.ws.business;
 
-import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 import com.pandero.ws.bean.ResultadoBean;
 
 public interface InversionBusiness {
@@ -15,5 +14,8 @@ public interface InversionBusiness {
 	
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
-
+	
+	public ResultadoBean enviarCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean anularCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	
 }
