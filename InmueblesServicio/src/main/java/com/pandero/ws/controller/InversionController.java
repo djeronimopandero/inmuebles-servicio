@@ -419,5 +419,84 @@ public class InversionController {
 		}
 		return resultadoBean;
 	}
+	
+	
+	@RequestMapping(value = "/recepcionarCargoContabilidad", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> recepcionarCargoContabilidad(@RequestBody Map<String, Object> params) {	
+		LOG.info("###recepcionarCargoContabilidad params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String fechaRecepcion = String.valueOf(params.get("fechaRecepcion"));
+			String usuarioRecepcion = String.valueOf(params.get("usuarioRecepcion"));
+			result = inversionBusiness.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/recepcionarCargoContabilidad:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}
+	
+	@RequestMapping(value = "/envioCargoContabilidadActualizSaldo", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> envioCargoContabilidadActualizSaldo(@RequestBody Map<String, Object> params) {	
+		LOG.info("###recepcionarCargoContabilidad params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			String fechaEnvio = String.valueOf(params.get("fechaEnvio"));
+			String usuarioEnvio = String.valueOf(params.get("usuarioEnvio"));
+			result = inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, fechaEnvio, usuarioEnvio);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/envioCargoContabilidadActualizSaldo:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
 
+	@RequestMapping(value = "/recepcionarCargoContabilidadActualizSaldo", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> recepcionarCargoContabilidadActualizSaldo(@RequestBody Map<String, Object> params) {	
+		LOG.info("###recepcionarCargoContabilidadActualizSaldo params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			String fechaRecepcion = String.valueOf(params.get("fechaRecepcion"));
+			String usuarioRecepcion = String.valueOf(params.get("usuarioRecepcion"));
+			result = inversionBusiness.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/recepcionarCargoContabilidadActualizSaldo:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
 }

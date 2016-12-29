@@ -619,5 +619,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultadoBean;
 	}
 
+	@Override
+	public String recepcionarCargoContabilidad(String inversionId,
+			String nroArmada, String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+		return null;
+	}
+
+	@Override
+	public String envioCargoContabilidadActualizSaldo(String inversionId,
+			String fechaEnvio, String usuarioEnvio) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, fechaEnvio, usuarioEnvio);
+		return null;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,
+			String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		return null;
+	}
+
 	
 }
