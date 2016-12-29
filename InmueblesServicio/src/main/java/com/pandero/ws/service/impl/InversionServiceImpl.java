@@ -20,6 +20,7 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.UtilEnum;
 
 @Service
 public class InversionServiceImpl implements InversionService {
@@ -279,6 +280,37 @@ public class InversionServiceImpl implements InversionService {
 		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidad(String inversionId,
+			String nroArmada, String fechaRecepcion, String usuarioRecepcion,
+			String estado) throws Exception {		
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("RecepContabilidadFecha", fechaRecepcion);	
+		request.put("RecepContabilidadUsuario", usuarioRecepcion);	
+		request.put("EstadoContabilidad", UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());	
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";
+		
+		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);
+		return null;
+	}
+
+	@Override
+	public String envioCargoContabilidadActualizSaldo(String inversionId,
+			String fechaEnvio, String usuarioEnvio) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,
+			String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
