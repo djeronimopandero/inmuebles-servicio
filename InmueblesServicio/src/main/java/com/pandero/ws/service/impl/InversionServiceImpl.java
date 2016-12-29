@@ -265,4 +265,21 @@ public class InversionServiceImpl implements InversionService {
 		return listaComprobantes;
 	}
 	
+	@Override
+	public String actualizarComprobanteEnvioCartaContabilidad(String inversionId,String nroArmada,String fechaEnvio,String usuarioEnvio, String estado) throws Exception {
+		LOG.info("##InversionServiceImpl.actualizarComprobanteEnvioCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+", fechaEnvio"+fechaEnvio+", estado:"+estado);
+		
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("EnvioContabilidadFecha", fechaEnvio);	
+		request.put("EnvioContabilidadUsuario", usuarioEnvio);	
+		request.put("EstadoContabilidad", estado);	
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";
+		
+		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+	
 }

@@ -1,6 +1,7 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -576,6 +577,46 @@ public class InversionBusinessImpl implements InversionBusiness{
 			
 		}	
 		return locationHref;
+	}
+
+	@Override
+	public ResultadoBean enviarCartaContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+	
+		Date date=Util.getFechaActual();
+		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+		LOG.info("##strFecha:"+strFecha);
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		
+		resultadoBean = new ResultadoBean();
+		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		resultadoBean.setResultado("Se enviaron a carta de contabilidad");
+		
+		return resultadoBean;
+	}
+
+	@Override
+	public ResultadoBean anularCartaContabilidad(String inversionId, String nroArmada, String usuarioId)
+			throws Exception {
+		LOG.info("###InversionBusinessImpl.anularCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+	
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
+		
+		resultadoBean = new ResultadoBean();
+		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		resultadoBean.setResultado("Se anulo el envio a carta de contabilidad");
+		
+		return resultadoBean;
 	}
 
 	

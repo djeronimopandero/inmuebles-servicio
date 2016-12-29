@@ -19,7 +19,6 @@ import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
-import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -367,6 +366,56 @@ public class InversionController {
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 			resultadoBean.setResultado("Ocurrio un error, el InversionId es null");
+		}
+		return resultadoBean;
+	}
+	
+	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean enviarCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
+		LOG.info("###ContratoController.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
+			try {
+				
+				resultadoBean = inversionBusiness.enviarCartaContabilidad(inversionId, nroArmada, usuarioId);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al enviar carta contabilidad");
+				LOG.error("###enviarCartaContabilidad:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
+		}
+		return resultadoBean;
+	}
+	
+	@RequestMapping(value = "anularCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean anularCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
+		LOG.info("###ContratoController.anularCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
+			try {
+				
+				resultadoBean = inversionBusiness.anularCartaContabilidad(inversionId, nroArmada, usuarioId);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al anular el envio de carta contabilidad");
+				LOG.error("###enviarCartaContabilidad:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
 		}
 		return resultadoBean;
 	}

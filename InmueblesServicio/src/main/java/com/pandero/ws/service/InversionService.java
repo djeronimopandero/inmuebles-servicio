@@ -25,4 +25,6 @@ public interface InversionService {
 	public List<Inversion> listarPedidoInversionPorPedidoId(String pedidoId) throws Exception;
 	
 	public List<ComprobanteCaspio> getComprobantes(Integer inversionId, Integer nroArmada) throws Exception;
+	
+	public String actualizarComprobanteEnvioCartaContabilidad(String inversionId,String nroArmada,String fechaEnvio,String usuarioEnvio, String estado) throws Exception;
 }

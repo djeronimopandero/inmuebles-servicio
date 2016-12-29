@@ -98,4 +98,26 @@ public class UtilEnum {
 		}
 	}
 	
+	public static enum ESTADO_COMPROBANTE {
+		
+		ENVIADO(1, "ENVIADO"),
+		RECIBIDO(2, "RECIBIDO");
+		
+		private final Integer codigo;
+		private final String texto;
+
+		private ESTADO_COMPROBANTE(Integer codigo, String texto) {
+			this.codigo = codigo;
+			this.texto = texto;
+		}
+
+		public Integer getCodigo() {
+			return codigo;
+		}
+
+		public String getTexto() {
+			return texto;
+		}
+	}
+	
 }
