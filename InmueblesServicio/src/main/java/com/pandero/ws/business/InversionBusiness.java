@@ -17,6 +17,7 @@ public interface InversionBusiness {
 	
 	public ResultadoBean enviarCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
 	public ResultadoBean anularCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
 	
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
 	

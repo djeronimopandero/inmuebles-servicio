@@ -419,8 +419,7 @@ public class InversionController {
 		}
 		return resultadoBean;
 	}
-	
-	
+		
 	@RequestMapping(value = "/recepcionarCargoContabilidad", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> recepcionarCargoContabilidad(@RequestBody Map<String, Object> params) {	
@@ -499,4 +498,30 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);			
 		return response;
 	}	
+
+	@RequestMapping(value = "verificarRegistrarFacturas/{inversionId}/{nroArmada}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean verificarRegistrarFacturas(
+	@PathVariable(value="inversionId") String inversionId,@PathVariable(value="nroArmada") String nroArmada){
+		LOG.info("###ContratoController.verificarRegistrarFacturas inversionId:"+inversionId+", nroArmada:"+nroArmada);
+		
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionId && null!=nroArmada){
+			try {
+				
+				resultadoBean = inversionBusiness.verificarRegistrarFacturas(inversionId, nroArmada);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al verificar si es posible registrar facturas");
+				LOG.error("###verificarRegistrarFacturas:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
+		}
+		return resultadoBean;
+	}
+	
 }
