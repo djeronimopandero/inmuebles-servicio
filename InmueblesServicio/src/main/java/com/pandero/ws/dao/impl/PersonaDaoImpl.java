@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.PersonaDao;
+import com.pandero.ws.util.Util;
 
 @Repository
 public class PersonaDaoImpl implements PersonaDao {
@@ -104,10 +105,10 @@ public class PersonaDaoImpl implements PersonaDao {
 		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.INTEGER));
 		call.returningResultSet("proveedor", new ProveedorMapper());
 		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-		.addValue("@ProveedorID", proveedorId)
-		.addValue("@TipoProveedorID", Integer.parseInt(tipoProveedor))
-		.addValue("@PersonaID", personaID)
-		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento.equals("")?"0":tipoDocumento))
+		.addValue("@ProveedorID", proveedorId==null?0:proveedorId)
+		.addValue("@TipoProveedorID", Integer.parseInt(Util.esVacio(tipoProveedor)?"0":tipoProveedor))
+		.addValue("@PersonaID", personaID==null?0:personaID)
+		.addValue("@TipoDocumento", Integer.parseInt(Util.esVacio(tipoDocumento)?"0":tipoDocumento))
 		.addValue("@NroDocumento", nroDocumento);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		

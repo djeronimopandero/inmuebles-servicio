@@ -193,11 +193,12 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			resultadoBean=new ResultadoBean();
 			
 			DetalleDiferenciaPrecio ddp = obtenerMontoDiferenciaPrecio(pedidoId);
-			double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio().replace(",", ""));
+			Double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio().replace(",", ""));
+			System.out.println("diferenciaPrecio2::: "+diferenciaPrecio);
 			
 			resultadoBean.setResultado(ddp);
 			
-			if(diferenciaPrecio<0){
+			if(diferenciaPrecio>0){
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());

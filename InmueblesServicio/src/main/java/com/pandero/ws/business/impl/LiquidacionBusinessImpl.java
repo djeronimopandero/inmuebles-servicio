@@ -132,6 +132,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 		
 		// Obtener valores pedido-contrato actualizado
+		System.out.println("pedidoInversionSAF.getNroPedido(): "+pedidoInversionSAF.getNroPedido());
 		List<Contrato> listaPedidoContrato = obtenerTablaContratosPedidoActualizado(pedidoInversionSAF.getNroPedido());
 		
 		// Obtener datos de la inversion
@@ -172,14 +173,17 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 		
 		// Verificar si existe monto disponible para la inversion - si no es construccion
-		if(!Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){		
+		double totalDisponible=0;
+		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
+				&& !inversion.getServicioConstructora()){
+		}else{
 			if(validacionLiquidacion){
 				// Obtener total disponible en contratos
 				double totalDisponibleContratos = obtenerTotalDisponibleEnPedido(listaPedidoContrato);
 				// Obtener diferencia precio pagada
 				Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
 				double montoDifPrecio = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto();
-				double totalDisponible=totalDisponibleContratos+montoDifPrecio;
+				totalDisponible=totalDisponibleContratos+montoDifPrecio;
 				System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 				// Verfivar si hay monto para liquidar
 				if(totalDisponible<inversion.getImporteInversion().doubleValue()){
@@ -198,7 +202,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				List<Constante> listaArmadasDesemb = constanteService.obtenerListaArmadasDesembolso();
 				double porcentajeArmada = Util.obtenerPorcentajeArmada(listaArmadasDesemb, nroArmadaId);
 				System.out.println("inversion.getImporteInversion(): "+inversion.getImporteInversion()+" - porcentajeArmada: "+porcentajeArmada);
-				montoALiquidar = inversion.getImporteInversion().doubleValue()*(porcentajeArmada/100);	
+				
+				double montoUsadoLiquidacion = inversion.getImporteInversion().doubleValue();
+				if(!inversion.getServicioConstructora()){
+					if(totalDisponible<inversion.getImporteInversion().doubleValue()){
+						montoUsadoLiquidacion = totalDisponible;
+					}
+				}
+				montoALiquidar = montoUsadoLiquidacion*(porcentajeArmada/100);					
 			}else{
 				montoALiquidar = inversion.getImporteInversion();
 			}
@@ -436,7 +447,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		
 		// Obtener monto pagado dif. precio
 		diferenciaPrecio.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-		diferenciaPrecio.setTipoInversion(inversion.getTipoInversion());
+		diferenciaPrecio.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
 				
 		return diferenciaPrecio;
 	}
