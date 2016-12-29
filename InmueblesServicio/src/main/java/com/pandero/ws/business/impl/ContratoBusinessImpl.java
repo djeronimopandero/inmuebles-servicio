@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,17 +84,20 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								// de documento
 		
 								PersonaSAF personaSAF = personaDao.obtenerPersonaSAF(String.valueOf(contratoSAF.getPersonaId()));
-		
+								
+								LOGGER.info("##personaSAF:"+personaSAF);
+								
 								UtilEnum.TIPO_DOCUMENTO tipoDoc;
 		
 								tipoDoc = UtilEnum.TIPO_DOCUMENTO
-										.obtenerTipoDocumentoByCodigo(null != personaSAF.getTipoDocumentoID()
+										.obtenerTipoDocumentoByCodigo(!StringUtils.isEmpty(personaSAF.getTipoDocumentoID())
 												? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
 		
 								PersonaCaspio personaCaspio = personaService.obtenerPersonaCaspio(String.valueOf(tipoDoc.getCodigoCaspio()), personaSAF.getPersonaCodigoDocumento());
 								
 								if (null == personaCaspio
 										|| (personaCaspio.getTipoDocumento() == null && personaCaspio.getNroDocumento() == null)) {
+									LOGGER.info("###Por grabar a la persona en Caspio "+personaSAF.getNombreCompleto());
 									// if not exists --> insert todos los campos
 									PersonaSAF personaNuevaCaspio = new PersonaSAF();
 									personaNuevaCaspio.setPersonaID(personaSAF.getPersonaID());
@@ -128,6 +132,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 								contratoCaspioReg.setFechaAdjudicacion(contratoSAF.getFechaAdjudicacion());
 								contratoCaspioReg.setSituacionContrato(contratoSAF.getSituacionContrato());
 								String success = contratoService.crearContratoCaspio(contratoCaspioReg);
+								LOGGER.info("##Se grabo el contrato en Caspio nro:"+contratoSAF.getNroContrato());
 						}else{
 							LOGGER.info("###El contrato "+contratoSAF.getNroContrato()+" no esta adjudicado, no sera registrado en CASPIO");
 						}

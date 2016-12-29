@@ -37,7 +37,7 @@ public class PersonaDaoImpl implements PersonaDao {
 	
 	@Override
 	public PersonaSAF obtenerPersonaSAF(String personaID) throws Exception {
-		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF");		
+		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF personaID:"+personaID);		
 		List<PersonaSAF> listPersonas = null;
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
