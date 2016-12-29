@@ -21,6 +21,6 @@ public interface InversionBusiness {
 	
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
 	
-	public String envioCargoContabilidadActualizSaldo(String inversionId,String fechaEnvio,String usuarioEnvio) throws Exception;
+	public String envioCargoContabilidadActualizSaldo(String inversionId,String usuarioEnvio) throws Exception;
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 }
