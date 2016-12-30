@@ -38,7 +38,8 @@ public class MailServiceImpl implements MailService{
 			
 			helper.setFrom(email.getEmailFrom());
 			helper.setReplyTo("afernandezl@pandero.com.pe");
-			helper.setTo(email.getEmailTo());
+//			helper.setTo(email.getEmailTo());
+			helper.setTo("afernandezl@pandero.com.pe");
 			helper.setSubject(email.getSubject());
 			
 //			if(email.isFormatHtml()){
