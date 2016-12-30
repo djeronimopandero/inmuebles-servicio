@@ -30,7 +30,7 @@ public class MailServiceImpl implements MailService{
 	
 //	public void sendMail(String emailFrom, String emailTo, String asunto, String documento, String textoEmail,boolean isFormatHtml) {
 	public void sendMail(EmailBean email) {
-		LOGGER.info("##sendMail...");
+		LOGGER.info("##sendMail... email:"+email);
 	   MimeMessage message = mailSender.createMimeMessage();
 
 	   try{
@@ -38,7 +38,8 @@ public class MailServiceImpl implements MailService{
 			
 			helper.setFrom(email.getEmailFrom());
 			helper.setReplyTo("afernandezl@pandero.com.pe");
-			helper.setTo(email.getEmailTo());
+//			helper.setTo(email.getEmailTo());
+			helper.setTo("afernandezl@pandero.com.pe");
 			helper.setSubject(email.getSubject());
 			
 //			if(email.isFormatHtml()){

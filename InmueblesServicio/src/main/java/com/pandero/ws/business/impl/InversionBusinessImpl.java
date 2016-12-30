@@ -490,6 +490,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
 
+		         LOG.info("##emailTo: "+emailTo);
 		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
 		         LOG.info("##enviarArchivo: "+enviarArchivo);
 		         
