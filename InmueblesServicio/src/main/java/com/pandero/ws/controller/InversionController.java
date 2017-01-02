@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
+import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -379,7 +381,7 @@ public class InversionController {
 		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
 			try {
 				
-				resultadoBean = inversionBusiness.enviarCartaContabilidad(inversionId, nroArmada, usuarioId);
+				resultadoBean = inversionBusiness.enviarCargoContabilidad(inversionId, nroArmada, usuarioId);
 				
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
@@ -404,7 +406,7 @@ public class InversionController {
 		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
 			try {
 				
-				resultadoBean = inversionBusiness.anularCartaContabilidad(inversionId, nroArmada, usuarioId);
+				resultadoBean = inversionBusiness.anularCargoContabilidad(inversionId, nroArmada, usuarioId);
 				
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
@@ -525,4 +527,28 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {	
+		LOG.info("###recepcionarCargoContabilidadActualizSaldo params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(nroInversion);
+			if(liquidacionSAF!=null){
+				result = "1";
+				detail = JsonUtil.toJson(liquidacionSAF);
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerUltimaLiquidacionInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
 }

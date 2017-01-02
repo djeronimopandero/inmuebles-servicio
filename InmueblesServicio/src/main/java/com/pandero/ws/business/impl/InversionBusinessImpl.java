@@ -29,6 +29,7 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
@@ -67,6 +68,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	MailService mailService;
 	@Autowired
 	LiquidacionDao liquidacionDao;
+	@Autowired
+	LiquidacionBusiness liquidacionBusiness;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -581,28 +584,48 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public ResultadoBean enviarCartaContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
 		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
-		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+		ResultadoBean resultadoBean  = new ResultadoBean();	
 		Date date=Util.getFechaActual();
 		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
 		LOG.info("##strFecha:"+strFecha);
+		
+		// Actualizar estado de envio a contabilidad
 		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		
+		// Verificar si se debe generar liquidacion automatica
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
+		if(inversion!=null){
+			// Si es construccion sin constructora
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+					&& !inversion.getServicioConstructora()){
+				// Obtener la ultima liquidacion
+				LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
+				if(ultimaLiquidacion!=null){
+					if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
+						int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+						if(nroArmadaActual==2||nroArmadaActual==3){
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+						}
+					}
+				}
+			}
+		}
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se enviaron a carta de contabilidad");
+		resultadoBean.setResultado("Se envió el cargo a contabilidad");
 		
 		return resultadoBean;
 	}
 
 	@Override
-	public ResultadoBean anularCartaContabilidad(String inversionId, String nroArmada, String usuarioId)
+	public ResultadoBean anularCargoContabilidad(String inversionId, String nroArmada, String usuarioId)
 			throws Exception {
 		LOG.info("###InversionBusinessImpl.anularCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
 		
@@ -615,7 +638,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anulo el envio a carta de contabilidad");
+		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
 		
 		return resultadoBean;
 	}
@@ -683,6 +706,28 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		
 		return resultadoBean;
+	}
+
+	@Override
+	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion)
+			throws Exception {
+		LiquidacionSAF ultimaLiquidacion = null;
+		
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			ultimaLiquidacion = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+				liquidacionImporte += liquidacion.getLiquidacionImporte();
+				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+			}
+			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
+		}		
+		return ultimaLiquidacion;
 	}
 
 	
