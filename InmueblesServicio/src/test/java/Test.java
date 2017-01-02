@@ -47,8 +47,12 @@ public class Test {
 //		String format = decimalFormat.format(1956500.50);
 //		System.out.println(format);
 		
-		List<ObservacionInversion> listObs=new ArrayList<>();
-		System.out.println(listObs.size());
+//		List<ObservacionInversion> listObs=new ArrayList<>();
+//		System.out.println(listObs.size());
+//		
+		List<String> lista = new ArrayList<String>();
+		lista.add("alan cabrera");
+		System.out.println(lista.indexOf("alan cabrera"));
 		
 	}
 	
