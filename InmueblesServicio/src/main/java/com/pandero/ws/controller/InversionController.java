@@ -386,13 +386,13 @@ public class InversionController {
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-				resultadoBean.setResultado("Ocurrio un error al enviar carta contabilidad");
+				resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 				LOG.error("###enviarCartaContabilidad:",e);
 			}
 		}else{
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-			resultadoBean.setResultado("Ocurrio un error, parametro null");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 		}
 		return resultadoBean;
 	}

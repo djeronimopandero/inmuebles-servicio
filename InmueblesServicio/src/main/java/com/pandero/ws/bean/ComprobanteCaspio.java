@@ -17,7 +17,7 @@ public class ComprobanteCaspio implements java.io.Serializable {
 	private String NumeroDocumento;
 	private String TipoDocumento;
 	private String TipoMoneda;
-	private String Importe;
+	private Double Importe;
 	private String FechaEnvio;
 	private String Proveedor;
 	private String InversionId;
@@ -69,11 +69,11 @@ public class ComprobanteCaspio implements java.io.Serializable {
 	}
 	public void setTipoMoneda(String tipoMoneda) {
 		TipoMoneda = tipoMoneda;
-	}
-	public String getImporte() {
+	}	
+	public Double getImporte() {
 		return Importe;
 	}
-	public void setImporte(String importe) {
+	public void setImporte(Double importe) {
 		Importe = importe;
 	}
 	public String getFechaEnvio() {
