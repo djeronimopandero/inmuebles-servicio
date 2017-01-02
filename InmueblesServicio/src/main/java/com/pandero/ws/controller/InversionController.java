@@ -315,6 +315,21 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}", method = RequestMethod.GET)
+	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero){
+		LOG.info("###ContratoController.solicitudDesembolso inversionNumero:"+inversionNumero);
+		String resultadoBean = null;
+		if(null!=inversionNumero ){
+			try {
+				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero);
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+				return "ERROR";
+			}
+		}
+		return resultadoBean;
+	}
+	
 	@RequestMapping(value = "obtenerMontosDifPrecioInversion/{nroInversion}", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> obtenerMontosDifPrecioInversion(@PathVariable(value="nroInversion") String nroInversion) {	
@@ -372,6 +387,7 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+
 	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean enviarCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
 			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
@@ -551,4 +567,5 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);			
 		return response;
 	}	
+	
 }

@@ -1,8 +1,10 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
@@ -552,6 +555,80 @@ public class InversionBusinessImpl implements InversionBusiness{
 		rb.setResultado(importe);
 		
 		return rb;
+	}
+	
+	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String generarDocumentoDesembolso(String nroInversion)
+			throws Exception {
+		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
+			
+		}else{
+			LiquidacionSAF liquidacion = liquidaciones.get(0);
+			String armada = Constantes.ARMADAS_DOC_DESEMBOLSO.get(liquidacion.getNroArmada());
+			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+			List<Contrato> contratos =pedidoDao.obtenerContratosxPedidoSAF(pedidoInversion.getNroPedido());
+			if(contratos!=null){
+				List<Contrato> contratosLiquidacion = new ArrayList<Contrato>();
+				for(LiquidacionSAF liquidacionContrato:liquidaciones){
+					for(Contrato contrato:contratos){
+						if(liquidacionContrato.getContratoID().intValue()==contrato.getContratoId().intValue()){
+							contratosLiquidacion.add(contrato);
+							break;
+						}
+					}
+				}
+				
+				List<String> asociadosLiquidacion = new ArrayList<String>();
+				String asociadosFirmas = "";
+				String asociadosDocumento = "";
+				String contratoDocumento = "";
+				
+				for(Contrato contrato:contratosLiquidacion){
+					List<Asociado> asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
+					for(Asociado asociado:asociados){
+						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
+						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
+							String asociadoFirma = " ASOCIADO: " + asociado.getNombreCompleto() + "\n" + asociado.getTipoDocumentoIdentidad() + ": " + asociado.getNroDocumentoIdentidad() + "\n\n";
+							asociadosLiquidacion.add(asociadoImpresion);
+							asociadosDocumento+=asociadoImpresion;
+							contratoDocumento+= contrato.getNroContrato() + ", ";
+							asociadosFirmas+= asociadoFirma;
+						}
+					}
+				}
+								
+				Map<String,String> parameters = new HashMap<String, String>();
+				parameters.put("PagoTesoreriaID", liquidacion.getLiquidacionPagoTesoreria());
+				Map<String,Object> pagoTesoreria = liquidacionDao.executeProcedure(parameters, "USP_LOG_ReportePagoTesoreria_Dos");
+				LOG.info("pago tesoreria: "+pagoTesoreria);
+				LOG.info("asociadosLiquidacion: "+asociadosLiquidacion);
+				String desembolso = "";
+				if(!asociadosLiquidacion.isEmpty()){
+					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
+					for(Map<String,Object> current:data){
+						desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";						
+					}
+				}
+				
+				DocumentoUtil documentoUtil=new DocumentoUtil();	
+				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-conformidad-desembolsoTemplate.docx");
+				if (doc != null) {
+					List<Parametro> parametros = new ArrayList<Parametro>();
+					parametros.add(new Parametro("$asociados", asociadosDocumento));
+					parametros.add(new Parametro("$contratos", contratoDocumento));
+					parametros.add(new Parametro("$desembolsos", desembolso));
+					parametros.add(new Parametro("$armada", armada));
+					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
+					StringBuilder sb=new StringBuilder();
+					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

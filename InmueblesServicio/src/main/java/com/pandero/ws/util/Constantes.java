@@ -1,6 +1,20 @@
 package com.pandero.ws.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constantes {
+	
+	public static final Map<Integer,String> ARMADAS_DOC_DESEMBOLSO;
+	static {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        map.put(1, "primera armada por el 100%");
+        map.put(2, "primera armada por el 50%");
+        map.put(3, "segunda armada por el 40%");
+        map.put(4, "tercera armada por el 10%");
+        ARMADAS_DOC_DESEMBOLSO = Collections.unmodifiableMap(map);
+    }
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";

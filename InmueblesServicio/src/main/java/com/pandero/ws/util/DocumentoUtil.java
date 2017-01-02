@@ -969,4 +969,93 @@ public class DocumentoUtil {
 		
 		return strHtml.toString();
 	}
+	
+	
+	public static XWPFDocument replaceParamsDocumentoDesembolso(XWPFDocument doc, List<Parametro> params) {
+
+		LOG.info("---------------------------------------TEXTO----------------------------------------");
+		for(int i=0; i<doc.getParagraphs().size(); i++){
+			XWPFParagraph p=doc.getParagraphs().get(i);
+			List<XWPFRun> runs = p.getRuns();
+			if (runs != null) {
+				for (XWPFRun r : runs) {
+					String text = r.getText(0);
+
+					if (text != null) {
+						if (null != params) {
+							for (Parametro param : params) {
+								if (null != param) {
+									
+									LOG.info("text >>"+text+"<<");
+									
+//									if(text.contains("$tablaFirmas")){
+//										System.out.println("EN $tablaFirmas");
+//										/** Tabla de Firmas **/
+//										text = text.replace("$tablaFirmas", "");
+//										r.setText(text, 0);
+//										System.out.println("EN TABLA FIRMAS");										
+//										XmlCursor cursor = p.getCTP().newCursor();
+//										XWPFTable t1 = doc.insertNewTbl(cursor);
+//										t1.getCTTbl().getTblPr().unsetTblBorders();
+//										for(Asociado asociado : listaAsociados){
+//											XWPFTableRow row = null;				
+//											row=t1.createRow();
+//											row.getCell(0).setText("___________________________");
+//											if(Util.esPersonaJuridica(asociado.getTipoDocumentoIdentidad())){
+//												row=t1.createRow();
+//												row.getCell(0).setText("RAZÓN SOCIAL: "+asociado.getNombreCompleto());
+//											}else{
+//												row=t1.createRow();
+//												row.getCell(0).setText("NOMBRE: "+asociado.getNombreCompleto());
+//											}
+//											row=t1.createRow();
+//											row.getCell(0).setText(asociado.getTipoDocumentoIdentidad()+": "+asociado.getNroDocumentoIdentidad());	
+//										}
+//									}
+																	
+									
+									if (text.contains(param.getKey())) {
+										text = text.replace(param.getKey(), param.getValue());
+										r.setText(text, 0);
+									}
+									
+								}
+							}
+						}
+					}
+
+				}
+			}
+		}
+
+		LOG.info("---------------------------------------TABLA----------------------------------------");
+
+		for (XWPFTable tbl : doc.getTables()) {
+			for (XWPFTableRow row : tbl.getRows()) {
+				for (XWPFTableCell cell : row.getTableCells()) {
+					for (XWPFParagraph p : cell.getParagraphs()) {
+						for (XWPFRun r : p.getRuns()) {
+							String text = r.getText(0);
+							if (text != null) {
+								if (null != params) {
+									for (Parametro param : params) {
+										if (null != param) {
+											if (text.contains(param.getKey())) {
+												text = text.replace(param.getKey(), param.getValue());
+												r.setText(text, 0);
+											}
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+			}
+		}
+
+		
+		return doc;
+	}
 }

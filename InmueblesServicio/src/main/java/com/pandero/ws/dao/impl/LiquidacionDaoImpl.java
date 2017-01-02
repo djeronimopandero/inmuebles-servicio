@@ -3,6 +3,7 @@ package com.pandero.ws.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			e.setLiquidacionDestino(rs.getString("LiquidacionDestino"));
 			e.setLiquidacionEstado(rs.getString("LiquidacionEstado"));
 			e.setNroArmada(rs.getInt("NroArmada"));
+			e.setLiquidacionPagoTesoreria(rs.getString("LiquidacionPagoTesoreria"));
 			return e;		    
 			}
 		}
@@ -204,5 +206,17 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		
 		return null;
 	}
+	
+	@Override
+    public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName){
+    	SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+    	call.withProcedureName(procedureName);
+    	MapSqlParameterSource in = new MapSqlParameterSource();
+    	for(Map.Entry<String, String> parameter:parameters.entrySet()){
+    		in.addValue(parameter.getKey(), parameter.getValue());
+    	}
+    	Map<String,Object> procedureResult = call.execute(in);
+		return procedureResult;
+    }
 		
 }

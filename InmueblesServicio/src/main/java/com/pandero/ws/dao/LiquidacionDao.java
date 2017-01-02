@@ -1,6 +1,7 @@
 package com.pandero.ws.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.pandero.ws.bean.LiquidacionSAF;
 
@@ -14,4 +15,6 @@ public interface LiquidacionDao {
 	public String eliminarLiquidacionInversionSAF(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	
 	public String confirmarLiquidacionInversion(String nroInversion, String usuarioId) throws Exception;
+	
+	public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName);
 }

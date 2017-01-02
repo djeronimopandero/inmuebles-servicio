@@ -14,6 +14,7 @@ public interface InversionBusiness {
 	public ResultadoBean getImporteComprobante(String inversionNumero, Integer nroArmada)throws Exception;
 	
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
+	public String generarDocumentoDesembolso(String nroInversion) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
 	
 	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
@@ -26,5 +27,6 @@ public interface InversionBusiness {
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 
 	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
+
 }
 	
