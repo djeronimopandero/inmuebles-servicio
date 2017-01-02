@@ -1,6 +1,8 @@
 package com.pandero.ws.bean;
 
-public class PersonaCaspio {
+public class PersonaCaspio implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private String PersonaId;
 	private String TipoDocumento;

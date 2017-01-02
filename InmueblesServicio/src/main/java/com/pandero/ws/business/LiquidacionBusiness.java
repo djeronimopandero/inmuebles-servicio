@@ -3,6 +3,7 @@ package com.pandero.ws.business;
 import java.util.List;
 
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 
 public interface LiquidacionBusiness {
 
@@ -13,5 +14,5 @@ public interface LiquidacionBusiness {
 	public String eliminarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	
 	public String confirmarLiquidacionInversion(String nroInversion, String usuarioId) throws Exception;
-	
+	public DetalleDiferenciaPrecio obtenerMontosDifPrecioInversion(String nroInversion) throws Exception;
 }

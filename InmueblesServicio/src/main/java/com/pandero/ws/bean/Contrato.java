@@ -1,6 +1,9 @@
 package com.pandero.ws.bean;
 
-public class Contrato{
+public class Contrato implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Integer ContratoId;
 	private String NroContrato;
 	private Integer PedidoId;

@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class PedidoInversionSAF {
-
+public class PedidoInversionSAF implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String pedidoID;
 	private String proveedorID;
 	private String beneficiarioID;

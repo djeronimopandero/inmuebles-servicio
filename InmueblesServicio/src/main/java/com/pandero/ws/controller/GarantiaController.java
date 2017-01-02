@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.business.GarantiaBusiness;
-import com.pandero.ws.util.Constantes;
 
 @Controller
 @RequestMapping("/garantia")
@@ -45,7 +44,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		}catch(Exception e){
 			LOG.error("Error pedido/crearGarantiaSAF:: ",e);
 			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			result="0";
 			detail=e.getMessage();
 		}			
 		response.put("result",result);
@@ -75,7 +74,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		}catch(Exception e){
 			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
 			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			result="0";
 			detail=e.getMessage();
 		}			
 		response.put("result",result);

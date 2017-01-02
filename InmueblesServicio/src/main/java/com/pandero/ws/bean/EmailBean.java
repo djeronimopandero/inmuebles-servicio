@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class EmailBean {
+public class EmailBean implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1L;
+		
 	private String emailFrom; 
 	private String emailTo;
 	private String subject;

@@ -6,7 +6,9 @@ package com.pandero.ws.bean;
   * @time	: 11:06:55 a. m.
   * @author	: Arly Fernandez.
  */
-public class ComprobanteCaspio {
+public class ComprobanteCaspio implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private String Documento;
 	private String FechaEmision;
@@ -20,6 +22,11 @@ public class ComprobanteCaspio {
 	private String Proveedor;
 	private String InversionId;
 	private String NroArmada;
+	private String EnvioContabilidadFecha;
+	private String EnvioContabilidadUsuario;
+	private String RecepContabilidadFecha;
+	private String RecepContabilidadUsuario;
+	private String EstadoContabilidad;
 	
 	public String getDocumento() {
 		return Documento;
@@ -104,6 +111,35 @@ public class ComprobanteCaspio {
 	public void setNroArmada(String nroArmada) {
 		NroArmada = nroArmada;
 	}
+	public String getEnvioContabilidadFecha() {
+		return EnvioContabilidadFecha;
+	}
+	public void setEnvioContabilidadFecha(String envioContabilidadFecha) {
+		EnvioContabilidadFecha = envioContabilidadFecha;
+	}
+	public String getEnvioContabilidadUsuario() {
+		return EnvioContabilidadUsuario;
+	}
+	public void setEnvioContabilidadUsuario(String envioContabilidadUsuario) {
+		EnvioContabilidadUsuario = envioContabilidadUsuario;
+	}
+	public String getRecepContabilidadFecha() {
+		return RecepContabilidadFecha;
+	}
+	public void setRecepContabilidadFecha(String recepContabilidadFecha) {
+		RecepContabilidadFecha = recepContabilidadFecha;
+	}
+	public String getRecepContabilidadUsuario() {
+		return RecepContabilidadUsuario;
+	}
+	public void setRecepContabilidadUsuario(String recepContabilidadUsuario) {
+		RecepContabilidadUsuario = recepContabilidadUsuario;
+	}
+	public String getEstadoContabilidad() {
+		return EstadoContabilidad;
+	}
+	public void setEstadoContabilidad(String estadoContabilidad) {
+		EstadoContabilidad = estadoContabilidad;
+	}
 	
-
 }

@@ -2,8 +2,10 @@ package com.pandero.ws.bean;
 
 import java.util.List;
 
-public class ResultadoBean {
+public class ResultadoBean implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1L;
+		
 	private Integer estado;
 	private String mensajeError;
 	private Object resultado;

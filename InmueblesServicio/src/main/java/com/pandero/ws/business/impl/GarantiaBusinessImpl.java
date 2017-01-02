@@ -44,10 +44,6 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		garantia.setPartidaRegistral(partidaRegistral.equals("")?null:partidaRegistral);		
 		garantia.setFichaConstitucion(fichaConstitucion.equals("")?null:fichaConstitucion);
 		garantia.setFechaConstitucion(fechaConstitucion.equals("")?null:fechaConstitucion);
-		if(garantia.getFechaConstitucion()!=null){
-			Date fechaConst = Util.convertirFechaStrADate(garantia.getFechaConstitucion(), "dd/MM/yyyy");
-			garantia.setFechaConstitucion(Util.getDateFormat(fechaConst, "yyyy-MM-dd"));
-		}
 		garantia.setMontoPrima(montoPrima.equals("")?null:montoPrima);
 		
 		// Crear garantia en el SAF		
@@ -76,11 +72,6 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		garantia.setPartidaRegistral((partidaRegistral.equals("")||partidaRegistral.equals("null"))?null:partidaRegistral);		
 		garantia.setFichaConstitucion((fichaConstitucion.equals("")||fichaConstitucion.equals("null"))?null:fichaConstitucion);
 		garantia.setFechaConstitucion((fechaConstitucion.equals("")||fechaConstitucion.equals("null"))?null:fechaConstitucion);
-		if(garantia.getFechaConstitucion()!=null){
-			Date fechaConst = Util.convertirFechaStrADate(garantia.getFechaConstitucion(), "dd/MM/yyyy");
-			String nuevaFecha = Util.getDateFormat(fechaConst, "yyyy-MM-dd");
-			garantia.setFechaConstitucion(nuevaFecha);
-		}
 		garantia.setMontoPrima((montoPrima.equals("") || montoPrima.equals("null"))?null:montoPrima);
 		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion()+" -"+montoPrima+"-");
 		// Actualizar garantia en SAF

@@ -261,5 +261,14 @@ public class Util {
 		}		
 		return estadoLiquidacion;
 	}
-	
+
+	public static String obtenerBooleanString(Boolean valor){
+		String resultado = "0";
+		if(valor!=null){
+			if(valor){
+				resultado="1";
+			}
+		}
+		return resultado;
+	}
 }

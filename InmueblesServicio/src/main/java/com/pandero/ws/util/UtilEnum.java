@@ -7,7 +7,7 @@ public class UtilEnum {
 		DNI(4, "DNI", 59),
 		CE(4, "C.E.", 57),
 		PSP(4, "PSP", 58),
-		PASAPORTE (8, "RUC", 60);
+		RUC (8, "RUC", 60);
 		
 		private final Integer codigo;
 		private final String texto;
@@ -85,6 +85,28 @@ public class UtilEnum {
 		private final String texto;
 
 		private ESTADO_OPERACION(Integer codigo, String texto) {
+			this.codigo = codigo;
+			this.texto = texto;
+		}
+
+		public Integer getCodigo() {
+			return codigo;
+		}
+
+		public String getTexto() {
+			return texto;
+		}
+	}
+	
+	public static enum ESTADO_COMPROBANTE {
+		
+		ENVIADO(1, "ENVIADO"),
+		RECIBIDO(2, "RECIBIDO");
+		
+		private final Integer codigo;
+		private final String texto;
+
+		private ESTADO_COMPROBANTE(Integer codigo, String texto) {
 			this.codigo = codigo;
 			this.texto = texto;
 		}

@@ -2,6 +2,7 @@ package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
@@ -69,6 +71,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	MailService mailService;
 	@Autowired
 	LiquidacionDao liquidacionDao;
+	@Autowired
+	LiquidacionBusiness liquidacionBusiness;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -159,12 +163,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		// Actualizar situacion confirmacion inversion en Caspio
-		if(Util.esVacio(resultado)){				
-			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
+		if(Util.esVacio(resultado)){		
 			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
 				// Verificar si existe excedente certificado o diferencia de precio
 				resultado=validarDiferenciaPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
 			}
+			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
 		}
 							
 		return resultado;
@@ -492,6 +496,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }
 
+		         LOG.info("##emailTo: "+emailTo);
 		         LOG.info("##Enviar por correo archivo PDF: "+strRutaGenerados+pdfConvertido);
 		         LOG.info("##enviarArchivo: "+enviarArchivo);
 		         
@@ -624,6 +629,182 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getURLCancelarComprobante(String inversionId) throws Exception {
+	LOG.info("###InversionBusinessImpl.getURLCancelarComprobante inversionId:"+inversionId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		String locationHref="";
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			
+			if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.CONSTRUCCION_COD)){
+			    if(!inversion.getServicioConstructora()){//No
+			      locationHref = "registrar-factura-proveedor.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			    }else{
+			    	locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			    }
+			 }else if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.CANCELACION_COD)){
+				 locationHref = "registrar-actualizacion-saldo.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }else if(inversion.getTipoInversion().equalsIgnoreCase(Constantes.TipoInversion.ADQUISICION_COD) && inversion.getPropietarioTipoDocId().equals(String.valueOf(UtilEnum.TIPO_DOCUMENTO.RUC.getCodigoCaspio()))){
+				 locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }else{
+				 locationHref = "registrar-factura-proveedor-sin-armadas.aspx?NroInversion="+inversion.getNroInversion()+"&InversionId="+inversionId;
+			 }
+			
+		}	
+		return locationHref;
+	}
+
+	@Override
+	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();	
+		Date date=Util.getFechaActual();
+		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+		LOG.info("##strFecha:"+strFecha);
+		
+		// Actualizar estado de envio a contabilidad
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		
+		// Verificar si se debe generar liquidacion automatica
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
+		if(inversion!=null){
+			// Si es construccion sin constructora
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+					&& !inversion.getServicioConstructora()){
+				// Obtener la ultima liquidacion
+				LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
+				if(ultimaLiquidacion!=null){
+					if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
+						int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+						if(nroArmadaActual==2||nroArmadaActual==3){
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+						}
+					}
+				}
+			}
+		}
+		
+		resultadoBean = new ResultadoBean();
+		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		resultadoBean.setResultado("Se envió el cargo a contabilidad");
+		
+		return resultadoBean;
+	}
+
+	@Override
+	public ResultadoBean anularCargoContabilidad(String inversionId, String nroArmada, String usuarioId)
+			throws Exception {
+		LOG.info("###InversionBusinessImpl.anularCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+	
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
+		
+		resultadoBean = new ResultadoBean();
+		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
+		
+		return resultadoBean;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidad(String inversionId,
+			String nroArmada, String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+		return "";
+	}
+
+	@Override
+	public String envioCargoContabilidadActualizSaldo(String inversionId, String usuarioEnvio) throws Exception {
+		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuarioEnvio:"+usuarioEnvio);
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Date date=Util.getFechaActual();
+		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+		LOG.info("##strFecha:"+strFecha);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, strFecha, usuarioEnvio);
+		return "";
+	}
+
+	@Override
+	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,
+			String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		return "";
+	}
+	
+	public ResultadoBean verificarRegistrarFacturas(String inversionId, String nroArmada) throws Exception {
+		LOG.info("###InversionBusinessImpl.verificarRegistrarFacturas inversionId:"+inversionId+", nroArmada:"+nroArmada);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+	
+		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+		
+		if(null!=listComprobantes){
+			
+			ComprobanteCaspio comprobanteCaspio = listComprobantes.get(0);
+			
+			if(comprobanteCaspio.getEstadoContabilidad().equalsIgnoreCase(UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto())){
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setResultado("El desembolso fue enviado a cargo de contabilidad.");
+			}else{
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				resultadoBean.setResultado("Proceder al registro de facturas");
+			}
+			
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Proceder al registro de facturas");
+		}
+		
+		
+		return resultadoBean;
+	}
+
+	@Override
+	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion)
+			throws Exception {
+		LiquidacionSAF ultimaLiquidacion = null;
+		
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			ultimaLiquidacion = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+				liquidacionImporte += liquidacion.getLiquidacionImporte();
+				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+			}
+			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
+		}		
+		return ultimaLiquidacion;
 	}
 
 	

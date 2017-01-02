@@ -1,8 +1,10 @@
 package com.pandero.ws.bean;
 
 
-public class Asociado{
-
+public class Asociado implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String nombreCompleto;
 	private String tipoDocumentoIdentidad;
 	private String nroDocumentoIdentidad;

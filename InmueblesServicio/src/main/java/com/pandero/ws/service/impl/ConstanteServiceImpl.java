@@ -154,8 +154,8 @@ public class ConstanteServiceImpl implements ConstanteService {
 	        		if(mapConstantes!=null && mapConstantes.size()>0){
 	        			listaConstantes = new ArrayList<Constante>();
 	        			for(Object bean : mapConstantes){
-	        				String beanString = JsonUtil.toJson(bean);
-	        				Constante constante =  JsonUtil.fromJson(beanString, DocumentoRequisito.class);
+	        		 		String beanString = JsonUtil.toJson(bean);
+	        				Constante constante =  JsonUtil.fromJson(beanString, Constante.class);
 	        				listaConstantes.add(constante);        				
 	        			}
 	        			System.out.println("listaConstantesArmadaDesemb:: "+listaConstantes.size());

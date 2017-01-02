@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.PersonaDao;
+import com.pandero.ws.util.Util;
 
 @Repository
 public class PersonaDaoImpl implements PersonaDao {
@@ -37,7 +38,7 @@ public class PersonaDaoImpl implements PersonaDao {
 	
 	@Override
 	public PersonaSAF obtenerPersonaSAF(String personaID) throws Exception {
-		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF");		
+		LOG.info("###PersonaDaoImpl.obtenerAsociadosxContratoSAF personaID:"+personaID);		
 		List<PersonaSAF> listPersonas = null;
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
@@ -90,6 +91,8 @@ public class PersonaDaoImpl implements PersonaDao {
 	public PersonaSAF obtenerProveedorSAF(Integer proveedorId, String tipoProveedor, Integer personaID, 
 			String tipoDocumento, String nroDocumento) throws Exception {
 		List<PersonaSAF> listPersonas = null;
+		LOG.info("obtenerProveedorSAF:::  proveedorId="+proveedorId+", tipoProveedor="+tipoProveedor+", personaID="+personaID
+				+", tipoDocumento="+tipoDocumento+", nroDocumento="+nroDocumento);
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
@@ -102,10 +105,10 @@ public class PersonaDaoImpl implements PersonaDao {
 		call.addDeclaredParameter(new SqlParameter("@PersonaID", Types.INTEGER));
 		call.returningResultSet("proveedor", new ProveedorMapper());
 		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-		.addValue("@ProveedorID", proveedorId)
-		.addValue("@TipoProveedorID", Integer.parseInt(tipoProveedor))
-		.addValue("@PersonaID", personaID)
-		.addValue("@TipoDocumento", Integer.parseInt(tipoDocumento.equals("")?"0":tipoDocumento))
+		.addValue("@ProveedorID", proveedorId==null?0:proveedorId)
+		.addValue("@TipoProveedorID", Integer.parseInt(Util.esVacio(tipoProveedor)?"0":tipoProveedor))
+		.addValue("@PersonaID", personaID==null?0:personaID)
+		.addValue("@TipoDocumento", Integer.parseInt(Util.esVacio(tipoDocumento)?"0":tipoDocumento))
 		.addValue("@NroDocumento", nroDocumento);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
@@ -135,6 +138,10 @@ public class PersonaDaoImpl implements PersonaDao {
 	@Override
 	public PersonaSAF registrarProveedorSAF(PersonaSAF personaSAF) throws Exception {
 		List<PersonaSAF> listPersonas = null;
+		if(personaSAF!=null){
+			LOG.info("registrarProveedorSAF:::  tipoProveedor="+personaSAF.getTipoProveedor()+", personaID="+personaSAF.getPersonaID()
+					+", tipoDocumento="+personaSAF.getTipoDocumentoID()+", nroDocumento="+personaSAF.getPersonaCodigoDocumento());
+		}
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");

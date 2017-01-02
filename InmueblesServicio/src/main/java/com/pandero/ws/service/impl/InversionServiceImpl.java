@@ -20,6 +20,7 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.UtilEnum;
 
 @Service
 public class InversionServiceImpl implements InversionService {
@@ -208,7 +209,7 @@ public class InversionServiceImpl implements InversionService {
 		LOG.info("###listarPedidoInversionPorPedidoId pedidoId:"+pedidoId);
 		
 		List<Inversion> listaInversiones = null;	
-		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + "\"}";	
+		String serviceWhere = "{\"where\":\"PedidoId=" + pedidoId + " and Estado!='ANULADO'\"}";	
 		String obtenerRequisitosxInversionURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
@@ -263,6 +264,67 @@ public class InversionServiceImpl implements InversionService {
         }
         
 		return listaComprobantes;
+	}
+	
+	@Override
+	public String actualizarComprobanteEnvioCartaContabilidad(String inversionId,String nroArmada,String fechaEnvio,String usuarioEnvio, String estado) throws Exception {
+		LOG.info("##InversionServiceImpl.actualizarComprobanteEnvioCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+", fechaEnvio"+fechaEnvio+", estado:"+estado);
+		
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("EnvioContabilidadFecha", fechaEnvio);	
+		request.put("EnvioContabilidadUsuario", usuarioEnvio);	
+		request.put("EstadoContabilidad", estado);	
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";
+		
+		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidad(String inversionId,
+			String nroArmada, String fechaRecepcion, String usuarioRecepcion) throws Exception {		
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("RecepContabilidadFecha", fechaRecepcion);	
+		request.put("RecepContabilidadUsuario", usuarioRecepcion);	
+		request.put("EstadoContabilidad", UtilEnum.ESTADO_COMPROBANTE.RECIBIDO.getTexto());	
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";
+		
+		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);
+		return null;
+	}
+
+	@Override
+	public String envioCargoContabilidadActualizSaldo(String inversionId,
+			String fechaEnvio, String usuarioEnvio) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("EnvioContabilidadFecha", fechaEnvio);
+		request.put("EnvioContabilidadUsuario", usuarioEnvio);
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
+		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
+		return null;
+	}
+
+	@Override
+	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,
+			String fechaRecepcion, String usuarioRecepcion) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("RecepContabilidadFecha", fechaRecepcion);
+		request.put("RecepContabilidadUsuario", usuarioRecepcion);
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
+		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
+		return null;
 	}
 	
 }

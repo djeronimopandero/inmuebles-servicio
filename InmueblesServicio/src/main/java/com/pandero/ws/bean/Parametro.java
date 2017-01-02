@@ -1,7 +1,9 @@
 package com.pandero.ws.bean;
 
-public class Parametro{
-
+public class Parametro implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String key;
 	private String value;
 	
