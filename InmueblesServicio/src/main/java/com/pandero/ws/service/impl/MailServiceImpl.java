@@ -37,9 +37,7 @@ public class MailServiceImpl implements MailService{
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
 			
 			helper.setFrom(email.getEmailFrom());
-			helper.setReplyTo("afernandezl@pandero.com.pe");
-//			helper.setTo(email.getEmailTo());
-			helper.setTo("afernandezl@pandero.com.pe");
+			helper.setTo(email.getEmailTo());
 			helper.setSubject(email.getSubject());
 			
 //			if(email.isFormatHtml()){
