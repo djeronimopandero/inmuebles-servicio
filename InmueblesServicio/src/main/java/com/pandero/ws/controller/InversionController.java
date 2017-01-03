@@ -594,5 +594,28 @@ public class InversionController {
 		return response;
 	}	
 
+	@RequestMapping(value = "/actualizarDesembolsoCaspio", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> actualizarDesembolsoCaspio(@RequestBody Map<String, Object> params) {
+		LOG.info("###actualizarDesembolsoCaspio params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String nroDesembolso = String.valueOf(params.get("nroDesembolso"));
+			liquidacionBusiness.actualizarDesembolsoCaspio(nroInversion, nroArmada, nroDesembolso);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+		}catch(Exception e){
+			LOG.error("Error inversion/actualizarDesembolsoCaspio:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
 	
 }
