@@ -685,13 +685,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String resultado = "";
 		// Obtener la ultima liquidacion
 		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
-		
+		System.out.println("inversion.getTipoInversion():: "+inversion.getTipoInversion());
 		// Si es construccion sin constructora
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora()){				
 			if(ultimaLiquidacion!=null){
 				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
 					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+					System.out.println("nroArmadaActual:: "+nroArmadaActual);
 					if(nroArmadaActual==2||nroArmadaActual==3){
 						liquidacionAutomatica = true;
 						// Obtener monto de los comprobantes
@@ -705,6 +706,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 						// Obtener monto del desembolso
 						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
 						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
 						if(totalComprobantes>=montoMinimoDesembolso){
 							// Generar siguiente liquidacion
 							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
@@ -722,6 +724,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}else{
 			resultado = "Se enviaron los documentos a contabilidad";
 		}
+		System.out.println("RESULTADO ENVIO CONTABILIDAD: "+resultado);
 		
 		// Enviar respuesta
 		resultadoBean = new ResultadoBean();
