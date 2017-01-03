@@ -798,7 +798,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			if(comprobanteCaspio.getEstadoContabilidad().equalsIgnoreCase(UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto())){
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setResultado("El desembolso fue enviado a cargo de contabilidad.");
+				resultadoBean.setResultado("Operación cancelada. Los documentos registrados ya han sido enviados a contabilidad, para registrar más comprobantes deberá anular el envío.");
 			}else{
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
