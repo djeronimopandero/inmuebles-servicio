@@ -670,7 +670,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
-		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=true;
+		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=false;
 
 		Date date=Util.getFechaActual();
 		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.Desembolso;
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
@@ -120,6 +121,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	@Override
 	public String generarLiquidacionPorInversion(String nroInversion, String nroArmada, String usuarioId)
 			throws Exception {
+		System.out.println("EN generarLiquidacionPorInversion");
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
@@ -471,8 +473,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		String inversionId = String.valueOf(inversion.getInversionId().intValue());
 		
+		// Obtener desembolso
+		Desembolso desembolso = desembolsoService.obtenerDesembolsoPorInversionArmada(inversionId, nroArmada);
+		
 		// Registrar desembolso
-		desembolsoService.crearDesembolsoInversion(inversionId, nroArmada, nroDesembolso);
+		if(desembolso==null){
+			desembolsoService.crearDesembolsoInversion(inversionId, nroArmada, nroDesembolso);
+		}
 		
 		return null;
 	}
