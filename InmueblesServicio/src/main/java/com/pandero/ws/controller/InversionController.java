@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
+import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -313,6 +315,21 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}", method = RequestMethod.GET)
+	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero){
+		LOG.info("###ContratoController.solicitudDesembolso inversionNumero:"+inversionNumero);
+		String resultadoBean = null;
+		if(null!=inversionNumero ){
+			try {
+				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero);
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+				return "ERROR";
+			}
+		}
+		return resultadoBean;
+	}
+	
 	@RequestMapping(value = "obtenerMontosDifPrecioInversion/{nroInversion}", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> obtenerMontosDifPrecioInversion(@PathVariable(value="nroInversion") String nroInversion) {	
@@ -370,6 +387,7 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+
 	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean enviarCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
 			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
@@ -384,13 +402,13 @@ public class InversionController {
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-				resultadoBean.setResultado("Ocurrio un error al enviar carta contabilidad");
+				resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 				LOG.error("###enviarCartaContabilidad:",e);
 			}
 		}else{
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-			resultadoBean.setResultado("Ocurrio un error, parametro null");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 		}
 		return resultadoBean;
 	}
@@ -525,6 +543,7 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+
 	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean grabarComprobantes(@PathVariable(value="inversionId") String inversionId,
 			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
@@ -549,5 +568,31 @@ public class InversionController {
 		}
 		return resultadoBean;
 	}
+
+	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {
+		LOG.info("###recepcionarCargoContabilidadActualizSaldo params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(nroInversion);
+			if(liquidacionSAF!=null){
+				result = "1";
+				detail = JsonUtil.toJson(liquidacionSAF);
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerUltimaLiquidacionInversion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
+
 	
 }

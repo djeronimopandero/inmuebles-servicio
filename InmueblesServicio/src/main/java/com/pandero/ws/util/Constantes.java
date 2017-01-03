@@ -1,6 +1,20 @@
 package com.pandero.ws.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constantes {
+	
+	public static final Map<Integer,String> ARMADAS_DOC_DESEMBOLSO;
+	static {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        map.put(1, "primera armada por el 100%");
+        map.put(2, "primera armada por el 50%");
+        map.put(3, "segunda armada por el 40%");
+        map.put(4, "tercera armada por el 10%");
+        ARMADAS_DOC_DESEMBOLSO = Collections.unmodifiableMap(map);
+    }
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
@@ -20,6 +34,9 @@ public class Constantes {
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "INVERSION_DESEMBOLSADA";
 		//public final static String RESULTADO_PASO_LIQUIDACION = "PASO_LIQUIDACION";
 		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
+		public final static String RESULTADO_SI_LIQUIDACION_AUTO = "SI_LIQUIDACION_AUTO";
+		public final static String RESULTADO_NO_LIQUIDACION_AUTO = "NO_LIQUIDACION_AUTO";
+		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
 	}
 	
 	public class Pedido {
@@ -117,6 +134,7 @@ public class Constantes {
 		public final static String LIQUI_ESTADO_CREADO="1";
 		public final static String LIQUI_ESTADO_VB_CONTB="2";
 		public final static String LIQUI_ESTADO_DESEMBOLSADO="3";
+		public final static double PORCENTAJE_MIN_DESEMBOLSO=0.97;
 	}
 	
 	public class GenLista{

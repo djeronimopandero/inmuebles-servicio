@@ -2,7 +2,9 @@ package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
@@ -29,6 +32,7 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
+import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
@@ -67,6 +71,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	MailService mailService;
 	@Autowired
 	LiquidacionDao liquidacionDao;
+	@Autowired
+	LiquidacionBusiness liquidacionBusiness;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -539,7 +545,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
 			if(null!=listComprobante){
 				for(ComprobanteCaspio comprobante:listComprobante){
-					importe += (null!=comprobante.getImporte()?Double.parseDouble(comprobante.getImporte()):0);
+					importe += (comprobante.getImporte()==null?0.00:comprobante.getImporte());
 				}
 			}
 		}
@@ -549,6 +555,80 @@ public class InversionBusinessImpl implements InversionBusiness{
 		rb.setResultado(importe);
 		
 		return rb;
+	}
+	
+	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String generarDocumentoDesembolso(String nroInversion)
+			throws Exception {
+		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
+			
+		}else{
+			LiquidacionSAF liquidacion = liquidaciones.get(0);
+			String armada = Constantes.ARMADAS_DOC_DESEMBOLSO.get(liquidacion.getNroArmada());
+			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+			List<Contrato> contratos =pedidoDao.obtenerContratosxPedidoSAF(pedidoInversion.getNroPedido());
+			if(contratos!=null){
+				List<Contrato> contratosLiquidacion = new ArrayList<Contrato>();
+				for(LiquidacionSAF liquidacionContrato:liquidaciones){
+					for(Contrato contrato:contratos){
+						if(liquidacionContrato.getContratoID().intValue()==contrato.getContratoId().intValue()){
+							contratosLiquidacion.add(contrato);
+							break;
+						}
+					}
+				}
+				
+				List<String> asociadosLiquidacion = new ArrayList<String>();
+				String asociadosFirmas = "";
+				String asociadosDocumento = "";
+				String contratoDocumento = "";
+				
+				for(Contrato contrato:contratosLiquidacion){
+					List<Asociado> asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
+					for(Asociado asociado:asociados){
+						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
+						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
+							String asociadoFirma = " ASOCIADO: " + asociado.getNombreCompleto() + "\n" + asociado.getTipoDocumentoIdentidad() + ": " + asociado.getNroDocumentoIdentidad() + "\n\n";
+							asociadosLiquidacion.add(asociadoImpresion);
+							asociadosDocumento+=asociadoImpresion;
+							contratoDocumento+= contrato.getNroContrato() + ", ";
+							asociadosFirmas+= asociadoFirma;
+						}
+					}
+				}
+								
+				Map<String,String> parameters = new HashMap<String, String>();
+				parameters.put("PagoTesoreriaID", liquidacion.getLiquidacionPagoTesoreria());
+				Map<String,Object> pagoTesoreria = liquidacionDao.executeProcedure(parameters, "USP_LOG_ReportePagoTesoreria_Dos");
+				LOG.info("pago tesoreria: "+pagoTesoreria);
+				LOG.info("asociadosLiquidacion: "+asociadosLiquidacion);
+				String desembolso = "";
+				if(!asociadosLiquidacion.isEmpty()){
+					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
+					for(Map<String,Object> current:data){
+						desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";						
+					}
+				}
+				
+				DocumentoUtil documentoUtil=new DocumentoUtil();	
+				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-conformidad-desembolsoTemplate.docx");
+				if (doc != null) {
+					List<Parametro> parametros = new ArrayList<Parametro>();
+					parametros.add(new Parametro("$asociados", asociadosDocumento));
+					parametros.add(new Parametro("$contratos", contratoDocumento));
+					parametros.add(new Parametro("$desembolsos", desembolso));
+					parametros.add(new Parametro("$armada", armada));
+					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
+					StringBuilder sb=new StringBuilder();
+					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -588,17 +668,65 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
-			
+		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=true;
+
 		Date date=Util.getFechaActual();
 		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
 		LOG.info("##strFecha:"+strFecha);
+		
+		// Actualizar estado de envio a contabilidad
 		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
 		
+		// Verificar si se debe generar liquidacion automatica
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
+
+		String resultado = "";
+		// Obtener la ultima liquidacion
+		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
+		
+		// Si es construccion sin constructora
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+				&& !inversion.getServicioConstructora()){				
+			if(ultimaLiquidacion!=null){
+				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
+					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+					if(nroArmadaActual==2||nroArmadaActual==3){
+						liquidacionAutomatica = true;
+						// Obtener monto de los comprobantes
+						List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+						double totalComprobantes = 0;
+						if(comprobantes!=null && comprobantes.size()>0){
+							for(ComprobanteCaspio comprobante : comprobantes){
+								totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
+							}								
+						}
+						// Obtener monto del desembolso
+						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+						if(totalComprobantes>=montoMinimoDesembolso){
+							// Generar siguiente liquidacion
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+							liquidacionAutomaticaExitosa = true;
+						}	
+					}
+				}
+			}
+		}
+		
+		if(liquidacionAutomaticaExitosa){
+			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automatica.";
+		}else if(liquidacionAutomatica){
+			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automatica.";
+		}else{
+			resultado = "Se enviaron los documentos a contabilidad";
+		}
+		
+		// Enviar respuesta
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 		resultadoBean.setResultado("Se enviaron a carta de contabilidad");
-		//return resultadoBean;
-			
+		resultadoBean.setResultado(resultado);
+	
 		return resultadoBean;
 	}
 
@@ -616,7 +744,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anulo el envio a carta de contabilidad");
+		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
 		
 		return resultadoBean;
 	}
@@ -713,7 +841,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				
 				if(null!=listComprobantes){
 					for(ComprobanteCaspio comprobante:listComprobantes){
-						totalComprobantes+= (comprobante.getImporte()!=null?Double.parseDouble(comprobante.getImporte()):0.00);
+						totalComprobantes+= (comprobante.getImporte()!=null?comprobante.getImporte():0.00);
 					}
 					
 					LOG.info("## Suma de comprobantes de la inversion "+inversionId+", totalComprobantes :"+totalComprobantes);
@@ -749,6 +877,27 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		return resultadoBean;
+	}
+
+	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion)
+			throws Exception {
+		LiquidacionSAF ultimaLiquidacion = null;
+		
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			ultimaLiquidacion = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+			}
+			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
+		}		
+		return ultimaLiquidacion;
 	}
 
 	

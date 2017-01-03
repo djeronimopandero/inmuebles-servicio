@@ -125,7 +125,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		garantiaService.setTokenCaspio(tokenCaspio);
 		contratoService.setTokenCaspio(tokenCaspio);
 		
-		String resultado = "", nroArmadaId = "1";;
+		String resultado = "", nroArmadaId = "1";
 		boolean validacionLiquidacion = true;
 		
 		// Obtener datos pedido-inversion SAF

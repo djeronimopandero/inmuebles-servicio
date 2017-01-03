@@ -1,12 +1,7 @@
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-
-import com.pandero.ws.bean.ObservacionInversion;
 
 public class Test {
 
@@ -51,6 +46,10 @@ public class Test {
 //		System.out.println(listObs.size());
 		
 		test2();
+//		
+		List<String> lista = new ArrayList<String>();
+		lista.add("alan cabrera");
+		System.out.println(lista.indexOf("alan cabrera"));
 		
 	}
 	
