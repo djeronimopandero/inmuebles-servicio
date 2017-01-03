@@ -543,9 +543,35 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
+
+	@RequestMapping(value = "grabarComprobante/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean grabarComprobantes(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
+		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
+			try {
+				
+				resultadoBean = inversionBusiness.grabarComprobantes(inversionId, nroArmada, usuarioId);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al grabar los comprobantes para inversionId:"+inversionId);
+				LOG.error("###grabarComprobantes:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
+		}
+		return resultadoBean;
+	}
+
 	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {	
+	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {
 		LOG.info("###recepcionarCargoContabilidadActualizSaldo params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
@@ -567,5 +593,6 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);			
 		return response;
 	}	
+
 	
 }

@@ -985,45 +985,15 @@ public class DocumentoUtil {
 						if (null != params) {
 							for (Parametro param : params) {
 								if (null != param) {
-									
-									LOG.info("text >>"+text+"<<");
-									
-//									if(text.contains("$tablaFirmas")){
-//										System.out.println("EN $tablaFirmas");
-//										/** Tabla de Firmas **/
-//										text = text.replace("$tablaFirmas", "");
-//										r.setText(text, 0);
-//										System.out.println("EN TABLA FIRMAS");										
-//										XmlCursor cursor = p.getCTP().newCursor();
-//										XWPFTable t1 = doc.insertNewTbl(cursor);
-//										t1.getCTTbl().getTblPr().unsetTblBorders();
-//										for(Asociado asociado : listaAsociados){
-//											XWPFTableRow row = null;				
-//											row=t1.createRow();
-//											row.getCell(0).setText("___________________________");
-//											if(Util.esPersonaJuridica(asociado.getTipoDocumentoIdentidad())){
-//												row=t1.createRow();
-//												row.getCell(0).setText("RAZÓN SOCIAL: "+asociado.getNombreCompleto());
-//											}else{
-//												row=t1.createRow();
-//												row.getCell(0).setText("NOMBRE: "+asociado.getNombreCompleto());
-//											}
-//											row=t1.createRow();
-//											row.getCell(0).setText(asociado.getTipoDocumentoIdentidad()+": "+asociado.getNroDocumentoIdentidad());	
-//										}
-//									}
-																	
-									
+									LOG.info("text :"+text+", param.getKey():"+param.getKey());
 									if (text.contains(param.getKey())) {
 										text = text.replace(param.getKey(), param.getValue());
 										r.setText(text, 0);
 									}
-									
 								}
 							}
 						}
 					}
-
 				}
 			}
 		}
@@ -1054,7 +1024,6 @@ public class DocumentoUtil {
 				}
 			}
 		}
-
 		
 		return doc;
 	}

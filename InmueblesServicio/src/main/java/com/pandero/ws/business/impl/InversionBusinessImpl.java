@@ -1,8 +1,8 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -564,6 +564,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	public String generarDocumentoDesembolso(String nroInversion)
 			throws Exception {
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			
 		}else{
@@ -622,6 +623,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 					parametros.add(new Parametro("$contratos", contratoDocumento));
 					parametros.add(new Parametro("$desembolsos", desembolso));
 					parametros.add(new Parametro("$armada", armada));
+					parametros.add(new Parametro("$asociadosFirmas", asociadosFirmas));
 					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
 					StringBuilder sb=new StringBuilder();
 					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
@@ -669,6 +671,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
 		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=true;
+
 		Date date=Util.getFechaActual();
 		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
 		LOG.info("##strFecha:"+strFecha);
@@ -715,9 +718,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		if(liquidacionAutomaticaExitosa){
-			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automatica.";
+			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automática.";
 		}else if(liquidacionAutomatica){
-			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automatica.";
+			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automática.";
 		}else{
 			resultado = "Se enviaron los documentos a contabilidad";
 		}
@@ -745,7 +748,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
+		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
 		
 		return resultadoBean;
 	}
@@ -816,6 +819,70 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
+	public ResultadoBean grabarComprobantes(String inversionId, String nroArmada, String usuarioId) throws Exception {
+		LOG.info("###InversionBusinessImpl.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+		boolean validarTotalMontoDesembolso=true;
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion())){
+				if(!inversion.getServicioConstructora()){//Sin constructora
+					//No validar
+					validarTotalMontoDesembolso=false;
+				}
+			}
+			
+			if(validarTotalMontoDesembolso){
+				//Validar que la suma de los comprobantes cubra el 100% para todas las inversiones menos SC
+				Double totalComprobantes=0.00;
+				List<ComprobanteCaspio> listComprobantes=inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+				
+				if(null!=listComprobantes){
+					for(ComprobanteCaspio comprobante:listComprobantes){
+						totalComprobantes+= (comprobante.getImporte()!=null?comprobante.getImporte():0.00);
+					}
+					
+					LOG.info("## Suma de comprobantes de la inversion "+inversionId+", totalComprobantes :"+totalComprobantes);
+					
+					if(inversion.getImporteInversion()!=totalComprobantes){
+						resultadoBean = new ResultadoBean();
+						resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+						resultadoBean.setResultado("El total de comprobantes no cubre el monto desembolsado");
+						return resultadoBean;
+					}
+				}else{
+					resultadoBean = new ResultadoBean();
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setResultado("El total de comprobantes no cubre el monto desembolsado");
+					return resultadoBean;
+				}
+			}
+			
+			Date date=Util.getFechaActual();
+			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+			LOG.info("##strFecha:"+strFecha);
+			inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.GUARDADO.getTexto());
+			
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Se grabo el registro de comprobantes para inversionId:"+inversionId);
+			
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("No existe la inversion:"+inversionId);
+			return resultadoBean;
+		}
+		
+		return resultadoBean;
+	}
+
 	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion)
 			throws Exception {
 		LiquidacionSAF ultimaLiquidacion = null;

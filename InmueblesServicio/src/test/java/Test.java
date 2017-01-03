@@ -1,12 +1,7 @@
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-
-import com.pandero.ws.bean.ObservacionInversion;
 
 public class Test {
 
@@ -49,6 +44,8 @@ public class Test {
 		
 //		List<ObservacionInversion> listObs=new ArrayList<>();
 //		System.out.println(listObs.size());
+		
+		test2();
 //		
 		List<String> lista = new ArrayList<String>();
 		lista.add("alan cabrera");
@@ -63,6 +60,17 @@ public class Test {
 		String fecha=sdf.format(date);
 		sb.append(fecha);
 		return sb.toString();
+	}
+	
+	public static void test2(){
+		StringBuilder s1 = new StringBuilder("Java");
+		 String s2 = "Love";
+		 s1.append(s2);
+		 s1.substring(4);
+		 int foundAt = s1.indexOf(s2);
+		System.out.println(foundAt);
+
+		
 	}
 	
 }
