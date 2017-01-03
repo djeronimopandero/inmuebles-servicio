@@ -15,8 +15,9 @@ public interface InversionBusiness {
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
 	
-	public ResultadoBean enviarCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
-	public ResultadoBean anularCartaContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean enviarCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean anularCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean grabarComprobantes(String inversionId,String nroArmada,String usuarioId) throws Exception;
 	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
 	
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
