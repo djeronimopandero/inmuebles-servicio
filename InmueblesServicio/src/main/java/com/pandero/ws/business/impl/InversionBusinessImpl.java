@@ -616,7 +616,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}
 				
 				DocumentoUtil documentoUtil=new DocumentoUtil();	
-				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-conformidad-desembolsoTemplate.docx");
+				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-de-conformidad-de-desembolso-TEMPLATE.docx");
 				if (doc != null) {
 					List<Parametro> parametros = new ArrayList<Parametro>();
 					parametros.add(new Parametro("$asociados", asociadosDocumento));
@@ -626,7 +626,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 					parametros.add(new Parametro("$asociadosFirmas", asociadosFirmas));
 					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
 					StringBuilder sb=new StringBuilder();
-					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
+					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString());
+
+					/*Convertir a pdf*/
+					sb=new StringBuilder();
+					String strRutaGenerados=sb.append(rutaDocumentosGenerados).append("/").toString();
+					DocumentoUtil.convertDocxToPdf(
+							strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx",
+					strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".pdf");
+					
 				}
 			}
 		}
