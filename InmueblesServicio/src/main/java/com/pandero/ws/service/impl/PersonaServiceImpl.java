@@ -72,9 +72,9 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 		request.put("TipoDocumento", persona.getTipoDocumentoID());
 		request.put("NroDocumento", persona.getPersonaCodigoDocumento());
 		request.put("Nombres", persona.getNombre());
-		request.put("ApellidoPaterno",  persona.getApellidoPaterno()  );			
-		request.put("ApellidoMaterno", persona.getApellidoMaterno() );			
-		request.put("RazonSocial",  persona.getRazonSocial() );			
+		request.put("ApellidoPaterno",  persona.getApellidoPaterno() );			
+		request.put("ApellidoMaterno", persona.getApellidoMaterno());			
+		request.put("RazonSocial",  persona.getRazonSocial());			
 		request.put("TipoPersona", persona.getTipoPersona());		
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tablePersonaURL,Object.class,request,null);	
 		return "SUCCESS";
