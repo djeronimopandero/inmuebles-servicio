@@ -564,6 +564,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	public String generarDocumentoDesembolso(String nroInversion)
 			throws Exception {
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			
 		}else{
@@ -622,6 +623,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 					parametros.add(new Parametro("$contratos", contratoDocumento));
 					parametros.add(new Parametro("$desembolsos", desembolso));
 					parametros.add(new Parametro("$armada", armada));
+					parametros.add(new Parametro("$asociadosFirmas", asociadosFirmas));
 					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
 					StringBuilder sb=new StringBuilder();
 					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
@@ -714,9 +716,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 		if(liquidacionAutomaticaExitosa){
-			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automatica.";
+			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automática.";
 		}else if(liquidacionAutomatica){
-			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automatica.";
+			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automática.";
 		}else{
 			resultado = "Se enviaron los documentos a contabilidad";
 		}
@@ -724,7 +726,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 		// Enviar respuesta
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se enviaron a carta de contabilidad");
 		resultadoBean.setResultado(resultado);
 	
 		return resultadoBean;
@@ -744,7 +745,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
+		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
 		
 		return resultadoBean;
 	}

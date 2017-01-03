@@ -544,7 +544,7 @@ public class InversionController {
 	}
 	
 
-	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
+	@RequestMapping(value = "grabarComprobante/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean grabarComprobantes(@PathVariable(value="inversionId") String inversionId,
 			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
 		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
