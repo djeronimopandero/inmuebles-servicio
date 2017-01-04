@@ -742,7 +742,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String resultado = "";
 		// Obtener la ultima liquidacion
 		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
-		System.out.println("inversion.getTipoInversion():: "+inversion.getTipoInversion());
+		LOG.info("inversion.getTipoInversion():: "+inversion.getTipoInversion());
 		// Si es construccion sin constructora
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora()){				
@@ -781,7 +781,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}else{
 			resultado = "Se enviaron los documentos a contabilidad";
 		}
-		System.out.println("RESULTADO ENVIO CONTABILIDAD: "+resultado);
+		LOG.info("RESULTADO ENVIO CONTABILIDAD: "+resultado);
 		
 		// Enviar respuesta
 		resultadoBean = new ResultadoBean();

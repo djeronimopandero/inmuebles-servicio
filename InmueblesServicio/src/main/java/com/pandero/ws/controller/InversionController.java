@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
@@ -21,6 +22,7 @@ import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -36,30 +38,24 @@ public class InversionController {
 	@Autowired
 	InversionService inversionService;
 	
-	@RequestMapping(value = "/obtenerInversion", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> obtenerInversion(@RequestBody Map<String, Object> params) {
-		LOG.info("###obtenerInversion params:"+params);
-		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", detail="";
+	public ResultadoBean obtenerInversion(@PathVariable(value="inversionId") String inversionId) {
+		LOG.info("###obtenerInversion inversionId:"+inversionId);
+		ResultadoBean response = null;
 		try{
-//			String inversionId = String.valueOf(params.get("inversionId"));
-//			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);		
-//			if(inversion!=null){
-//				detail = JsonUtil.toJson(inversion);
-//			}
-			result = Constantes.Service.RESULTADO_EXITOSO;
+			String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+			inversionService.setTokenCaspio(tokenCaspio);
+			
+			Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);	
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			response.setResultado(inversion);
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerInversion:: ",e);
-			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-			detail=e.getMessage();
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
 		}
-			
-		response.put("result",result);
-		response.put("detail",detail);
-		System.out.println("RESPONSE: " +  response);	
-		
 		return response;
 	}
 	
