@@ -54,14 +54,13 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 
 	@Override
 	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
-			String fechaConstitucion, String montoPrima, String usuarioId)
+			String fechaConstitucion, String montoPrima, String modalidad, String usuarioId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
 		
 		// Obtener garantia por Id
-		Garantia garantiaCaspio = garantiaService.obtenerGarantiaPorId(garantiaId);
-		
+		Garantia garantiaCaspio = garantiaService.obtenerGarantiaPorId(garantiaId);		
 		if(garantiaCaspio!=null){
 			System.out.println("garantiaCaspio.getGarantiaSAFId():: "+garantiaCaspio.getGarantiaSAFId());
 		}		
@@ -73,9 +72,29 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		garantia.setFichaConstitucion((fichaConstitucion.equals("")||fichaConstitucion.equals("null"))?null:fichaConstitucion);
 		garantia.setFechaConstitucion((fechaConstitucion.equals("")||fechaConstitucion.equals("null"))?null:fechaConstitucion);
 		garantia.setMontoPrima((montoPrima.equals("") || montoPrima.equals("null"))?null:montoPrima);
-		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion()+" -"+montoPrima+"-");
+		garantia.setModalidad((modalidad.equals("") || modalidad.equals("null"))?null:modalidad);
+		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion()+" -"+montoPrima+"-"+modalidad);
 		// Actualizar garantia en SAF
 		garantiaDao.editarGarantiaSAF(garantia, usuarioId);
+		
+		return null;
+	}
+
+	@Override
+	public String eliminarGarantiaSAF(String garantiaId, String usuarioId)
+			throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		garantiaService.setTokenCaspio(tokenCaspio);
+		
+		// Obtener garantia por Id
+		Garantia garantiaCaspio = garantiaService.obtenerGarantiaPorId(garantiaId);		
+		if(garantiaCaspio!=null){
+			System.out.println("garantiaCaspio.getGarantiaSAFId():: "+garantiaCaspio.getGarantiaSAFId());
+		}
+		
+		// Eliminar garantia
+		String garantiaSAFId = String.valueOf(garantiaCaspio.getGarantiaSAFId().intValue());
+		garantiaDao.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
 		
 		return null;
 	}

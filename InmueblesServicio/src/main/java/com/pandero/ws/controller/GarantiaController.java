@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.business.GarantiaBusiness;
+import com.pandero.ws.util.Constantes;
 
 @Controller
 @RequestMapping("/garantia")
@@ -66,15 +67,43 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
 			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
 			String montoPrima = String.valueOf(params.get("montoPrima"));
+			String modalidad = String.valueOf(params.get("modalidad"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			result = garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
-					fechaConstitucion, montoPrima, usuarioId);
-					
+			garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
+					fechaConstitucion, montoPrima, modalidad, usuarioId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			
 		}catch(Exception e){
 			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
 			e.printStackTrace();
-			result="0";
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/eliminarGarantiaSAF", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> eliminarGarantiaSAF(@RequestBody Map<String, Object> params) {
+		LOG.info("###eliminarGarantiaSAF params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String garantiaId = String.valueOf(params.get("garantiaId"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			
+			garantiaBusiness.eliminarGarantiaSAF(garantiaId, usuarioId);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			
+		}catch(Exception e){
+			LOG.error("Error pedido/eliminarGarantiaSAF:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();
 		}			
 		response.put("result",result);
