@@ -315,13 +315,14 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
-	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}", method = RequestMethod.GET)
-	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero){
+	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero,
+			@PathVariable(value="usuarioId") String usuarioId){
 		LOG.info("###ContratoController.solicitudDesembolso inversionNumero:"+inversionNumero);
 		String resultadoBean = null;
 		if(null!=inversionNumero ){
 			try {
-				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero);
+				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,usuarioId);
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
 				return "ERROR";
