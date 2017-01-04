@@ -971,7 +971,7 @@ public class DocumentoUtil {
 	}
 	
 	
-	public static XWPFDocument replaceParamsDocumentoDesembolso(XWPFDocument doc, List<Parametro> params) {
+	public static XWPFDocument replaceParamsDocumentoDesembolso(XWPFDocument doc, List<Parametro> params,List<String> firmas) {
 
 		LOG.info("---------------------------------------TEXTO----------------------------------------");
 		for(int i=0; i<doc.getParagraphs().size(); i++){
@@ -982,13 +982,32 @@ public class DocumentoUtil {
 					String text = r.getText(0);
 
 					if (text != null) {
-						if (null != params) {
-							for (Parametro param : params) {
-								if (null != param) {
-									LOG.info("text :"+text+", param.getKey():"+param.getKey());
-									if (text.contains(param.getKey())) {
-										text = text.replace(param.getKey(), param.getValue());
-										r.setText(text, 0);
+						if(text.contains("$firmas")){
+							
+							text = text.replace("$firmas", "");
+							r.setText(text, 0);
+							
+							XmlCursor cursor = p.getCTP().newCursor();
+							XWPFTable t1 = doc.insertNewTbl(cursor);
+							t1.getCTTbl().getTblPr().unsetTblBorders();
+							
+							for(String firma : firmas){
+								XWPFTableRow row = null;		
+								row=t1.createRow();
+								row.getCell(0).setText("___________________________");
+								row=t1.createRow();
+								row.getCell(0).setText(firma);
+							}
+							
+						}else{
+							if (null != params) {
+								for (Parametro param : params) {
+									if (null != param) {
+										LOG.info("text :"+text+", param.getKey():"+param.getKey());
+										if (text.contains(param.getKey())) {
+											text = text.replace(param.getKey(), param.getValue());
+											r.setText(text, 0);
+										}
 									}
 								}
 							}
@@ -1000,30 +1019,30 @@ public class DocumentoUtil {
 
 		LOG.info("---------------------------------------TABLA----------------------------------------");
 
-		for (XWPFTable tbl : doc.getTables()) {
-			for (XWPFTableRow row : tbl.getRows()) {
-				for (XWPFTableCell cell : row.getTableCells()) {
-					for (XWPFParagraph p : cell.getParagraphs()) {
-						for (XWPFRun r : p.getRuns()) {
-							String text = r.getText(0);
-							if (text != null) {
-								if (null != params) {
-									for (Parametro param : params) {
-										if (null != param) {
-											if (text.contains(param.getKey())) {
-												text = text.replace(param.getKey(), param.getValue());
-												r.setText(text, 0);
-											}
-										}
-									}
-								}
-							}
-
-						}
-					}
-				}
-			}
-		}
+//		for (XWPFTable tbl : doc.getTables()) {
+//			for (XWPFTableRow row : tbl.getRows()) {
+//				for (XWPFTableCell cell : row.getTableCells()) {
+//					for (XWPFParagraph p : cell.getParagraphs()) {
+//						for (XWPFRun r : p.getRuns()) {
+//							String text = r.getText(0);
+//							if (text != null) {
+//								if (null != params) {
+//									for (Parametro param : params) {
+//										if (null != param) {
+//											if (text.contains(param.getKey())) {
+//												text = text.replace(param.getKey(), param.getValue());
+//												r.setText(text, 0);
+//											}
+//										}
+//									}
+//								}
+//							}
+//
+//						}
+//					}
+//				}
+//			}
+//		}
 		
 		return doc;
 	}

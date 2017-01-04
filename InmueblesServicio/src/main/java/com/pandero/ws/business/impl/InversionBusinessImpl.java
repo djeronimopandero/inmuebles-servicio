@@ -584,20 +584,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}
 				
 				List<String> asociadosLiquidacion = new ArrayList<String>();
-				String asociadosFirmas = "";
+				List<String> firmas = new ArrayList<String>();
+//				String asociadosFirmas = "";
 				String asociadosDocumento = "";
 				String contratoDocumento = "";
 				
 				for(Contrato contrato:contratosLiquidacion){
 					List<Asociado> asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
-					for(Asociado asociado:asociados){
+					
+//					for(Asociado asociado:asociados){
+					for(int i=0; i<asociados.size();i++){
+						Asociado asociado = asociados.get(i);
 						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
 						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
-							String asociadoFirma = " ASOCIADO: " + asociado.getNombreCompleto() + "\n" + asociado.getTipoDocumentoIdentidad() + ": " + asociado.getNroDocumentoIdentidad() + "\n\n";
+							String asociadoFirma = "Asociado: " + asociado.getNombreCompleto() + "\n" + asociado.getTipoDocumentoIdentidad() + ": " + asociado.getNroDocumentoIdentidad() + "\n\n";
 							asociadosLiquidacion.add(asociadoImpresion);
+							firmas.add(asociadoFirma);
 							asociadosDocumento+=asociadoImpresion;
-							contratoDocumento+= contrato.getNroContrato() + ", ";
-							asociadosFirmas+= asociadoFirma;
+							
+							
+							if(i==asociados.size()-1){
+								contratoDocumento+= contrato.getNroContrato();
+							}else{
+								contratoDocumento+= contrato.getNroContrato() + ", ";
+							}
+							
+//							asociadosFirmas+= asociadoFirma;
 						}
 					}
 				}
@@ -623,8 +635,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 					parametros.add(new Parametro("$contratos", contratoDocumento));
 					parametros.add(new Parametro("$desembolsos", desembolso));
 					parametros.add(new Parametro("$armada", armada));
-					parametros.add(new Parametro("$asociadosFirmas", asociadosFirmas));
-					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
+//					parametros.add(new Parametro("$firmas", asociadosFirmas));
+					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros,firmas);
 					StringBuilder sb=new StringBuilder();
 					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString());
 
