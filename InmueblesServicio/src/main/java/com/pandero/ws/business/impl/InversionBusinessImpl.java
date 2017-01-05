@@ -1,7 +1,9 @@
 package com.pandero.ws.business.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -720,7 +722,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuario, String usuarioId)throws Exception {
 		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
@@ -734,7 +736,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		LOG.info("##strFecha:"+strFecha);
 		
 		// Actualizar estado de envio a contabilidad
-		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuario,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
 		
 		// Verificar si se debe generar liquidacion automatica
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
@@ -798,14 +800,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
-		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+			
 		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
 		
-		resultadoBean = new ResultadoBean();
+		ResultadoBean resultadoBean  = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
+		resultadoBean.setResultado("Se anuló el envío de documentos a contabilidad.");
 		
 		return resultadoBean;
 	}
@@ -838,6 +838,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		return "";
+	}
+	
+	@Override
+	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, null, null);
 		return "";
 	}
 	
@@ -959,6 +967,38 @@ public class InversionBusinessImpl implements InversionBusiness{
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
 		return ultimaLiquidacion;
+	}
+	
+	@Override
+	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception {
+		
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double importe=0.00;
+		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(inversionNumero);
+		String fecha = "";
+		
+		if(null!=inversion){
+			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
+			if(null!=listComprobante){
+				for(ComprobanteCaspio comprobante:listComprobante){
+					importe += (null!=comprobante.getImporte()?comprobante.getImporte().doubleValue():0);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");  
+					Date d = sdf.parse(comprobante.getFechaEmision());
+					sdf.applyPattern("dd/MM/yyyy");
+					fecha = sdf.format(d);
+				}
+			}
+		}
+		
+		LinkedHashMap<String,Object> result = new LinkedHashMap<String,Object>();
+		result.put("fecha", fecha);
+		result.put("importe", importe);
+		result.put("tipo", "COMPROBANTES ENTREGADOS");
+		
+		return result;
 	}
 
 	

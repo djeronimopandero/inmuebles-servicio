@@ -13,6 +13,7 @@ public class ConceptoLiquidacion {
 	private String ContratoNumero;
 	private Integer PedidoID;
 	private Integer PedidoInversionID;
+	
 	public String getConceptoID() {
 		return ConceptoID;
 	}

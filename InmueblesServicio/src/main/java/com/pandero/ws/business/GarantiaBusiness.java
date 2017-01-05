@@ -6,6 +6,6 @@ public interface GarantiaBusiness {
 			String fechaConstitucion, String montoPrima, String usuarioId) throws Exception;
 	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
 			String fechaConstitucion, String montoPrima, String modalidad, String usuarioId) throws Exception;
-	public String eliminarGarantiaSAF(String garantiaId, String usuarioId) throws Exception;
+	public String eliminarGarantia(String garantiaId, String usuarioId) throws Exception;
 	
 }

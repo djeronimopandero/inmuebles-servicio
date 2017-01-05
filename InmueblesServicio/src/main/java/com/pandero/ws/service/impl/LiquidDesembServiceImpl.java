@@ -14,15 +14,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.Desembolso;
-import com.pandero.ws.bean.Inversion;
-import com.pandero.ws.service.DesembolsoService;
+import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 
 @Service
-public class DesembolsoServiceImpl implements DesembolsoService {
+public class LiquidDesembServiceImpl implements LiquidDesembService {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(InversionServiceImpl.class);
@@ -31,8 +30,8 @@ public class DesembolsoServiceImpl implements DesembolsoService {
 	@Qualifier("restTemplate")
 	private RestTemplate restTemplate;
 
-	@Value("${url.service.table.desembolso}")
-	private String tableDesembolsoURL;
+	@Value("${url.service.table.liquidacionDesembolso}")
+	private String tableLiquidacionDesembolsoURL;
 
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
@@ -40,22 +39,36 @@ public class DesembolsoServiceImpl implements DesembolsoService {
 	}
 	
 	@Override
-	public String crearDesembolsoInversion(String inversionId, String nroArmada, String nroDesembolso) throws Exception {
+	public String registrarLiquidacionInversion(String inversionId, String nroArmada, String nroLiquidacion) throws Exception {
 		Map<String, String> request = new HashMap<String, String>();
 		request.put("InversionId", inversionId);
 		request.put("NroArmada", nroArmada);
+		request.put("NroLiquidacion", nroLiquidacion);
+		request.put("FechaLiquidacion",  Util.getFechaActualYYYYMMDD());	
+		request.put("Estado", Constantes.Inversion.ESTADO_LIQUIDADO);
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableLiquidacionDesembolsoURL,Object.class,request,null);	
+		return null;
+	}
+	
+	public String registrarDesembolsoInversion(String inversionId, String nroArmada, String nroDesembolso) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
 		request.put("NroDesembolso", nroDesembolso);
-		request.put("FechaDesembolso",  Util.getFechaActualYYYYMMDD());		
-        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableDesembolsoURL,Object.class,request,null);	
+		request.put("FechaDesembolso",  Util.getFechaActualYYYYMMDD());	
+		request.put("Estado", Constantes.Inversion.ESTADO_DESEMBOLSADO);		
+		
+		String serviceWhere = "{\"where\":\"InversionId="+inversionId+" and NroArmada="+nroArmada+"\"}";	
+		String registrarDesembolsoURL = tableLiquidacionDesembolsoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,registrarDesembolsoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 
 	@Override
-	public Desembolso obtenerDesembolsoPorInversionArmada(String inversionId, String nroArmada)
+	public Desembolso obtenerLiquidacionDesembolsoPorInversionArmada(String inversionId, String nroArmada)
 			throws Exception {
 		Desembolso desembolso = null;
 		String serviceWhere = "{\"where\":\"InversionId=" + inversionId + " and NroArmada="+nroArmada+"\"}";		
-		String obtenerInversionesxPedidoURL = tableDesembolsoURL+Constantes.Service.URL_WHERE;
+		String obtenerInversionesxPedidoURL = tableLiquidacionDesembolsoURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
      	String response = JsonUtil.toJson(jsonResult);	     	
@@ -76,6 +89,18 @@ public class DesembolsoServiceImpl implements DesembolsoService {
 	    }
 
 		return desembolso;
+	}
+
+	@Override
+	public String eliminarLiquidacionInversion(String inversionId,
+			String nroArmada) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		
+		String serviceWhere = "{\"where\":\"InversionId="+inversionId+" and NroArmada="+nroArmada+"\"}";	
+		String eliminarLiquidacionURL = tableLiquidacionDesembolsoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,eliminarLiquidacionURL,Object.class,request,serviceWhere);	
+		return null;
 	}
 
 
