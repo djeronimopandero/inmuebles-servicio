@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.PersonaBusiness;
 import com.pandero.ws.dao.PersonaDao;
+import com.pandero.ws.service.InversionService;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -29,6 +32,9 @@ public class PersonaController {
 	
 	@Autowired
 	PersonaDao personaDAO;
+	
+	@Autowired
+	InversionService inversionService;
 	
 	@RequestMapping(value = "obtenerPorPedidoId/{pedidoId}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean getPersonaPorPedidoId(@PathVariable(value="pedidoId") Integer pedidoId){
@@ -133,6 +139,44 @@ public class PersonaController {
 			response.setResultado("Ocurrio un error al registrar el proveedor");
 		}
 		return response;
+	}
+	
+	@RequestMapping(value = "obtenerPersonaPorDocumento/{inversionId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean getPersonaPorInversionId(@PathVariable(value="inversionId") String inversionId){
+		LOG.info("###ContratoController.getPersonaPorInversionId inversionId:"+inversionId);
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionId){
+			try {
+				String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+				inversionService.setTokenCaspio(tokenCaspio);
+				
+				resultadoBean = new ResultadoBean();
+				
+				Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+				
+				UtilEnum.TIPO_DOCUMENTO tipoDocEnum= UtilEnum.TIPO_DOCUMENTO.obtenerTipoDocumentoByCodigoCaspio(Integer.parseInt(inversion.getPropietarioTipoDocId()));
+				
+				PersonaSAF personaSAF=personaDAO.obtenerPersonaPorDoc(tipoDocEnum.getCodigo(), inversion.getPropietarioNroDoc());
+				
+				if(null!=personaSAF){
+					tipoDocEnum = UtilEnum.TIPO_DOCUMENTO.obtenerTipoDocumentoByCodigo(Integer.parseInt(personaSAF.getTipoDocumentoID()));
+					personaSAF.setTipoDocumentoID(String.valueOf(tipoDocEnum.getCodigoCaspio()));
+					
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+					resultadoBean.setResultado(personaSAF);
+				}else{
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setResultado("La persona no existe");
+				}
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setResultado("Ocurrio un error al obtener persona por inversion");
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				LOG.error("###getPersonaPorInversionId:",e);
+			}
+		}
+		return resultadoBean;
 	}
 	
 }
