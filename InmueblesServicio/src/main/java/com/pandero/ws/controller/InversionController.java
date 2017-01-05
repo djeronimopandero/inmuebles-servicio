@@ -1,6 +1,9 @@
 package com.pandero.ws.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -567,5 +570,43 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);			
 		return response;
 	}	
+	
+	
+	@RequestMapping(value = "obtenerSolicitudDesembolsoExcepcional/{inversionNumero}", method = RequestMethod.GET)
+	public @ResponseBody List<LinkedHashMap<String,Object>> getResumenComprobante(@PathVariable(value="inversionNumero") String inversionNumero){
+		
+		List<LinkedHashMap<String,Object>> result = new ArrayList<LinkedHashMap<String,Object>>();
+		LinkedHashMap<String,Object> element = new LinkedHashMap<String,Object>();
+		
+		if(null!=inversionNumero){
+			try {
+				LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(inversionNumero);
+				if(liquidacionSAF!=null){
+					if("3".equals(liquidacionSAF.getLiquidacionEstado())){
+						element.put("fecha", liquidacionSAF.getLiquidacionFecha());
+						element.put("importe", liquidacionSAF.getLiquidacionImporte());
+						element.put("tipo", "DESEMBOLSO");
+						result.add(element);					
+						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,liquidacionSAF.getNroArmada()));
+						
+					}else{
+						element.put("message", "Operación Cancelada. El estado de la liquidación consultada es diferente a DESEMBOLSADO.");
+						result.add(element);	
+					}
+				}else{
+					element.put("message", "Operación Cancelada. La liquidación consultada NO EXISTE.");
+					result.add(element);					
+				}
+				
+				
+			} catch (Exception e) {
+				element = new LinkedHashMap<String,Object>();
+				element.put("message", UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				result.add(element);
+				LOG.error("###obtenerImporteComprobante:",e);
+			}
+		}
+		return result;
+	}
 	
 }

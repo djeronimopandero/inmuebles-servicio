@@ -99,6 +99,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			e.setLiquidacionEstado(rs.getString("LiquidacionEstado"));
 			e.setNroArmada(rs.getInt("NroArmada"));
 			e.setLiquidacionPagoTesoreria(rs.getString("LiquidacionPagoTesoreria"));
+			e.setLiquidacionFecha(rs.getString("Fecha"));
 			return e;		    
 			}
 		}

@@ -1,5 +1,7 @@
 package com.pandero.ws.business;
 
+import java.util.LinkedHashMap;
+
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 
@@ -27,6 +29,7 @@ public interface InversionBusiness {
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 
 	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
+	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 
 }
 	

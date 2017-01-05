@@ -1,8 +1,10 @@
 package com.pandero.ws.business.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -805,6 +807,38 @@ public class InversionBusinessImpl implements InversionBusiness{
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
 		return ultimaLiquidacion;
+	}
+	
+	@Override
+	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception {
+		
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double importe=0.00;
+		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(inversionNumero);
+		String fecha = "";
+		
+		if(null!=inversion){
+			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
+			if(null!=listComprobante){
+				for(ComprobanteCaspio comprobante:listComprobante){
+					importe += (null!=comprobante.getImporte()?Double.parseDouble(comprobante.getImporte()):0);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+					Date d = sdf.parse(comprobante.getFechaEmision());
+					sdf.applyPattern("dd/MM/yyyy");
+					fecha = sdf.format(d);
+				}
+			}
+		}
+		
+		LinkedHashMap<String,Object> result = new LinkedHashMap<String,Object>();
+		result.put("fecha", fecha);
+		result.put("importe", importe);
+		result.put("tipo", "COMPROBANTES ENTREGADOS");
+		
+		return result;
 	}
 
 	
