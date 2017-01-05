@@ -970,8 +970,66 @@ public class DocumentoUtil {
 		return strHtml.toString();
 	}
 	
+	public static String getHtmlConstanciaDesembolsoParcial(String nroInversion,String contratos,String asociado,String tipoInversion,String tipoInmueble,String libreGravamen,String areaTotal,String partidaRegistrar,String importeInversion,String importeDesembolsoParcial){
+		StringBuilder strHtml= new StringBuilder("");
+		
+		strHtml.append("<head>");
+		strHtml.append("</head>");
+		strHtml.append("<body>");
+		strHtml.append("<table>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>CC</td>");
+				strHtml.append("<td>:"+contratos+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Asociado</td>");
+				strHtml.append("<td>:"+asociado+"</td>");
+			strHtml.append("</tr>");
+		strHtml.append("</table>");
+		strHtml.append("</br>");
+		strHtml.append("<table>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Se adjunta la constancia de desembolso parcial de la inversión Nro. "+nroInversion+". Solicitar la firma del Asociado.</td>");
+			strHtml.append("</tr>");
+		strHtml.append("</table>");
+		strHtml.append("</br>");
+		strHtml.append("<table>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Tipo de inversión</td>");
+				strHtml.append("<td>:"+tipoInversion+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Tipo de inmueble</td>");
+				strHtml.append("<td>:"+tipoInmueble+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Libre de gravamen</td>");
+				strHtml.append("<td>:"+libreGravamen+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Área total (m2)</td>");
+				strHtml.append("<td>:"+areaTotal+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Partida registral</td>");
+				strHtml.append("<td>:"+partidaRegistrar+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+				strHtml.append("<td>Importe de inversión (US$)</td>");
+				strHtml.append("<td>:"+importeInversion+"</td>");
+			strHtml.append("</tr>");
+			strHtml.append("<tr>");
+			strHtml.append("<td>Importe de desembolso parcial (US$)</td>");
+			strHtml.append("<td>:"+importeDesembolsoParcial+"</td>");
+			strHtml.append("</tr>");
+		strHtml.append("</table>");
+		strHtml.append("</body>");
+		strHtml.append("</html>");
+		
+		return strHtml.toString();
+	}
 	
-	public static XWPFDocument replaceParamsDocumentoDesembolso(XWPFDocument doc, List<Parametro> params) {
+	public static XWPFDocument replaceParamsDocumentoDesembolso(XWPFDocument doc, List<Parametro> params,List<Asociado> asociados) {
 
 		LOG.info("---------------------------------------TEXTO----------------------------------------");
 		for(int i=0; i<doc.getParagraphs().size(); i++){
@@ -982,79 +1040,80 @@ public class DocumentoUtil {
 					String text = r.getText(0);
 
 					if (text != null) {
-						if (null != params) {
-							for (Parametro param : params) {
-								if (null != param) {
-									
-									LOG.info("text >>"+text+"<<");
-									
-//									if(text.contains("$tablaFirmas")){
-//										System.out.println("EN $tablaFirmas");
-//										/** Tabla de Firmas **/
-//										text = text.replace("$tablaFirmas", "");
-//										r.setText(text, 0);
-//										System.out.println("EN TABLA FIRMAS");										
-//										XmlCursor cursor = p.getCTP().newCursor();
-//										XWPFTable t1 = doc.insertNewTbl(cursor);
-//										t1.getCTTbl().getTblPr().unsetTblBorders();
-//										for(Asociado asociado : listaAsociados){
-//											XWPFTableRow row = null;				
-//											row=t1.createRow();
-//											row.getCell(0).setText("___________________________");
-//											if(Util.esPersonaJuridica(asociado.getTipoDocumentoIdentidad())){
-//												row=t1.createRow();
-//												row.getCell(0).setText("RAZÓN SOCIAL: "+asociado.getNombreCompleto());
-//											}else{
-//												row=t1.createRow();
-//												row.getCell(0).setText("NOMBRE: "+asociado.getNombreCompleto());
-//											}
-//											row=t1.createRow();
-//											row.getCell(0).setText(asociado.getTipoDocumentoIdentidad()+": "+asociado.getNroDocumentoIdentidad());	
-//										}
-//									}
-																	
-									
-									if (text.contains(param.getKey())) {
-										text = text.replace(param.getKey(), param.getValue());
-										r.setText(text, 0);
+						/*if(text.contains("$firmas")){
+							
+							text = text.replace("$firmas", "");
+							r.setText(text, 0);
+							
+							for(Asociado asociado:asociados){
+								
+								p.insertNewRun(i);
+								XWPFRun newRun = r;
+								CTRPr rPr = newRun.getCTR().isSetRPr() ? newRun.getCTR().getRPr() : newRun.getCTR().addNewRPr();
+								rPr.set(r.getCTR().getRPr());
+								newRun.setText("___________________________");
+								newRun.addCarriageReturn();
+								
+								p.insertNewRun(i);
+								XWPFRun newRun2 = r;
+								CTRPr rPr2 = newRun2.getCTR().isSetRPr() ? newRun2.getCTR().getRPr() : newRun2.getCTR().addNewRPr();
+								rPr2.set(r.getCTR().getRPr());
+								newRun2.setText("Asociado: " + asociado.getNombreCompleto());
+								newRun2.addCarriageReturn();
+								
+								p.insertNewRun(i);
+								XWPFRun newRun3 = r;
+								CTRPr rPr3 = newRun3.getCTR().isSetRPr() ? newRun3.getCTR().getRPr() : newRun3.getCTR().addNewRPr();
+								rPr3.set(r.getCTR().getRPr());
+								newRun3.setText(asociado.getTipoDocumentoIdentidad()+": " + asociado.getNroDocumentoIdentidad());
+								newRun3.addCarriageReturn();
+							}
+							
+							
+						}else{
+							if (null != params) {
+								for (Parametro param : params) {
+									if (null != param) {
+										LOG.info("text :"+text+", param.getKey():"+param.getKey());
+										if (text.contains(param.getKey())) {
+											text = text.replace(param.getKey(), param.getValue());
+											r.setText(text, 0);
+										}
 									}
-									
 								}
 							}
-						}
+						}*/
 					}
-
 				}
 			}
 		}
 
 		LOG.info("---------------------------------------TABLA----------------------------------------");
 
-		for (XWPFTable tbl : doc.getTables()) {
-			for (XWPFTableRow row : tbl.getRows()) {
-				for (XWPFTableCell cell : row.getTableCells()) {
-					for (XWPFParagraph p : cell.getParagraphs()) {
-						for (XWPFRun r : p.getRuns()) {
-							String text = r.getText(0);
-							if (text != null) {
-								if (null != params) {
-									for (Parametro param : params) {
-										if (null != param) {
-											if (text.contains(param.getKey())) {
-												text = text.replace(param.getKey(), param.getValue());
-												r.setText(text, 0);
-											}
-										}
-									}
-								}
-							}
-
-						}
-					}
-				}
-			}
-		}
-
+//		for (XWPFTable tbl : doc.getTables()) {
+//			for (XWPFTableRow row : tbl.getRows()) {
+//				for (XWPFTableCell cell : row.getTableCells()) {
+//					for (XWPFParagraph p : cell.getParagraphs()) {
+//						for (XWPFRun r : p.getRuns()) {
+//							String text = r.getText(0);
+//							if (text != null) {
+//								if (null != params) {
+//									for (Parametro param : params) {
+//										if (null != param) {
+//											if (text.contains(param.getKey())) {
+//												text = text.replace(param.getKey(), param.getValue());
+//												r.setText(text, 0);
+//											}
+//										}
+//									}
+//								}
+//							}
+//
+//						}
+//					}
+//				}
+//			}
+//		}
 		
 		return doc;
 	}

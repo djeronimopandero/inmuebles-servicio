@@ -64,7 +64,7 @@ public class PersonaDaoImpl implements PersonaDao {
 	private static final class PersonaMapper implements RowMapper<PersonaSAF>{
 		public PersonaSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
 			PersonaSAF p = new PersonaSAF();
-			p.setTipoDocumentoID(null!=rs.getString("TipoDocumentoID")?"":rs.getString("TipoDocumentoID"));
+			p.setTipoDocumentoID(null!=rs.getString("TipoDocumentoID")?rs.getString("TipoDocumentoID"):"");
 			p.setPersonaCodigoDocumento(null!=rs.getString("PersonaCodigoDocumento")?rs.getString("PersonaCodigoDocumento"):"");
 			p.setNombre(null!=rs.getString("PersonaNombre")?rs.getString("PersonaNombre"):"");
 			p.setApellidoPaterno(null!=rs.getString("PersonaApellidoPaterno")?rs.getString("PersonaApellidoPaterno"):"");
@@ -83,6 +83,8 @@ public class PersonaDaoImpl implements PersonaDao {
 			PersonaSAF p = new PersonaSAF();
 			p.setNombreCompleto(null!=rs.getString("PersonaNombreCompleto")?rs.getString("PersonaNombreCompleto"):"");
 			p.setPersonaID(rs.getInt("PersonaID"));
+			p.setTipoDocumentoID(rs.getString("TipoDocumentoID"));
+			p.setPersonaCodigoDocumento(rs.getString("PersonaCodigoDocumento"));
 			return p;		    
 		}
 	}

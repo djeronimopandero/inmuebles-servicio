@@ -2,9 +2,9 @@ package com.pandero.ws.business.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -547,7 +547,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
 			if(null!=listComprobante){
 				for(ComprobanteCaspio comprobante:listComprobante){
-					importe += (null!=comprobante.getImporte()?Double.parseDouble(comprobante.getImporte()):0);
+					importe += (comprobante.getImporte()==null?0.00:comprobante.getImporte());
 				}
 			}
 		}
@@ -563,9 +563,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String generarDocumentoDesembolso(String nroInversion)
+	public String generarDocumentoDesembolso(String nroInversion, String usuarioSAFId)
 			throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			
 		}else{
@@ -584,21 +588,28 @@ public class InversionBusinessImpl implements InversionBusiness{
 					}
 				}
 				
+				Double dblImporteDesembolsoParcial=0.00;
 				List<String> asociadosLiquidacion = new ArrayList<String>();
-				String asociadosFirmas = "";
 				String asociadosDocumento = "";
 				String contratoDocumento = "";
+				List<Asociado> asociados=new ArrayList<>();
 				
 				for(Contrato contrato:contratosLiquidacion){
-					List<Asociado> asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
-					for(Asociado asociado:asociados){
+					asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
+					
+					for(int i=0; i<asociados.size();i++){
+						Asociado asociado = asociados.get(i);
 						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
 						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
-							String asociadoFirma = " ASOCIADO: " + asociado.getNombreCompleto() + "\n" + asociado.getTipoDocumentoIdentidad() + ": " + asociado.getNroDocumentoIdentidad() + "\n\n";
 							asociadosLiquidacion.add(asociadoImpresion);
 							asociadosDocumento+=asociadoImpresion;
-							contratoDocumento+= contrato.getNroContrato() + ", ";
-							asociadosFirmas+= asociadoFirma;
+							
+							if(i==asociados.size()-1){
+								contratoDocumento+= contrato.getNroContrato();
+							}else{
+								contratoDocumento+= contrato.getNroContrato() + ", ";
+							}
+							
 						}
 					}
 				}
@@ -606,27 +617,75 @@ public class InversionBusinessImpl implements InversionBusiness{
 				Map<String,String> parameters = new HashMap<String, String>();
 				parameters.put("PagoTesoreriaID", liquidacion.getLiquidacionPagoTesoreria());
 				Map<String,Object> pagoTesoreria = liquidacionDao.executeProcedure(parameters, "USP_LOG_ReportePagoTesoreria_Dos");
+				
 				LOG.info("pago tesoreria: "+pagoTesoreria);
 				LOG.info("asociadosLiquidacion: "+asociadosLiquidacion);
+				
 				String desembolso = "";
 				if(!asociadosLiquidacion.isEmpty()){
 					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
 					for(Map<String,Object> current:data){
+						dblImporteDesembolsoParcial += (current.get("Importe")!=null?Double.parseDouble(current.get("Importe").toString()):0.00);
 						desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";						
 					}
 				}
 				
 				DocumentoUtil documentoUtil=new DocumentoUtil();	
-				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-conformidad-desembolsoTemplate.docx");
+				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-de-conformidad-de-desembolso-TEMPLATE.docx");
 				if (doc != null) {
 					List<Parametro> parametros = new ArrayList<Parametro>();
 					parametros.add(new Parametro("$asociados", asociadosDocumento));
 					parametros.add(new Parametro("$contratos", contratoDocumento));
 					parametros.add(new Parametro("$desembolsos", desembolso));
 					parametros.add(new Parametro("$armada", armada));
-					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros);
+					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros,asociados);
 					StringBuilder sb=new StringBuilder();
-					documentoUtil.saveDocument(doc, sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolsoTemplate").toString());	
+					String docGenerado = sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString();
+					documentoUtil.saveDocument(doc, docGenerado);
+
+					/*Convertir a pdf*/
+//					sb=new StringBuilder();
+//					String strRutaGenerados=sb.append(rutaDocumentosGenerados).append("/").toString();
+//					DocumentoUtil.convertDocxToPdf(
+//							strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx",
+//					strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".pdf");
+					
+						/*Enviar por correo*/
+					 	Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
+				        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
+				         
+				         String emailTo = documentoEmailTo;
+				         if(!Util.esVacio(usuario.getCelulaCorreo())){
+				        	 emailTo = usuario.getCelulaCorreo();
+				         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
+				        	 emailTo = usuario.getEmpleadoCorreo();
+				         }
+				         
+				         String strNroContratos = Util.getContratosFromList(contratosLiquidacion);
+				         
+				         Inversion pic= inversionService.obtenerInversionCaspioPorNro(nroInversion);
+				         
+				         String speech = DocumentoUtil.getHtmlConstanciaDesembolsoParcial(
+				        		 nroInversion,
+				        		 strNroContratos,
+				        		 asociados.get(0).getNombreCompleto(), 
+				        		 StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion(), 
+				        		 StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
+				        		 StringUtils.isEmpty(pic.getGravamen())?"":pic.getGravamen(), 
+				        		 Util.getMontoFormateado(pic.getAreaTotal()), 
+				        		 StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
+				        		 Util.getMontoFormateado(pic.getImporteInversion()), 
+				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
+	
+				         EmailBean emailBean=new EmailBean();
+				         emailBean.setEmailFrom(emailDesarrolloPandero);
+				         emailBean.setEmailTo(emailTo);
+				         emailBean.setSubject("Constancia de desembolso parcial - "+asociados.get(0).getNombreCompleto());
+				         emailBean.setDocumento(docGenerado);
+				         emailBean.setTextoEmail(speech);
+				         emailBean.setFormatHtml(true);
+				         emailBean.setEnviarArchivo(true);
+				         mailService.sendMail(emailBean);
 				}
 			}
 		}
@@ -669,7 +728,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
-		ResultadoBean resultadoBean  = new ResultadoBean();	
+		ResultadoBean resultadoBean  = new ResultadoBean();
+		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=false;
+
 		Date date=Util.getFechaActual();
 		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
 		LOG.info("##strFecha:"+strFecha);
@@ -679,27 +740,56 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		// Verificar si se debe generar liquidacion automatica
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
-		if(inversion!=null){
-			// Si es construccion sin constructora
-			if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
-					&& !inversion.getServicioConstructora()){
-				// Obtener la ultima liquidacion
-				LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
-				if(ultimaLiquidacion!=null){
-					if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
-						int nroArmadaActual = ultimaLiquidacion.getNroArmada();
-						if(nroArmadaActual==2||nroArmadaActual==3){
-							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+
+		String resultado = "";
+		// Obtener la ultima liquidacion
+		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
+		LOG.info("inversion.getTipoInversion():: "+inversion.getTipoInversion());
+		// Si es construccion sin constructora
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+				&& !inversion.getServicioConstructora()){				
+			if(ultimaLiquidacion!=null){
+				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
+					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+					System.out.println("nroArmadaActual:: "+nroArmadaActual);
+					if(nroArmadaActual==2||nroArmadaActual==3){
+						liquidacionAutomatica = true;
+						// Obtener monto de los comprobantes
+						List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+						double totalComprobantes = 0;
+						if(comprobantes!=null && comprobantes.size()>0){
+							for(ComprobanteCaspio comprobante : comprobantes){
+								totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
+							}								
 						}
+						// Obtener monto del desembolso
+						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
+						if(totalComprobantes>=montoMinimoDesembolso){
+							// Generar siguiente liquidacion
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+							liquidacionAutomaticaExitosa = true;
+						}	
 					}
 				}
 			}
 		}
 		
+		if(liquidacionAutomaticaExitosa){
+			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automática.";
+		}else if(liquidacionAutomatica){
+			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automática.";
+		}else{
+			resultado = "Se enviaron los documentos a contabilidad";
+		}
+		LOG.info("RESULTADO ENVIO CONTABILIDAD: "+resultado);
+		
+		// Enviar respuesta
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se envió el cargo a contabilidad");
-		
+		resultadoBean.setResultado(resultado);
+	
 		return resultadoBean;
 	}
 
@@ -717,7 +807,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		resultadoBean = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anuló el cargo a contabilidad");
+		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
 		
 		return resultadoBean;
 	}
@@ -770,7 +860,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			if(comprobanteCaspio.getEstadoContabilidad().equalsIgnoreCase(UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto())){
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setResultado("El desembolso fue enviado a cargo de contabilidad.");
+				resultadoBean.setResultado("Operación cancelada. Los documentos registrados ya han sido enviados a contabilidad, para registrar más comprobantes deberá anular el envío.");
 			}else{
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
@@ -788,6 +878,70 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
+	public ResultadoBean grabarComprobantes(String inversionId, String nroArmada, String usuarioId) throws Exception {
+		LOG.info("###InversionBusinessImpl.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean  = new ResultadoBean();
+		boolean validarTotalMontoDesembolso=true;
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion())){
+				if(!inversion.getServicioConstructora()){//Sin constructora
+					//No validar
+					validarTotalMontoDesembolso=false;
+				}
+			}
+			
+			if(validarTotalMontoDesembolso){
+				//Validar que la suma de los comprobantes cubra el 100% para todas las inversiones menos SC
+				Double totalComprobantes=0.00;
+				List<ComprobanteCaspio> listComprobantes=inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+				
+				if(null!=listComprobantes){
+					for(ComprobanteCaspio comprobante:listComprobantes){
+						totalComprobantes+= (comprobante.getImporte()!=null?comprobante.getImporte():0.00);
+					}
+					
+					LOG.info("## Suma de comprobantes de la inversion "+inversionId+", totalComprobantes :"+totalComprobantes);
+					
+					if(inversion.getImporteInversion()!=totalComprobantes){
+						resultadoBean = new ResultadoBean();
+						resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+						resultadoBean.setResultado("El total de comprobantes no cubre el monto desembolsado");
+						return resultadoBean;
+					}
+				}else{
+					resultadoBean = new ResultadoBean();
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setResultado("El total de comprobantes no cubre el monto desembolsado");
+					return resultadoBean;
+				}
+			}
+			
+			Date date=Util.getFechaActual();
+			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+			LOG.info("##strFecha:"+strFecha);
+			inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.GUARDADO.getTexto());
+			
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Se grabo el registro de comprobantes para inversionId:"+inversionId);
+			
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("No existe la inversion:"+inversionId);
+			return resultadoBean;
+		}
+		
+		return resultadoBean;
+	}
+
 	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion)
 			throws Exception {
 		LiquidacionSAF ultimaLiquidacion = null;
@@ -800,7 +954,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
 				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
 				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
-				liquidacionImporte += liquidacion.getLiquidacionImporte();
+				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
 				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
 				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
 			}
@@ -824,7 +978,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
 			if(null!=listComprobante){
 				for(ComprobanteCaspio comprobante:listComprobante){
-					importe += (null!=comprobante.getImporte()?Double.parseDouble(comprobante.getImporte()):0);
+					importe += (null!=comprobante.getImporte()?comprobante.getImporte().doubleValue():0);
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 					Date d = sdf.parse(comprobante.getFechaEmision());
 					sdf.applyPattern("dd/MM/yyyy");

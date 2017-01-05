@@ -101,7 +101,8 @@ public class UtilEnum {
 	public static enum ESTADO_COMPROBANTE {
 		
 		ENVIADO(1, "ENVIADO"),
-		RECIBIDO(2, "RECIBIDO");
+		GUARDADO(2, "GUARDADO"),
+		RECIBIDO(3, "RECIBIDO");
 		
 		private final Integer codigo;
 		private final String texto;

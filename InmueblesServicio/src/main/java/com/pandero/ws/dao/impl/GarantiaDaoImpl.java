@@ -71,6 +71,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		call.addDeclaredParameter(new SqlParameter("@FichaConstitucion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@FechaConstitucion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@MontoPrima", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@Modalidad", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
@@ -79,6 +80,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		parameters.addValue("@FichaConstitucion", garantia.getFichaConstitucion());
 		parameters.addValue("@FechaConstitucion", garantia.getFechaConstitucion());
 		parameters.addValue("@MontoPrima", garantia.getMontoPrima());
+		parameters.addValue("@Modalidad", garantia.getModalidad());
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		System.out.println("garantia.getMontoPrima()>"+garantia.getMontoPrima()+"<");

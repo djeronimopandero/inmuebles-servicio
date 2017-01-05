@@ -16,13 +16,14 @@ public interface InversionBusiness {
 	public ResultadoBean getImporteComprobante(String inversionNumero, Integer nroArmada)throws Exception;
 	
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
-	public String generarDocumentoDesembolso(String nroInversion) throws Exception;
+	public String generarDocumentoDesembolso(String nroInversion, String usuarioSAFId) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
 	
 	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
 	
 	public ResultadoBean enviarCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;
 	public ResultadoBean anularCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;	
+	public ResultadoBean grabarComprobantes(String inversionId,String nroArmada,String usuarioId) throws Exception;
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
 	
 	public String envioCargoContabilidadActualizSaldo(String inversionId,String usuarioEnvio) throws Exception;
