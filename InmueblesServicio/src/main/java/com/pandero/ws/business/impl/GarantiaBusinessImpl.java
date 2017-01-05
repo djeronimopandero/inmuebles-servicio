@@ -81,7 +81,7 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	}
 
 	@Override
-	public String eliminarGarantiaSAF(String garantiaId, String usuarioId)
+	public String eliminarGarantia(String garantiaId, String usuarioId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
@@ -92,9 +92,12 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 			System.out.println("garantiaCaspio.getGarantiaSAFId():: "+garantiaCaspio.getGarantiaSAFId());
 		}
 		
-		// Eliminar garantia
+		// Eliminar garantia en SAF
 		String garantiaSAFId = String.valueOf(garantiaCaspio.getGarantiaSAFId().intValue());
 		garantiaDao.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+		
+		// Eliminar garantia en Caspio
+		garantiaService.eliminarGarantiaPorId(garantiaId);
 		
 		return null;
 	}

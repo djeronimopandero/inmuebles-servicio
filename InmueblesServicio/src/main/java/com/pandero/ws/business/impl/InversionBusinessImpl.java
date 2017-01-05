@@ -720,7 +720,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuario, String usuarioId)throws Exception {
 		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
@@ -734,7 +734,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		LOG.info("##strFecha:"+strFecha);
 		
 		// Actualizar estado de envio a contabilidad
-		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuario,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
 		
 		// Verificar si se debe generar liquidacion automatica
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
@@ -798,14 +798,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
-		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+			
 		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
 		
-		resultadoBean = new ResultadoBean();
+		ResultadoBean resultadoBean  = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
+		resultadoBean.setResultado("Se anuló el envío de documentos a contabilidad.");
 		
 		return resultadoBean;
 	}
@@ -838,6 +836,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		return "";
+	}
+	
+	@Override
+	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, null, null);
 		return "";
 	}
 	

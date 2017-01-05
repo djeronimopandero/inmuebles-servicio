@@ -87,21 +87,21 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		return response;
 	}
 	
-	@RequestMapping(value = "/eliminarGarantiaSAF", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/eliminarGarantia", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> eliminarGarantiaSAF(@RequestBody Map<String, Object> params) {
-		LOG.info("###eliminarGarantiaSAF params:"+params);
+	public Map<String, Object> eliminarGarantia(@RequestBody Map<String, Object> params) {
+		LOG.info("###eliminarGarantia params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
 			String garantiaId = String.valueOf(params.get("garantiaId"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			garantiaBusiness.eliminarGarantiaSAF(garantiaId, usuarioId);
+			garantiaBusiness.eliminarGarantia(garantiaId, usuarioId);
 			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/eliminarGarantiaSAF:: ",e);
+			LOG.error("Error pedido/eliminarGarantia:: ",e);
 			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Desembolso;
@@ -148,21 +149,31 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			nroArmadaId = String.valueOf(Integer.parseInt(nroArmada)+1);
 		}
 		LOG.info("nroArmadaId: "+nroArmadaId);
-		
-		// Obtener garantias del pedido
-		List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
-		if(listaGarantias!=null && listaGarantias.size()>0){
-			for(Garantia garantia : listaGarantias){
-				System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
-				if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-					validacionLiquidacion=false;
-				}
-			}
-		}else{
-			validacionLiquidacion=false;
+					
+		// Validar montos por cobrar
+		boolean validacionConceptos = validacionConceptosLiquidacion(inversion);
+		if(validacionConceptos==false){
+			validacionLiquidacion = false;
+			resultado = Constantes.Service.RESULTADO_PENDIENTE_COBROS;
 		}
-		// Verificar si existen garantias
-		if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+		
+		// Validar garantias
+		if(validacionLiquidacion){			
+			// Obtener garantias del pedido
+			List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
+			if(listaGarantias!=null && listaGarantias.size()>0){
+				for(Garantia garantia : listaGarantias){
+					System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
+					if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+						validacionLiquidacion=false;
+					}
+				}
+			}else{
+				validacionLiquidacion=false;
+			}
+			// Verificar si existen garantias
+			if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+		}
 					
 		// Validar el estado de la liquidacion
 		if(validacionLiquidacion){
@@ -176,13 +187,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 		}
 		
-		// Verificar si existe monto disponible para la inversion - si no es construccion
+		// Verificar si existe monto disponible para la inversion
 		double totalDisponible=0;
 		// Obtener total disponible en contratos
 		double totalDisponibleContratos = obtenerTotalDisponibleEnPedido(listaPedidoContrato);
 		// Obtener diferencia precio pagada
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
 		double montoDifPrecio = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto();
+		// Total disponible
 		totalDisponible=totalDisponibleContratos+montoDifPrecio;
 		System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 		
@@ -451,13 +463,19 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
 		
 		// Obtener saldo diferencia precio
-		DetalleDiferenciaPrecio diferenciaPrecio = contratoBusiness.obtenerMontoDiferenciaPrecio(pedido.getPedidoId());
-		
-		// Obtener monto pagado dif. precio
-		diferenciaPrecio.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-		diferenciaPrecio.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
-				
-		return diferenciaPrecio;
+		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(pedido.getPedidoId());
+		Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+		if(montoDiferenciaPrecio<0){		
+			ddp.setDiferenciaPrecio(Util.getMontoFormateado(Double.parseDouble(ddp.getDiferenciaPrecio())));
+			ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
+			ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
+			// Obtener monto pagado dif. precio			
+			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
+			ddp.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
+		}else{
+			ddp = null;
+		}
+		return ddp;
 	}
 
 	@Override
@@ -465,6 +483,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			String nroArmada, String nroDesembolso) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		desembolsoService.setTokenCaspio(tokenCaspio);
 		
 		// Actualizar estado de la inversion
 		inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_DESEMBOLSADO);
@@ -485,5 +504,40 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	}
 	
 	
-	
+	private boolean validacionConceptosLiquidacion(Inversion inversion) throws Exception{
+		boolean resultado = false, conceptoNoPagado=false;
+		
+		// Obtener conceptos de liquidacion
+		List<ConceptoLiquidacion> listaConceptos = liquidacionDao.obtenerConceptosLiquidacion(inversion.getNroInversion());
+		if(listaConceptos!=null && listaConceptos.size()>0){
+			for(ConceptoLiquidacion concepto : listaConceptos){
+				if(Constantes.Liquidacion.CONCEPTO_SITUACION_PENDIENTE.equals(concepto.getSituacionID())){
+					System.out.println("concepto no pagado: "+concepto.getConceptoNombre()+"-"+concepto.getSituacionID());
+					conceptoNoPagado=true;
+					break;
+				}
+			}
+		}
+		
+		// Obtener cancelacion diferencia precio
+		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
+		if(ddp!=null){
+			if(!ddp.getTipoInversion().equals("CONSTRUCCION-0")){
+				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
+				if(montoDiferenciaPrecio<0){
+					double montoPagado = Double.parseDouble(ddp.getMontoDifPrecioPagado());
+					if(montoPagado<montoDiferenciaPrecio){
+						conceptoNoPagado=true;
+					}
+				}
+			}
+		}
+		
+		if(conceptoNoPagado==false){
+			resultado=true;
+		}
+		
+		return resultado;
+	}
 }

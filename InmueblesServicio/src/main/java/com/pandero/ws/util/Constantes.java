@@ -37,6 +37,7 @@ public class Constantes {
 		public final static String RESULTADO_SI_LIQUIDACION_AUTO = "SI_LIQUIDACION_AUTO";
 		public final static String RESULTADO_NO_LIQUIDACION_AUTO = "NO_LIQUIDACION_AUTO";
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
+		public final static String RESULTADO_PENDIENTE_COBROS = "PENDIENTE_COBROS";
 	}
 	
 	public class Pedido {
@@ -135,6 +136,7 @@ public class Constantes {
 		public final static String LIQUI_ESTADO_VB_CONTB="2";
 		public final static String LIQUI_ESTADO_DESEMBOLSADO="3";
 		public final static double PORCENTAJE_MIN_DESEMBOLSO=0.97;
+		public final static String CONCEPTO_SITUACION_PENDIENTE="01";
 	}
 	
 	public class GenLista{
