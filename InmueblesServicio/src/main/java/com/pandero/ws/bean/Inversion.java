@@ -57,6 +57,7 @@ public class Inversion implements java.io.Serializable {
 	private String EntidadFinancieraNom;
 	private String DocumentosRequeridos;
 	private String NroLiquidacion;
+	private String Estado;
 	
 	public Integer getInversionId() {
 		return InversionId;
@@ -376,5 +377,11 @@ public class Inversion implements java.io.Serializable {
 	public void setNroLiquidacion(String nroLiquidacion) {
 		NroLiquidacion = nroLiquidacion;
 	}
-		
+	public String getEstado() {
+		return Estado;
+	}
+	public void setEstado(String estado) {
+		Estado = estado;
+	}
+	
 }

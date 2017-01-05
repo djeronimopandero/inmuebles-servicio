@@ -1,6 +1,9 @@
 package com.pandero.ws.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
@@ -21,6 +25,7 @@ import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
+import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -36,30 +41,24 @@ public class InversionController {
 	@Autowired
 	InversionService inversionService;
 	
-	@RequestMapping(value = "/obtenerInversion", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> obtenerInversion(@RequestBody Map<String, Object> params) {
-		LOG.info("###obtenerInversion params:"+params);
-		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", detail="";
+	public ResultadoBean obtenerInversion(@PathVariable(value="inversionId") String inversionId) {
+		LOG.info("###obtenerInversion inversionId:"+inversionId);
+		ResultadoBean response = null;
 		try{
-//			String inversionId = String.valueOf(params.get("inversionId"));
-//			Inversion inversion = inversionService.obtenerInversionCaspio(inversionId);		
-//			if(inversion!=null){
-//				detail = JsonUtil.toJson(inversion);
-//			}
-			result = Constantes.Service.RESULTADO_EXITOSO;
+			String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+			inversionService.setTokenCaspio(tokenCaspio);
+			
+			Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);	
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			response.setResultado(inversion);
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerInversion:: ",e);
-			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-			detail=e.getMessage();
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
 		}
-			
-		response.put("result",result);
-		response.put("detail",detail);
-		System.out.println("RESPONSE: " +  response);	
-		
 		return response;
 	}
 	
@@ -621,5 +620,43 @@ public class InversionController {
 		System.out.println("RESPONSE: " +  response);			
 		return response;
 	}	
+	
+	
+	@RequestMapping(value = "obtenerSolicitudDesembolsoExcepcional/{inversionNumero}", method = RequestMethod.GET)
+	public @ResponseBody List<LinkedHashMap<String,Object>> getResumenComprobante(@PathVariable(value="inversionNumero") String inversionNumero){
+		
+		List<LinkedHashMap<String,Object>> result = new ArrayList<LinkedHashMap<String,Object>>();
+		LinkedHashMap<String,Object> element = new LinkedHashMap<String,Object>();
+		
+		if(null!=inversionNumero){
+			try {
+				LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(inversionNumero);
+				if(liquidacionSAF!=null){
+					if("3".equals(liquidacionSAF.getLiquidacionEstado())){
+						element.put("fecha", liquidacionSAF.getLiquidacionFecha());
+						element.put("importe", liquidacionSAF.getLiquidacionImporte());
+						element.put("tipo", "DESEMBOLSO");
+						result.add(element);					
+						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,liquidacionSAF.getNroArmada()));
+						
+					}else{
+						element.put("message", "Operación Cancelada. El estado de la liquidación consultada es diferente a DESEMBOLSADO.");
+						result.add(element);	
+					}
+				}else{
+					element.put("message", "Operación Cancelada. La liquidación consultada NO EXISTE.");
+					result.add(element);					
+				}
+				
+				
+			} catch (Exception e) {
+				element = new LinkedHashMap<String,Object>();
+				element.put("message", UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				result.add(element);
+				LOG.error("###obtenerImporteComprobante:",e);
+			}
+		}
+		return result;
+	}
 	
 }

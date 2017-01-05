@@ -1,7 +1,9 @@
 package com.pandero.ws.business.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -742,7 +744,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String resultado = "";
 		// Obtener la ultima liquidacion
 		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
-		System.out.println("inversion.getTipoInversion():: "+inversion.getTipoInversion());
+		LOG.info("inversion.getTipoInversion():: "+inversion.getTipoInversion());
 		// Si es construccion sin constructora
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora()){				
@@ -781,7 +783,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}else{
 			resultado = "Se enviaron los documentos a contabilidad";
 		}
-		System.out.println("RESULTADO ENVIO CONTABILIDAD: "+resultado);
+		LOG.info("RESULTADO ENVIO CONTABILIDAD: "+resultado);
 		
 		// Enviar respuesta
 		resultadoBean = new ResultadoBean();
@@ -965,6 +967,38 @@ public class InversionBusinessImpl implements InversionBusiness{
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
 		return ultimaLiquidacion;
+	}
+	
+	@Override
+	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception {
+		
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double importe=0.00;
+		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(inversionNumero);
+		String fecha = "";
+		
+		if(null!=inversion){
+			List<ComprobanteCaspio> listComprobante=inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
+			if(null!=listComprobante){
+				for(ComprobanteCaspio comprobante:listComprobante){
+					importe += (null!=comprobante.getImporte()?comprobante.getImporte().doubleValue():0);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");  
+					Date d = sdf.parse(comprobante.getFechaEmision());
+					sdf.applyPattern("dd/MM/yyyy");
+					fecha = sdf.format(d);
+				}
+			}
+		}
+		
+		LinkedHashMap<String,Object> result = new LinkedHashMap<String,Object>();
+		result.put("fecha", fecha);
+		result.put("importe", importe);
+		result.put("tipo", "COMPROBANTES ENTREGADOS");
+		
+		return result;
 	}
 
 	

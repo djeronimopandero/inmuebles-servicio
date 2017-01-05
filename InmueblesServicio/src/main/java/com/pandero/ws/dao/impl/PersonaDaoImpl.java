@@ -83,6 +83,8 @@ public class PersonaDaoImpl implements PersonaDao {
 			PersonaSAF p = new PersonaSAF();
 			p.setNombreCompleto(null!=rs.getString("PersonaNombreCompleto")?rs.getString("PersonaNombreCompleto"):"");
 			p.setPersonaID(rs.getInt("PersonaID"));
+			p.setTipoDocumentoID(rs.getString("TipoDocumentoID"));
+			p.setPersonaCodigoDocumento(rs.getString("PersonaCodigoDocumento"));
 			return p;		    
 		}
 	}
