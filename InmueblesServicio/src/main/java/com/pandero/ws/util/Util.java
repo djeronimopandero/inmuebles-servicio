@@ -271,4 +271,15 @@ public class Util {
 		}
 		return resultado;
 	}
+	
+	public static int convertirCadenaAInt(String cadena){
+		int resultado = 0;
+		try{
+			resultado = Integer.parseInt(cadena);
+		}catch(Exception e){
+			System.out.println("ERROR convertir en integer: "+cadena);
+		}
+		return resultado;
+	}
+	
 }

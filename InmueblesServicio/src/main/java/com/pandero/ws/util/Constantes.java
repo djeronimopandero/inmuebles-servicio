@@ -39,6 +39,8 @@ public class Constantes {
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
 		public final static String RESULTADO_PENDIENTE_COBROS = "PENDIENTE_COBROS";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "INVERSION_NO_CONFIRMADA";
+		public final static String RESULTADO_SIN_COMPROBANTES= "SIN_COMPROBANTES";
+		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "SIN_ACTUALZ_SALDO_DEUDA";
 	}
 	
 	public class Pedido {

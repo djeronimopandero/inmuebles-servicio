@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.dao.GarantiaDao;
+import com.pandero.ws.util.Util;
 
 @Repository
 public class GarantiaDaoImpl implements GarantiaDao {
@@ -52,7 +53,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		.addValue("@FichaConstitucion", garantia.getFichaConstitucion())
 		.addValue("@FechaConstitucion", garantia.getFechaConstitucion())
 		.addValue("@MontoPrima", garantia.getMontoPrima())
-		.addValue("@UsuarioID", usuarioId);     
+		.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));     
 				
 		Map resultadoSP = call.execute(parameters);
 		garantiaSAFId = resultadoSP.get("@GarantiaInmbID")!=null?(String)resultadoSP.get("@GarantiaInmbID"):"";
@@ -81,7 +82,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		parameters.addValue("@FechaConstitucion", garantia.getFechaConstitucion());
 		parameters.addValue("@MontoPrima", garantia.getMontoPrima());
 		parameters.addValue("@Modalidad", garantia.getModalidad());
-		parameters.addValue("@UsuarioID", usuarioId);
+		parameters.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));
 				
 		System.out.println("garantia.getMontoPrima()>"+garantia.getMontoPrima()+"<");
 		System.out.println("garantia.getGarantiaSAFId()>"+String.valueOf(garantia.getGarantiaSAFId().intValue())+"<");
@@ -100,7 +101,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
 		parameters.addValue("@GarantiaInmbID", garantiaSAFId);
-		parameters.addValue("@UsuarioID", usuarioId);
+		parameters.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));
 				
 		call.execute(parameters);
 		return null;

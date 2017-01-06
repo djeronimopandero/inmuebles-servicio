@@ -58,6 +58,12 @@ public class Inversion implements java.io.Serializable {
 	private String DocumentosRequeridos;
 	private String NroLiquidacion;
 	private String Estado;
+	private Double ImporteInversionInicial;
+	private String FechaActualizacionSaldo;
+	private String EnvioContabilidadFecha;
+	private String EnvioContabilidadUsuario;
+	private String RecepContabilidadFecha;
+	private String RecepContabilidadUsuario;
 	
 	public Integer getInversionId() {
 		return InversionId;
@@ -382,6 +388,42 @@ public class Inversion implements java.io.Serializable {
 	}
 	public void setEstado(String estado) {
 		Estado = estado;
+	}
+	public Double getImporteInversionInicial() {
+		return ImporteInversionInicial;
+	}
+	public void setImporteInversionInicial(Double importeInversionInicial) {
+		ImporteInversionInicial = importeInversionInicial;
+	}
+	public String getFechaActualizacionSaldo() {
+		return FechaActualizacionSaldo;
+	}
+	public void setFechaActualizacionSaldo(String fechaActualizacionSaldo) {
+		FechaActualizacionSaldo = fechaActualizacionSaldo;
+	}
+	public String getEnvioContabilidadFecha() {
+		return EnvioContabilidadFecha;
+	}
+	public void setEnvioContabilidadFecha(String envioContabilidadFecha) {
+		EnvioContabilidadFecha = envioContabilidadFecha;
+	}
+	public String getEnvioContabilidadUsuario() {
+		return EnvioContabilidadUsuario;
+	}
+	public void setEnvioContabilidadUsuario(String envioContabilidadUsuario) {
+		EnvioContabilidadUsuario = envioContabilidadUsuario;
+	}
+	public String getRecepContabilidadFecha() {
+		return RecepContabilidadFecha;
+	}
+	public void setRecepContabilidadFecha(String recepContabilidadFecha) {
+		RecepContabilidadFecha = recepContabilidadFecha;
+	}
+	public String getRecepContabilidadUsuario() {
+		return RecepContabilidadUsuario;
+	}
+	public void setRecepContabilidadUsuario(String recepContabilidadUsuario) {
+		RecepContabilidadUsuario = recepContabilidadUsuario;
 	}
 	
 }
