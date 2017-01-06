@@ -31,6 +31,7 @@ public interface InversionBusiness {
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 
 	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
+	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId) throws Exception;
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 	
 	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada)throws Exception;
