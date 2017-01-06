@@ -40,7 +40,8 @@ public class GeneralDaoImpl implements GeneralDao{
 		call.withoutProcedureColumnMetaDataAccess();	
 		
 		call.addDeclaredParameter(new SqlParameter("@TipoCambio", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlOutParameter("@Fecha", Types.DATE));
+		call.addDeclaredParameter(new SqlParameter("@Fecha", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlOutParameter("@Monto", Types.DECIMAL));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
         parameters.addValue("@TipoCambio", tipoCambio);
@@ -49,8 +50,8 @@ public class GeneralDaoImpl implements GeneralDao{
 		Map resultadoSP = call.execute(parameters);
 //		BigDecimal bdDiferenciaPrecio = resultadoSP.get("@tipoCambio")!=null? 
 //				new BigDecimal(String.valueOf(resultadoSP.get("@tipoCambio"))):new BigDecimal("0");
-		Double dblDiferenciaPrecio = resultadoSP.get("@tipoCambio")!=null? 
-				Double.parseDouble(String.valueOf(resultadoSP.get("@tipoCambio"))):0.00;
+		Double dblDiferenciaPrecio = resultadoSP.get("@Monto")!=null? 
+				Double.parseDouble(String.valueOf(resultadoSP.get("@Monto"))):0.00;
 		LOG.info("###dblDiferenciaPrecio:: "+dblDiferenciaPrecio);
 		
 		return dblDiferenciaPrecio;

@@ -2,6 +2,7 @@ package com.pandero.ws.controller;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,12 @@ public class PersonaController {
 				
 				if(null!=personaSAF){
 					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+					
+					UtilEnum.TIPO_DOCUMENTO tipoDocumentoID = UtilEnum.TIPO_DOCUMENTO
+							.obtenerTipoDocumentoByCodigo(!StringUtils.isEmpty(personaSAF.getTipoDocumentoID())
+									? Integer.parseInt(personaSAF.getTipoDocumentoID()) : 4);
+					
+					personaSAF.setTipoDocumentoID(String.valueOf(tipoDocumentoID.getCodigoCaspio()));
 					resultadoBean.setResultado(personaSAF);
 				}else{
 					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
