@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.GeneralBusiness;
+import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
 
 @Controller
@@ -36,6 +37,7 @@ public class GeneralController {
 				
 				resultadoBean = new ResultadoBean();
 				montoDolares = generalBusiness.convertirDolares(montoSoles,fechaEmision);
+				montoDolares = Util.round(montoDolares, 2);
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 				resultadoBean.setResultado(montoDolares);
 
@@ -66,6 +68,7 @@ public class GeneralController {
 			try {
 				resultadoBean = new ResultadoBean();
 				montoSoles = generalBusiness.convertirSoles(montoDolares,fechaEmision);
+				montoSoles = Util.round(montoSoles, 2);
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 				resultadoBean.setResultado(montoSoles);
 				

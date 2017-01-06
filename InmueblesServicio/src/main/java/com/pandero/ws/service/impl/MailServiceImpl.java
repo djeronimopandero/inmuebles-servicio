@@ -61,6 +61,7 @@ public class MailServiceImpl implements MailService{
 			}
 		
 	     }catch (MessagingException e) {
+	    	 LOGGER.error("###sendMail:",e);
 	    	 throw new MailParseException(e);
 	     }
 	   

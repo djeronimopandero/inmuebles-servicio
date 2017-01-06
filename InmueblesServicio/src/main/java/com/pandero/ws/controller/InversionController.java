@@ -659,4 +659,34 @@ public class InversionController {
 		return result;
 	}
 	
+	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean validarImporteComprobantesNoExcedaInversion(
+			@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada){
+		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada);
+		
+		ResultadoBean resultadoBean = null;
+		boolean resultado=false;
+		if(null!=inversionId && null!=nroArmada){
+			try {
+				
+				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada));
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				resultadoBean.setResultado(resultado);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al validar el importe de comprobantes de la inversion:"+inversionId);
+				LOG.error("###validarImporteComprobantesNoExcedaInversion:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
+		}
+		return resultadoBean;
+	}
+	
 }

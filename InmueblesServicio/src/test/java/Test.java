@@ -45,11 +45,8 @@ public class Test {
 //		List<ObservacionInversion> listObs=new ArrayList<>();
 //		System.out.println(listObs.size());
 		
-		test2();
+//		test2();
 //		
-		List<String> lista = new ArrayList<String>();
-		lista.add("alan cabrera");
-		System.out.println(lista.indexOf("alan cabrera"));
 		
 	}
 	

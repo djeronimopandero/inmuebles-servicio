@@ -676,7 +676,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 				        		 StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
 				        		 Util.getMontoFormateado(pic.getImporteInversion()), 
 				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
-	
+				         
+				         LOG.info("###emailTo : "+emailTo);
+				         
 				         EmailBean emailBean=new EmailBean();
 				         emailBean.setEmailFrom(emailDesarrolloPandero);
 				         emailBean.setEmailTo(emailTo);
@@ -999,6 +1001,30 @@ public class InversionBusinessImpl implements InversionBusiness{
 		result.put("tipo", "COMPROBANTES ENTREGADOS");
 		
 		return result;
+	}
+
+	@Override
+	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada) throws Exception {
+		LOG.info("###InversionBusinessImpl.validarImporteComprobantesNoExcedaInversion inversionId:"+inversionId);
+	
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double dblImporteTotalComprobantes = 0.0;
+		
+		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
+		for(ComprobanteCaspio comprobante:listComprobantes){
+			dblImporteTotalComprobantes+=comprobante.getImporte();
+		}
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(dblImporteTotalComprobantes > inversion.getImporteInversion()){
+			return false;
+		}else{
+			return true;
+		}
+		
 	}
 
 	
