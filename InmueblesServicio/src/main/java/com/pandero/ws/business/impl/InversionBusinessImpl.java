@@ -819,8 +819,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 			String nroArmada, String fechaRecepcion, String usuarioRecepcion) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
-		return "";
+		String resultado = "";
+				
+		// lista comprobantes
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+		
+		if(listaComprobantes!=null && listaComprobantes.size()>0){
+			// Recepcionar cargo
+			inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+		}
+		
+		return resultado;
 	}
 
 	@Override
@@ -841,8 +852,17 @@ public class InversionBusinessImpl implements InversionBusiness{
 			String fechaRecepcion, String usuarioRecepcion) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
-		return "";
+		String resultado = "";
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(inversion.getImporteInversionInicial()!=null && !Util.esVacio(inversion.getFechaActualizacionSaldo())){
+			// Recepcionar cargo contabilidad
+			inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+		}
+		return resultado;
 	}
 	
 	@Override

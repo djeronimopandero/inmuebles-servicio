@@ -56,7 +56,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));     
 				
 		Map resultadoSP = call.execute(parameters);
-		garantiaSAFId = resultadoSP.get("@GarantiaInmbID")!=null?(String)resultadoSP.get("@GarantiaInmbID"):"";
+		garantiaSAFId = resultadoSP.get("@GarantiaInmbID")!=null?(String)resultadoSP.get("@GarantiaInmbID"):"0";
 		System.out.println("RESULTADOS:: "+garantiaSAFId);
 		return garantiaSAFId;
 	}
