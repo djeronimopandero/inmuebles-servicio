@@ -969,6 +969,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return ultimaLiquidacion;
 	}
 	
+	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId)
+			throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		LiquidacionSAF ultimaLiquidacion = null;
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			ultimaLiquidacion = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+			}
+			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
+		}		
+		return ultimaLiquidacion;
+	}
+	
 	@Override
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception {
 		
