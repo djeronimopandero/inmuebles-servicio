@@ -121,4 +121,27 @@ public class UtilEnum {
 		}
 	}
 	
+	public static enum TIPO_CAMBIO {
+		
+		COMPRA(1, "COMPRA"),
+		VENTA(2, "VENTA"),
+		CONTABLE(3, "CONTABLE");
+		
+		private final Integer codigo;
+		private final String texto;
+
+		private TIPO_CAMBIO(Integer codigo, String texto) {
+			this.codigo = codigo;
+			this.texto = texto;
+		}
+
+		public Integer getCodigo() {
+			return codigo;
+		}
+
+		public String getTexto() {
+			return texto;
+		}
+	}
+	
 }
