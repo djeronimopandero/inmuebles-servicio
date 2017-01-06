@@ -677,13 +677,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 				        		 Util.getMontoFormateado(pic.getImporteInversion()), 
 				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
 				         
-				         LOG.info("###emailTo : "+emailTo);
+				         LOG.info("###emailTo :"+emailTo);
+				         LOG.info("###speech :"+emailTo);
+				         LOG.info("###docGenerado :"+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
 				         
 				         EmailBean emailBean=new EmailBean();
 				         emailBean.setEmailFrom(emailDesarrolloPandero);
 				         emailBean.setEmailTo(emailTo);
 				         emailBean.setSubject("Constancia de desembolso parcial - "+asociados.get(0).getNombreCompleto());
-				         emailBean.setDocumento(docGenerado);
+				         emailBean.setDocumento("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
 				         emailBean.setTextoEmail(speech);
 				         emailBean.setFormatHtml(true);
 				         emailBean.setEnviarArchivo(true);
