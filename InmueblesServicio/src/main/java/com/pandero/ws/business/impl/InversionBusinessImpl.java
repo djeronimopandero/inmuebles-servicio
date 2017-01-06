@@ -624,9 +624,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 				String desembolso = "";
 				if(!asociadosLiquidacion.isEmpty()){
 					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
-					for(Map<String,Object> current:data){
+//					for(Map<String,Object> current:data){
+					for(int i=0;i<data.size();i++){
+						Map<String,Object> current=data.get(i);
+						
 						dblImporteDesembolsoParcial += (current.get("Importe")!=null?Double.parseDouble(current.get("Importe").toString()):0.00);
-						desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";						
+						
+						if(i==asociados.size()-1){
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe");
+						}else{
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";
+						}
+						
 					}
 				}
 				
