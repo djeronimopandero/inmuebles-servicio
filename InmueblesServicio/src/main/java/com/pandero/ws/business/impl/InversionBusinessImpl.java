@@ -678,7 +678,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
 				         
 				         LOG.info("###emailTo :"+emailTo);
-				         LOG.info("###speech :"+emailTo);
+				         LOG.info("###speech :"+speech);
 				         LOG.info("###docGenerado :"+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
 				         
 				         EmailBean emailBean=new EmailBean();
