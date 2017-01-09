@@ -456,6 +456,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
+		int nroArmada = 1;
 				
 		// Obtener liquidaciones de la inversion
 		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
@@ -464,8 +465,10 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			String estadoLiquidacion="";
 			for(LiquidacionSAF liquidacion : liquidacionInversion){
 				estadoLiquidacion=liquidacion.getLiquidacionEstado();
+				nroArmada=liquidacion.getNroArmada();
 			}
 			System.out.println("ESTADO LIQUIDA: "+estadoLiquidacion);
+			// Verificar estado liquidacion
 			if(Util.esVacio(estadoLiquidacion)){
 				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
@@ -478,6 +481,34 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			System.out.println("liquidacionInversion:. NULL");
 		}
 		
+		// Verificar envio de comprobantes
+		if(resultado.equals("")){
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+				if(Util.esVacio(inversion.getRecepContabilidadFecha())){
+					resultado = Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
+				}
+			}else if((Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())
+							&& Constantes.DocumentoIdentidad.RUC_ID.equals(inversion.getPropietarioTipoDocId())) 
+						|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+							&& inversion.getServicioConstructora())
+						|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+							&& !inversion.getServicioConstructora() && nroArmada>2)){
+				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), nroArmada);
+				if(listaComprobantes!=null && listaComprobantes.size()>0){
+					for(ComprobanteCaspio comprobante : listaComprobantes){
+						if(Util.esVacio(comprobante.getRecepContabilidadFecha())){
+							resultado = Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
+							break;
+						}
+					}
+				}else{
+					resultado = Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
+				}
+			}
+		}
+		
+		// Confirmar liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
 			liquidacionDao.confirmarLiquidacionInversion(nroInversion, usuarioId);
@@ -552,7 +583,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				}
 			}
 		}
-		
+
 		// Obtener cancelacion diferencia precio
 		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
 		if(ddp!=null){
@@ -561,7 +592,11 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
 				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
 				if(montoDiferenciaPrecio<0){
-					double montoPagado = Double.parseDouble(ddp.getMontoDifPrecioPagado());
+					// Obtener datos del pedido
+					Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
+					// Obtener montos a comparar
+					montoDiferenciaPrecio= montoDiferenciaPrecio*-1;
+					double montoPagado = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto().doubleValue();
 					if(montoPagado<montoDiferenciaPrecio){
 						conceptoNoPagado=true;
 					}
@@ -575,4 +610,5 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		
 		return resultado;
 	}
+	
 }

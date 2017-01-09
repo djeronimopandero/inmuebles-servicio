@@ -41,6 +41,7 @@ public class Constantes {
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "INVERSION_NO_CONFIRMADA";
 		public final static String RESULTADO_SIN_COMPROBANTES= "SIN_COMPROBANTES";
 		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "SIN_ACTUALZ_SALDO_DEUDA";
+		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "SIN_RECEPCION_CARGO_CONTABILIDAD";
 	}
 	
 	public class Pedido {
