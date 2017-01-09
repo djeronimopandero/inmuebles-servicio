@@ -1,6 +1,13 @@
 package com.pandero.ws.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +27,7 @@ import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.UtilEnum;
+import com.pandero.ws.util.UtilExcel;
 
 @Controller
 @RequestMapping("/persona")
@@ -177,6 +185,50 @@ public class PersonaController {
 			}
 		}
 		return resultadoBean;
+	}
+	
+	private static final int BUFFER_SIZE = 4096;
+	@RequestMapping(value = "descargaDatosSeguro/{pedidoId}", method = RequestMethod.GET)
+	public @ResponseBody void descargaDatosSeguro(@PathVariable(value="pedidoId") String pedidoId, HttpServletRequest request,
+            HttpServletResponse response){
+		LOG.info("###ContratoController.descargaDatosSeguro pedidoId:"+pedidoId);
+		List<Map<String,Object>> result = null;
+		if(null!=pedidoId){
+			try {
+				result = personaBusiness.obtenerDatosCorrespondencia(pedidoId);
+				File downloadFile = UtilExcel.createExcelFile(result, "seguros", "seguros.xlsx");
+				FileInputStream inputStream = new FileInputStream(downloadFile);
+		         
+		        // get MIME type of the file
+		        String mimeType =  "application/octet-stream";
+		        System.out.println("MIME type: " + mimeType);
+		 
+		        // set content attributes for the response
+		        response.setContentType(mimeType);
+		        response.setContentLength((int) downloadFile.length());
+		 
+		        // set headers for the response
+		        String headerKey = "Content-Disposition";
+		        String headerValue = String.format("attachment; filename=\"%s\"",
+		                downloadFile.getName());
+		        response.setHeader(headerKey, headerValue);
+		 
+		        // get output stream of the response
+		        OutputStream outStream = response.getOutputStream();
+		 
+		        byte[] buffer = new byte[BUFFER_SIZE];
+		        int bytesRead = -1;
+		 
+		        // write bytes read from the input stream into the output stream
+		        while ((bytesRead = inputStream.read(buffer)) != -1) {
+		            outStream.write(buffer, 0, bytesRead);
+		        }
+		 
+		        inputStream.close();
+		        outStream.close();
+			} catch (Exception e) {
+			}
+		}
 	}
 	
 }

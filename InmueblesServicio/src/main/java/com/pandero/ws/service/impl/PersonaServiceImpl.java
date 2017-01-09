@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PersonaCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.service.PersonaService;
@@ -32,6 +31,9 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
 		
 	@Value("${url.service.table.persona}")
 	private String tablePersonaURL;
+	
+	@Value("${url.service.view.descargaSeguro}")
+	private String descargaSeguro;
 	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
@@ -79,5 +81,15 @@ private static final Logger LOG = LoggerFactory.getLogger(PersonaServiceImpl.cla
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tablePersonaURL,Object.class,request,null);	
 		return "SUCCESS";
 	}
+	
+	@Override
+	public Map<String,Object> obtenerViewDescargaSeguroCaspio(String pedidoId) throws Exception {
+		String serviceWhere = "{\"where\":\"Garantia_pedidoId='" + pedidoId + "'\"}";		
+		String obtenerInversionesxPedidoURL = descargaSeguro+Constantes.Service.URL_WHERE;
+		Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);     	
+     	return JsonUtil.jsonToMap(response);        
+	}
+	
 
 }
