@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.LiquidacionDao;
@@ -74,7 +75,6 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		.addValue("@NumeroPedido", nroPedido);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
 		
-		PersonaSAF persona=null;
 		List resultado = (List) mapResultado.get("liquidacion");
 		if (resultado != null && resultado.size() > 0) {
 			listaLiquidacion = (List<LiquidacionSAF>) resultado;
@@ -219,5 +219,45 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
     	Map<String,Object> procedureResult = call.execute(in);
 		return procedureResult;
     }
+
+	@Override
+	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(
+			String nroInversion) throws Exception {
+		List<ConceptoLiquidacion> listaConceptos = null;
 		
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_LOG_Inmb_MostratConceptos_ActaEntrega");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.returningResultSet("concepto", new ConceptoLiquidacionMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroInversion", nroInversion);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("concepto");
+		if (resultado != null && resultado.size() > 0) {
+			listaConceptos = (List<ConceptoLiquidacion>) resultado;
+		}
+		
+		return listaConceptos;
+	}
+		
+	private static final class ConceptoLiquidacionMapper implements RowMapper<ConceptoLiquidacion>{
+		public ConceptoLiquidacion mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			ConceptoLiquidacion e = new ConceptoLiquidacion();	
+			e.setConceptoID(rs.getString("ConceptoID"));
+			e.setConceptoNombre(rs.getString("ConceptoNombre"));
+			e.setImporte(rs.getDouble("Importe"));
+			e.setImportePagado(rs.getDouble("ImportePagado"));
+			e.setTotalPendiente(rs.getDouble("TotalPendiente"));
+			e.setSituacionID(rs.getString("SituacionID"));
+			e.setSituacion(rs.getString("Situacion"));
+			e.setContratoID(rs.getInt("ContratoID"));
+			e.setContratoNumero(rs.getString("ContratoNumero"));
+			e.setPedidoID(rs.getInt("PedidoID"));
+			e.setPedidoInversionID(rs.getInt("VehiculoID"));
+			return e;		    
+			}
+		}
 }

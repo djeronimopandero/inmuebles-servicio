@@ -37,20 +37,11 @@ public class MailServiceImpl implements MailService{
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
 			
 			helper.setFrom(email.getEmailFrom());
-//			helper.setTo(email.getEmailTo());
 			helper.setTo("ichuyes@pandero.com.pe");
 			helper.setCc(email.getEmailTo());
-//			helper.setCc("is@pandero.com.pe");
 			helper.setBcc("djeronimo@pandero.com.pe");
 			helper.setSubject(email.getSubject());
-			
-//			if(email.isFormatHtml()){
-//				LOGGER.info("##Se envia un HTML");
-//				message.setContent(email.getTextoEmail(), "text/html");
-//			}else{
-//				LOGGER.info("##Se envia un texto");
-				helper.setText(email.getTextoEmail(),email.isFormatHtml());
-//			}
+			helper.setText(email.getTextoEmail(),email.isFormatHtml());
 			
 			LOGGER.info("##email.isEnviarArchivo():"+email.isEnviarArchivo());
 			if(email.isEnviarArchivo()){
@@ -61,6 +52,7 @@ public class MailServiceImpl implements MailService{
 			}
 		
 	     }catch (MessagingException e) {
+	    	 LOGGER.error("###sendMail:",e);
 	    	 throw new MailParseException(e);
 	     }
 	   

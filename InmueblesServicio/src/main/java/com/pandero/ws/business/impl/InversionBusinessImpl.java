@@ -624,9 +624,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 				String desembolso = "";
 				if(!asociadosLiquidacion.isEmpty()){
 					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
-					for(Map<String,Object> current:data){
+//					for(Map<String,Object> current:data){
+					for(int i=0;i<data.size();i++){
+						Map<String,Object> current=data.get(i);
+						
 						dblImporteDesembolsoParcial += (current.get("Importe")!=null?Double.parseDouble(current.get("Importe").toString()):0.00);
-						desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";						
+						
+						if(i==asociados.size()-1){
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe");
+						}else{
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";
+						}
+						
 					}
 				}
 				
@@ -676,12 +685,16 @@ public class InversionBusinessImpl implements InversionBusiness{
 				        		 StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
 				        		 Util.getMontoFormateado(pic.getImporteInversion()), 
 				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
-	
+				         
+				         LOG.info("###emailTo :"+emailTo);
+				         LOG.info("###speech :"+speech);
+				         LOG.info("###docGenerado :"+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
+				         
 				         EmailBean emailBean=new EmailBean();
 				         emailBean.setEmailFrom(emailDesarrolloPandero);
 				         emailBean.setEmailTo(emailTo);
 				         emailBean.setSubject("Constancia de desembolso parcial - "+asociados.get(0).getNombreCompleto());
-				         emailBean.setDocumento(docGenerado);
+				         emailBean.setDocumento("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
 				         emailBean.setTextoEmail(speech);
 				         emailBean.setFormatHtml(true);
 				         emailBean.setEnviarArchivo(true);
@@ -722,7 +735,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuarioId)throws Exception {
+	public ResultadoBean enviarCargoContabilidad(String inversionId, String nroArmada, String usuario, String usuarioId)throws Exception {
 		LOG.info("###InversionBusinessImpl.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
@@ -736,7 +749,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		LOG.info("##strFecha:"+strFecha);
 		
 		// Actualizar estado de envio a contabilidad
-		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuarioId,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuario,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
 		
 		// Verificar si se debe generar liquidacion automatica
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
@@ -800,14 +813,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
-		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+			
 		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
 		
-		resultadoBean = new ResultadoBean();
+		ResultadoBean resultadoBean  = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se realizó la anulación de cargo a contabilidad.");
+		resultadoBean.setResultado("Se anuló el envío de documentos a contabilidad.");
 		
 		return resultadoBean;
 	}
@@ -817,8 +828,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 			String nroArmada, String fechaRecepcion, String usuarioRecepcion) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
-		return "";
+		String resultado = "";
+				
+		// lista comprobantes
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+		
+		if(listaComprobantes!=null && listaComprobantes.size()>0){
+			// Recepcionar cargo
+			inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+		}
+		
+		return resultado;
 	}
 
 	@Override
@@ -839,7 +861,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 			String fechaRecepcion, String usuarioRecepcion) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		String resultado = "";
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(inversion.getImporteInversionInicial()!=null && !Util.esVacio(inversion.getFechaActualizacionSaldo())){
+			// Recepcionar cargo contabilidad
+			inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+		}
+		return resultado;
+	}
+	
+	@Override
+	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		inversionService.envioCargoContabilidadActualizSaldo(inversionId, null, null);
 		return "";
 	}
 	
@@ -963,6 +1002,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return ultimaLiquidacion;
 	}
 	
+	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId)
+			throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		LiquidacionSAF ultimaLiquidacion = null;
+		
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			ultimaLiquidacion = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+			}
+			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
+		}		
+		return ultimaLiquidacion;
+	}
+	
 	@Override
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception {
 		
@@ -993,6 +1058,30 @@ public class InversionBusinessImpl implements InversionBusiness{
 		result.put("tipo", "COMPROBANTES ENTREGADOS");
 		
 		return result;
+	}
+
+	@Override
+	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada) throws Exception {
+		LOG.info("###InversionBusinessImpl.validarImporteComprobantesNoExcedaInversion inversionId:"+inversionId);
+	
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		Double dblImporteTotalComprobantes = 0.0;
+		
+		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
+		for(ComprobanteCaspio comprobante:listComprobantes){
+			dblImporteTotalComprobantes+=comprobante.getImporte();
+		}
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(dblImporteTotalComprobantes > inversion.getImporteInversion()){
+			return false;
+		}else{
+			return true;
+		}
+		
 	}
 
 	

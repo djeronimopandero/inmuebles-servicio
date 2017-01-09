@@ -8,7 +8,7 @@ public interface GarantiaService {
 
 	public void setTokenCaspio(String token);
 	
-	public Garantia obtenerGarantiaPorId(String garantiaId) throws Exception;
-	
+	public Garantia obtenerGarantiaPorId(String garantiaId) throws Exception;	
 	public List<Garantia> obtenerGarantiasPorPedido(String pedidoId) throws Exception;
+	public String eliminarGarantiaPorId(String garantiaId) throws Exception;
 }

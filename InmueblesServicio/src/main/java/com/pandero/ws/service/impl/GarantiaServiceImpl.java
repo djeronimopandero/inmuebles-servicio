@@ -1,6 +1,7 @@
 package com.pandero.ws.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,6 +96,17 @@ public class GarantiaServiceImpl implements GarantiaService{
         }
         
 		return listaGarantias;
+	}
+
+	@Override
+	public String eliminarGarantiaPorId(String garantiaId) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		
+		String serviceWhere = "{\"where\":\"idGarantia="+garantiaId+"\"}";	
+		String eliminarGarantiaURL = tableGarantiaURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,eliminarGarantiaURL,Object.class,request,serviceWhere);	
+		return null;
 	}
 
 }

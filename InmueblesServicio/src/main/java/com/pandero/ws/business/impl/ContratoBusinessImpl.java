@@ -193,29 +193,28 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean=null;
-		if(null!=pedidoId){
-			
+		if(null!=pedidoId){			
 			resultadoBean=new ResultadoBean();
 			
 			DetalleDiferenciaPrecio ddp = obtenerMontoDiferenciaPrecio(pedidoId);
-			Double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio().replace(",", ""));
-			System.out.println("diferenciaPrecio2::: "+diferenciaPrecio);
-			
-			resultadoBean.setResultado(ddp);
-			
-			if(diferenciaPrecio>0){
+			Double diferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+			System.out.println("diferenciaPrecioFinal::: "+diferenciaPrecio);
+									
+			if(diferenciaPrecio.doubleValue()<0){
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				ddp.setDiferenciaPrecio(Util.getMontoFormateado(Double.parseDouble(ddp.getDiferenciaPrecio())));
+				ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
+				ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
+				resultadoBean.setResultado(ddp);
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 				resultadoBean.setMensajeError("No existe diferencia de precio, por lo tanto no se podrá registrar la cancelación");
-			}
-			
+			}			
 		}
 		return resultadoBean;
 	}
 	
-	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {
-		
+	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {		
 		Double sumMontoCertificado=0.00;
 		//1.- Suma de los certificados
 		//Consultar listado de PedidoContrato por pedidoId y obtener los contratos, capturar cada contratoId
@@ -253,9 +252,9 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		
 		DetalleDiferenciaPrecio ddp=new DetalleDiferenciaPrecio();
 		ddp.setPedidoId(pedidoId);
-		ddp.setDiferenciaPrecio(Util.getMontoFormateado(diferenciaPrecio));
-		ddp.setImporteFinanciado(Util.getMontoFormateado(sumImporteDiferenciaPrecio));
-		ddp.setSaldoDiferencia(Util.getMontoFormateado(saldoDiferencia));
+		ddp.setDiferenciaPrecio(String.valueOf(diferenciaPrecio));
+		ddp.setImporteFinanciado(String.valueOf(sumImporteDiferenciaPrecio));
+		ddp.setSaldoDiferencia(String.valueOf(saldoDiferencia));
 		
 		return ddp;
 	}

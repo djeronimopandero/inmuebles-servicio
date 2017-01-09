@@ -25,7 +25,6 @@ import org.springframework.stereotype.Repository;
 import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.PersonaSAF;
-import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.ContratoDao;
 
 @Repository

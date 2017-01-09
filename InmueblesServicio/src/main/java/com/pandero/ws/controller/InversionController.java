@@ -344,6 +344,8 @@ public class InversionController {
 				response.put("saldoDiferencia",detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
 				response.put("montoDifPrecioPagado",detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
 				response.put("tipoInversion",detalleDifPrecio.getTipoInversion());
+			}else{
+				response.put("result","0");
 			}
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerMontosDifPrecioInversion:: ",e);
@@ -388,17 +390,15 @@ public class InversionController {
 	}
 	
 
-	@RequestMapping(value = "enviarCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
-	public @ResponseBody ResultadoBean enviarCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
-			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
-		LOG.info("###ContratoController.enviarCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+	@RequestMapping(value = "enviarCargoContabilidad/{inversionId}/{nroArmada}/{usuario}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean enviarCargoContabilidad(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuario") String usuario,@PathVariable(value="usuarioId") String usuarioId){
+		LOG.info("###ContratoController.enviarCargoContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuario:"+usuario+",usuarioId:"+usuarioId);
 		
 		ResultadoBean resultadoBean = null;
 		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
-			try {
-				
-				resultadoBean = inversionBusiness.enviarCargoContabilidad(inversionId, nroArmada, usuarioId);
-				
+			try {				
+				resultadoBean = inversionBusiness.enviarCargoContabilidad(inversionId, nroArmada, usuario, usuarioId);				
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
@@ -413,27 +413,19 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
-	@RequestMapping(value = "anularCartaContabilidad/{inversionId}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
-	public @ResponseBody ResultadoBean anularCartaContabilidad(@PathVariable(value="inversionId") String inversionId,
-			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuarioId") String usuarioId){
-		LOG.info("###ContratoController.anularCartaContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuarioId:"+usuarioId);
+	@RequestMapping(value = "anularCargoContabilidad/{inversionId}/{nroArmada}/{usuario}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean anularCargoContabilidad(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="usuario") String usuario){
+		LOG.info("###ContratoController.anularCargoContabilidad inversionId:"+inversionId+", nroArmada:"+nroArmada+",usuario:"+usuario);
 		
 		ResultadoBean resultadoBean = null;
-		if(null!=inversionId && null!=nroArmada && null!=usuarioId){
-			try {
-				
-				resultadoBean = inversionBusiness.anularCargoContabilidad(inversionId, nroArmada, usuarioId);
-				
-			} catch (Exception e) {
-				resultadoBean = new ResultadoBean();
-				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-				resultadoBean.setResultado("Ocurrio un error al anular el envio de carta contabilidad");
-				LOG.error("###enviarCartaContabilidad:",e);
-			}
-		}else{
+		try {				
+			resultadoBean = inversionBusiness.anularCargoContabilidad(inversionId, nroArmada, usuario);				
+		} catch (Exception e) {
 			resultadoBean = new ResultadoBean();
-			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-			resultadoBean.setResultado("Ocurrio un error, parametro null");
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+			resultadoBean.setResultado("Ocurrió un error al anular el envío de documentos");
+			LOG.error("###enviarCargoContabilidad:",e);
 		}
 		return resultadoBean;
 	}
@@ -465,32 +457,43 @@ public class InversionController {
 		return response;
 	}
 	
-	@RequestMapping(value = "envioCargoContabilidadActualizSaldo/{inversionId}/{usuarioId}", method = RequestMethod.GET, produces = "application/json")
-	@ResponseBody
-	public Map<String, Object> envioCargoContabilidadActualizSaldo(@PathVariable(value="inversionId") String inversionId,@PathVariable(value="usuarioId") String usuarioId) {	
-		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuarioId:"+usuarioId);
-		Map<String, Object> response = new HashMap<String, Object>();
-		String result="1", detail="";
+	@RequestMapping(value = "envioCargoContabilidadActualizSaldo/{inversionId}/{usuario}", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody ResultadoBean envioCargoContabilidadActualizSaldo(@PathVariable(value="inversionId") String inversionId,@PathVariable(value="usuario") String usuario) {	
+		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuario:"+usuario);
+		ResultadoBean resultadoBean = null;
 		try{
-			if(null!=inversionId && null!=usuarioId){
-				result = inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuarioId);
-				if(result.equals("")){
-					result = Constantes.Service.RESULTADO_EXITOSO;
-				}
-			}else{
-				result = Constantes.Service.RESULTADO_DATOS_PENDIENTES;
-			}
-			
+			inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuario);
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Se enviaron los documentos a contabilidad.");
 		}catch(Exception e){
 			LOG.error("Error inversion/envioCargoContabilidadActualizSaldo:: ",e);
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-			detail=e.getMessage();
-		}			
-		response.put("result",result);
-		response.put("detail",detail);
-		LOG.info("RESPONSE: " +  response);			
-		return response;
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+			resultadoBean.setResultado("Ocurrió un error al enviar los documentos a contabilidad");
+			LOG.error("###enviarCartaContabilidad:",e);
+		}	
+		return resultadoBean;
 	}	
+	
+	@RequestMapping(value = "anularEnvioCargoContabilidadActualizSaldo/{inversionId}/{usuario}", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody ResultadoBean anularEnvioCargoContabilidadActualizSaldo(@PathVariable(value="inversionId") String inversionId,@PathVariable(value="usuario") String usuario) {	
+		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuario:"+usuario);
+		ResultadoBean resultadoBean = null;
+		try{
+			inversionBusiness.anularEnvioCargoContabilidadActualizSaldo(inversionId, usuario);
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			resultadoBean.setResultado("Se anuló el envio de documentos a contabilidad.");
+		}catch(Exception e){
+			LOG.error("Error inversion/anularEnvioCargoContabilidadActualizSaldo:: ",e);
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+			resultadoBean.setResultado("Ocurrió un error al anular el envío de documentos a contabilidad");
+			LOG.error("###enviarCartaContabilidad:",e);
+		}	
+		return resultadoBean;
+	}
 
 	@RequestMapping(value = "/recepcionarCargoContabilidadActualizSaldo", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
@@ -572,7 +575,7 @@ public class InversionController {
 	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {
-		LOG.info("###recepcionarCargoContabilidadActualizSaldo params:"+params);
+		LOG.info("###obtenerUltimaLiquidacionInversion params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
@@ -594,6 +597,31 @@ public class InversionController {
 		return response;
 	}	
 
+	@RequestMapping(value = "/obtenerUltimaLiquidacionInversionPorId", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> obtenerUltimaLiquidacionInversionPorId(@RequestBody Map<String, Object> params) {
+		LOG.info("###obtenerUltimaLiquidacionInversionPorId params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversionPorId(inversionId);
+			if(liquidacionSAF!=null){
+				result = "1";
+				detail = JsonUtil.toJson(liquidacionSAF);
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerUltimaLiquidacionInversionPorId:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
+	
 	@RequestMapping(value = "/actualizarDesembolsoCaspio", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> actualizarDesembolsoCaspio(@RequestBody Map<String, Object> params) {
@@ -654,6 +682,36 @@ public class InversionController {
 			}
 		}
 		return result;
+	}
+	
+	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean validarImporteComprobantesNoExcedaInversion(
+			@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="nroArmada") String nroArmada){
+		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada);
+		
+		ResultadoBean resultadoBean = null;
+		boolean resultado=false;
+		if(null!=inversionId && null!=nroArmada){
+			try {
+				
+				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada));
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+				resultadoBean.setResultado(resultado);
+				
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al validar el importe de comprobantes de la inversion:"+inversionId);
+				LOG.error("###validarImporteComprobantesNoExcedaInversion:",e);
+			}
+		}else{
+			resultadoBean = new ResultadoBean();
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+			resultadoBean.setResultado("Ocurrio un error, parametro null");
+		}
+		return resultadoBean;
 	}
 	
 }

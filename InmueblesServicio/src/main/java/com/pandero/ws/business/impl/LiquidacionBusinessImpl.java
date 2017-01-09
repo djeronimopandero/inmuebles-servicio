@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.pandero.ws.bean.ComprobanteCaspio;
+import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
-import com.pandero.ws.bean.Desembolso;
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
@@ -24,9 +25,9 @@ import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.ContratoService;
-import com.pandero.ws.service.DesembolsoService;
 import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
+import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.ServiceRestTemplate;
@@ -48,7 +49,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	@Autowired
 	GarantiaService garantiaService;
 	@Autowired
-	DesembolsoService desembolsoService;
+	LiquidDesembService liquidDesembService;
 	@Autowired
 	ContratoDao contratoDao;
 	@Autowired
@@ -128,106 +129,142 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		constanteService.setTokenCaspio(tokenCaspio);
 		garantiaService.setTokenCaspio(tokenCaspio);
 		contratoService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "", nroArmadaId = "1";
 		boolean validacionLiquidacion = true;
-		
-		// Obtener datos pedido-inversion SAF
-		PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
-		
-		// Obtener valores pedido-contrato actualizado
-		System.out.println("pedidoInversionSAF.getNroPedido(): "+pedidoInversionSAF.getNroPedido());
-		List<Contrato> listaPedidoContrato = obtenerTablaContratosPedidoActualizado(pedidoInversionSAF.getNroPedido());
 		
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		
 		// Obtener nroArmadaId		
-		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& inversion.getServicioConstructora().booleanValue()==false){	
 			nroArmadaId = String.valueOf(Integer.parseInt(nroArmada)+1);
 		}
 		LOG.info("nroArmadaId: "+nroArmadaId);
-		
-		// Obtener garantias del pedido
-		List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
-		if(listaGarantias!=null && listaGarantias.size()>0){
-			for(Garantia garantia : listaGarantias){
-				System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
-				if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-					validacionLiquidacion=false;
+				
+		// Validar inversion confirmada
+		if(inversion.getConfirmado()==null || !inversion.getConfirmado().equals("SI")){
+			validacionLiquidacion = false;
+			resultado = Constantes.Service.RESULTADO_INVERSION_NO_CONFIRMADA;
+		}else{		
+			// Obtener datos pedido-inversion SAF
+			PedidoInversionSAF pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+					
+			// Obtener valores pedido-contrato actualizado
+			System.out.println("pedidoInversionSAF.getNroPedido(): "+pedidoInversionSAF.getNroPedido());
+			List<Contrato> listaPedidoContrato = obtenerTablaContratosPedidoActualizado(pedidoInversionSAF.getNroPedido());
+			
+			// Verificar si existe monto disponible para la inversion
+			double totalDisponible=0;
+			double totalDisponibleContratos = obtenerTotalDisponibleEnPedido(listaPedidoContrato);
+			Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
+			double montoDifPrecio = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto();
+			// Total disponible
+			totalDisponible=totalDisponibleContratos+montoDifPrecio;
+			System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
+			
+			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
+					&& !inversion.getServicioConstructora()){
+			}else{
+				if(validacionLiquidacion){				
+					// Verficar si hay monto para liquidar
+					if(totalDisponible<inversion.getImporteInversion().doubleValue()){
+						resultado = Constantes.Service.NO_MONTO_DISPONIBLE_LIQUIDAR;
+						validacionLiquidacion = false;
+					}
 				}
 			}
-		}else{
-			validacionLiquidacion=false;
-		}
-		// Verificar si existen garantias
-		if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
-					
-		// Validar el estado de la liquidacion
-		if(validacionLiquidacion){
-			// Obtener liquidaciones del pedido
-			List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);						
-			String estadoLiquidacion = Util.obtenerEstadoLiquidacionPorNroArmada(liquidacionInversion, nroArmadaId);
-			LOG.info("ESTADO LIQUIDACION:: "+estadoLiquidacion);
-			if(!estadoLiquidacion.equals("")){
-				resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
-				validacionLiquidacion = false;
+			
+			// Verificar comprobantes
+			if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+				System.out.println("CANCELACION: "+inversion.getImporteInversionInicial()+" - "+inversion.getFechaActualizacionSaldo());
+				if(inversion.getImporteInversionInicial()==null || Util.esVacio(inversion.getFechaActualizacionSaldo())){
+					validacionLiquidacion = false;
+					resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+				}
+			}else if((Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())
+					&& Constantes.DocumentoIdentidad.RUC_ID.equals(inversion.getPropietarioTipoDocId())) 
+					|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+					&& inversion.getServicioConstructora())){
+				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt(nroArmada));
+				if(listaComprobantes==null || listaComprobantes.size()==0){
+					validacionLiquidacion = false;
+					resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+				}
 			}
-		}
-		
-		// Verificar si existe monto disponible para la inversion - si no es construccion
-		double totalDisponible=0;
-		// Obtener total disponible en contratos
-		double totalDisponibleContratos = obtenerTotalDisponibleEnPedido(listaPedidoContrato);
-		// Obtener diferencia precio pagada
-		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
-		double montoDifPrecio = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto();
-		totalDisponible=totalDisponibleContratos+montoDifPrecio;
-		System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
-		
-		if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
-				&& !inversion.getServicioConstructora()){
-		}else{
-			if(validacionLiquidacion){				
-				// Verfivar si hay monto para liquidar
-				if(totalDisponible<inversion.getImporteInversion().doubleValue()){
-					resultado = Constantes.Service.NO_MONTO_DISPONIBLE_LIQUIDAR;
+								
+			// Validar montos por cobrar
+			if(validacionLiquidacion){
+				boolean validacionConceptos = validacionConceptosLiquidacion(inversion);
+				if(validacionConceptos==false){
+					validacionLiquidacion = false;
+					resultado = Constantes.Service.RESULTADO_PENDIENTE_COBROS;
+				}
+			}
+			
+			// Validar garantias
+			if(validacionLiquidacion){			
+				// Obtener garantias del pedido
+				List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
+				if(listaGarantias!=null && listaGarantias.size()>0){
+					for(Garantia garantia : listaGarantias){
+						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
+						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+							validacionLiquidacion=false;
+						}
+					}
+				}else{
+					validacionLiquidacion=false;
+				}
+				// Verificar si existen garantias
+				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+			}
+						
+			// Validar el estado de la liquidacion
+			if(validacionLiquidacion){
+				// Obtener liquidaciones del pedido
+				List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);						
+				String estadoLiquidacion = Util.obtenerEstadoLiquidacionPorNroArmada(liquidacionInversion, nroArmadaId);
+				LOG.info("ESTADO LIQUIDACION:: "+estadoLiquidacion);
+				if(!estadoLiquidacion.equals("")){
+					resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
 					validacionLiquidacion = false;
 				}
 			}
-		}
-						
-		// Obtener liquidacion de la inversion
-		if(validacionLiquidacion){
-			// Obtener Armada x tipo de inversion
-			double montoALiquidar = 0.00;
-			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){				
-				// Obtener monto a liquidar
-				List<Constante> listaArmadasDesemb = constanteService.obtenerListaArmadasDesembolso();
-				double porcentajeArmada = Util.obtenerPorcentajeArmada(listaArmadasDesemb, nroArmadaId);
-				System.out.println("inversion.getImporteInversion(): "+inversion.getImporteInversion()+" - porcentajeArmada: "+porcentajeArmada);
-				
-				double montoUsadoLiquidacion = inversion.getImporteInversion().doubleValue();
-				if(!inversion.getServicioConstructora()){
-					if(totalDisponibleContratos<inversion.getImporteInversion().doubleValue()){
-						montoUsadoLiquidacion = totalDisponibleContratos;
+										
+			// Obtener liquidacion de la inversion
+			if(validacionLiquidacion){
+				// Obtener Armada x tipo de inversion
+				double montoALiquidar = 0.00;
+				if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){				
+					// Obtener monto a liquidar
+					List<Constante> listaArmadasDesemb = constanteService.obtenerListaArmadasDesembolso();
+					double porcentajeArmada = Util.obtenerPorcentajeArmada(listaArmadasDesemb, nroArmadaId);
+					System.out.println("inversion.getImporteInversion(): "+inversion.getImporteInversion()+" - porcentajeArmada: "+porcentajeArmada);
+					
+					double montoUsadoLiquidacion = inversion.getImporteInversion().doubleValue();
+					if(!inversion.getServicioConstructora()){
+						if(totalDisponibleContratos<inversion.getImporteInversion().doubleValue()){
+							montoUsadoLiquidacion = totalDisponibleContratos;
+						}
 					}
+					
+					double porcentajeDecimal = porcentajeArmada/100;
+					System.out.println("montoUsadoLiquidacion:: "+montoUsadoLiquidacion+" - porcentajeDecimal:: "+porcentajeDecimal);
+					montoALiquidar = montoUsadoLiquidacion*porcentajeDecimal;					
+				}else{
+					montoALiquidar = inversion.getImporteInversion();
 				}
+				System.out.println("montoALiquidar: "+montoALiquidar);
 				
-				double porcentajeDecimal = porcentajeArmada/100;
-				System.out.println("montoUsadoLiquidacion:: "+montoUsadoLiquidacion+" - porcentajeDecimal:: "+porcentajeDecimal);
-				montoALiquidar = montoUsadoLiquidacion*porcentajeDecimal;					
-			}else{
-				montoALiquidar = inversion.getImporteInversion();
+				// Generar liquidacion por monto
+				generarLiquidacionPorMonto(pedidoInversionSAF, montoALiquidar, nroArmadaId, listaPedidoContrato, usuarioId, inversion);
+							
+				// Actualizar montos de los contratos del pedido
+				actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
 			}
-			System.out.println("montoALiquidar: "+montoALiquidar);
-			
-			// Generar liquidacion por monto
-			generarLiquidacionPorMonto(pedidoInversionSAF, montoALiquidar, nroArmadaId, listaPedidoContrato, usuarioId);
-						
-			// Actualizar montos de los contratos del pedido
-			actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
 		}
 		LOG.info("TERMINO LIQUIDACION");		
 		
@@ -245,7 +282,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	}
 	
 	private String generarLiquidacionPorMonto(PedidoInversionSAF pedidoInversionSAF, double montoALiquidar, String nroArmadaId,
-			List<Contrato> listaPedidoContrato, String usuarioId) throws Exception{
+			List<Contrato> listaPedidoContrato, String usuarioId, Inversion inversion) throws Exception{
 		LiquidacionSAF liquidacionSAF = null;
 		List<LiquidacionSAF> listaLiquidaciones = new ArrayList<>();
 		double montoALiquidarRestante = montoALiquidar, montoTotalLiquidado = 0.00;
@@ -300,6 +337,9 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			// Actualizar nro liquidacion en inversion
 			inversionService.actualizarEstadoInversionLiquidadoPorNro(pedidoInversionSAF.getPedidoInversionNumero(), numeroLiquidacion, Constantes.Inversion.ESTADO_LIQUIDADO);
+			// Registrar liquidacion en caspio
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.registrarLiquidacionInversion(inversionId, nroArmadaId, numeroLiquidacion);
 		}		
 				
 		return null;
@@ -346,20 +386,26 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	@Override
 	public String eliminarLiquidacionInversion(String nroInversion,
 			String nroArmada, String usuarioId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
+		
 		String resultado = "";
 		boolean existeLiquidacionArmada = false;
+		
 		// Obtener liquidaciones
 		List<LiquidacionSAF> liquidacionesInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
 		
 		// Obtener el estado de la liquidacion
 		String nroArmadaId = "1";
 		PedidoInversionSAF pedidoInversionSAF = null;
+		Inversion inversion = null;
 		if(liquidacionesInversion!=null && liquidacionesInversion.size()>0){
 			// Obtener datos pedido-inversion SAF
 			pedidoInversionSAF = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 			
 			// Obtener datos de la inversion
-			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 			
 			// Obtener nroArmadaId			
 			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
@@ -392,6 +438,10 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			// Actualizar nro liquidacion en inversion
 			inversionService.actualizarEstadoInversionLiquidadoPorNro(pedidoInversionSAF.getPedidoInversionNumero(), "", Constantes.Inversion.ESTADO_EN_PROCESO);
 						
+			// Eliminar liquidacion en caspio
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.eliminarLiquidacionInversion(inversionId, nroArmadaId);
+			
 			// Actualizar montos de los contratos del pedido
 			actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
 		}
@@ -406,6 +456,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
+				
 		// Obtener liquidaciones de la inversion
 		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
@@ -451,13 +502,19 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
 		
 		// Obtener saldo diferencia precio
-		DetalleDiferenciaPrecio diferenciaPrecio = contratoBusiness.obtenerMontoDiferenciaPrecio(pedido.getPedidoId());
-		
-		// Obtener monto pagado dif. precio
-		diferenciaPrecio.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-		diferenciaPrecio.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
-				
-		return diferenciaPrecio;
+		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(pedido.getPedidoId());
+		Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+		if(montoDiferenciaPrecio<0){		
+			ddp.setDiferenciaPrecio(Util.getMontoFormateado(Double.parseDouble(ddp.getDiferenciaPrecio())));
+			ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
+			ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
+			// Obtener monto pagado dif. precio			
+			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
+			ddp.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
+		}else{
+			ddp = null;
+		}
+		return ddp;
 	}
 
 	@Override
@@ -465,6 +522,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			String nroArmada, String nroDesembolso) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
 		
 		// Actualizar estado de la inversion
 		inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_DESEMBOLSADO);
@@ -473,17 +531,48 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		String inversionId = String.valueOf(inversion.getInversionId().intValue());
 		
-		// Obtener desembolso
-		Desembolso desembolso = desembolsoService.obtenerDesembolsoPorInversionArmada(inversionId, nroArmada);
-		
-		// Registrar desembolso
-		if(desembolso==null){
-			desembolsoService.crearDesembolsoInversion(inversionId, nroArmada, nroDesembolso);
-		}
-		
+		// Registrar desembolso en caspio
+		liquidDesembService.registrarDesembolsoInversion(inversionId, nroArmada, nroDesembolso);
+				
 		return null;
 	}
 	
 	
-	
+	private boolean validacionConceptosLiquidacion(Inversion inversion) throws Exception{
+		boolean resultado = false, conceptoNoPagado=false;
+		
+		// Obtener conceptos de liquidacion
+		List<ConceptoLiquidacion> listaConceptos = liquidacionDao.obtenerConceptosLiquidacion(inversion.getNroInversion());
+		if(listaConceptos!=null && listaConceptos.size()>0){
+			for(ConceptoLiquidacion concepto : listaConceptos){
+				if(Constantes.Liquidacion.CONCEPTO_SITUACION_PENDIENTE.equals(concepto.getSituacionID())){
+					System.out.println("concepto no pagado: "+concepto.getConceptoNombre()+"-"+concepto.getSituacionID());
+					conceptoNoPagado=true;
+					break;
+				}
+			}
+		}
+		
+		// Obtener cancelacion diferencia precio
+		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
+		if(ddp!=null){
+			String tipoInversion = inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora());
+			if(!tipoInversion.equals("CONSTRUCCION-0")){
+				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
+				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
+				if(montoDiferenciaPrecio<0){
+					double montoPagado = Double.parseDouble(ddp.getMontoDifPrecioPagado());
+					if(montoPagado<montoDiferenciaPrecio){
+						conceptoNoPagado=true;
+					}
+				}
+			}
+		}
+		
+		if(conceptoNoPagado==false){
+			resultado=true;
+		}
+		
+		return resultado;
+	}
 }

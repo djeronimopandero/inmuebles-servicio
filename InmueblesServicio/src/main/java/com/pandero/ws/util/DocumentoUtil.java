@@ -1040,7 +1040,7 @@ public class DocumentoUtil {
 					String text = r.getText(0);
 
 					if (text != null) {
-						/*if(text.contains("$firmas")){
+						if(text.contains("$firmas")){
 							
 							text = text.replace("$firmas", "");
 							r.setText(text, 0);
@@ -1082,7 +1082,7 @@ public class DocumentoUtil {
 									}
 								}
 							}
-						}*/
+						}
 					}
 				}
 			}
