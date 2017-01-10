@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.Seguro;
 import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -32,7 +33,9 @@ public class GarantiaServiceImpl implements GarantiaService{
 
 	@Value("${url.service.table.garantia}")
 	private String tableGarantiaURL;
-
+	@Value("${url.service.table.seguro}")
+	private String tableSeguroURL;
+	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
@@ -107,6 +110,37 @@ public class GarantiaServiceImpl implements GarantiaService{
 		
         ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,eliminarGarantiaURL,Object.class,request,serviceWhere);	
 		return null;
+	}
+
+	@Override
+	public List<Seguro> obtenerSegurosPorGarantiaId(String garantiaId)
+			throws Exception {
+		List<Seguro> listaSeguros = null;	
+		String serviceWhere = "{\"where\":\"garantiaId=" + garantiaId + "\"}";	
+		String obtenerSegurosxGarantiaURL = tableSeguroURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerSegurosxGarantiaURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapResultado = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapResultado!=null && mapResultado.size()>0){
+	        			listaSeguros = new ArrayList<Seguro>();
+	        			for(Object bean : mapResultado){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				Seguro seguro =  JsonUtil.fromJson(beanString, Seguro.class);
+	        				listaSeguros.add(seguro);
+	        			}
+	        			System.out.println("listaSeguros:: "+listaSeguros.size());
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return listaSeguros;
 	}
 
 }

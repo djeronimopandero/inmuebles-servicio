@@ -43,7 +43,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		call.addDeclaredParameter(new SqlParameter("@PartidaRegistral", Types.VARCHAR));		
 		call.addDeclaredParameter(new SqlParameter("@FichaConstitucion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@FechaConstitucion", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@MontoPrima", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsoBien", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		call.addDeclaredParameter(new SqlOutParameter("@GarantiaInmbID", Types.VARCHAR));
 				
@@ -52,7 +52,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		.addValue("@PartidaRegistral", garantia.getPartidaRegistral())
 		.addValue("@FichaConstitucion", garantia.getFichaConstitucion())
 		.addValue("@FechaConstitucion", garantia.getFechaConstitucion())
-		.addValue("@MontoPrima", garantia.getMontoPrima())
+		.addValue("@UsoBien", garantia.getUsoBien())
 		.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));     
 				
 		Map resultadoSP = call.execute(parameters);
@@ -71,6 +71,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		call.addDeclaredParameter(new SqlParameter("@PartidaRegistral", Types.VARCHAR));		
 		call.addDeclaredParameter(new SqlParameter("@FichaConstitucion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@FechaConstitucion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsoBien", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@MontoPrima", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@Modalidad", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
@@ -80,11 +81,12 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		parameters.addValue("@PartidaRegistral", garantia.getPartidaRegistral());
 		parameters.addValue("@FichaConstitucion", garantia.getFichaConstitucion());
 		parameters.addValue("@FechaConstitucion", garantia.getFechaConstitucion());
+		parameters.addValue("@UsoBien", garantia.getUsoBien());
 		parameters.addValue("@MontoPrima", garantia.getMontoPrima());
 		parameters.addValue("@Modalidad", garantia.getModalidad());
 		parameters.addValue("@UsuarioID", Util.convertirCadenaAInt(usuarioId));
 				
-		System.out.println("garantia.getMontoPrima()>"+garantia.getMontoPrima()+"<");
+		System.out.println("garantia.getMontoPrima()>"+garantia.getMontoPrima()+"< >"+garantia.getUsoBien());
 		System.out.println("garantia.getGarantiaSAFId()>"+String.valueOf(garantia.getGarantiaSAFId().intValue())+"<");
 		call.execute(parameters);
 		return null;

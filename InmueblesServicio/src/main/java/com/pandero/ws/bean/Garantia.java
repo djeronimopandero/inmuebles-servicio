@@ -14,6 +14,7 @@ public class Garantia implements java.io.Serializable {
 	private String estadoGarantia;
 	private String pedidoNumero;
 	private String modalidad;
+	private String usoBien;
 	
 	public Integer getIdGarantia() {
 		return idGarantia;
@@ -74,6 +75,12 @@ public class Garantia implements java.io.Serializable {
 	}
 	public void setModalidad(String modalidad) {
 		this.modalidad = modalidad;
+	}
+	public String getUsoBien() {
+		return usoBien;
+	}
+	public void setUsoBien(String usoBien) {
+		this.usoBien = usoBien;
 	}
 		
 }

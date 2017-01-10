@@ -587,8 +587,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Obtener cancelacion diferencia precio
 		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
 		if(ddp!=null){
-			String tipoInversion = inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora());
-			if(!tipoInversion.equals("CONSTRUCCION-0")){
+			if(!inversion.getTipoInversion().equals(Constantes.TipoInversion.CONSTRUCCION_COD)){
 				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
 				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
 				if(montoDiferenciaPrecio<0){
