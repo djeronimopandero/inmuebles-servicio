@@ -16,6 +16,7 @@ public class PersonaSAF implements java.io.Serializable {
 	private Integer personaRelacionadaID;
 	private Integer proveedorID;
 	private String tipoProveedor;
+	private String telefono;
 	
 	public PersonaSAF(){
 		
@@ -122,6 +123,14 @@ public class PersonaSAF implements java.io.Serializable {
 
 	public void setTipoProveedor(String tipoProveedor) {
 		this.tipoProveedor = tipoProveedor;
+	}
+
+	public String getTelefono() {
+		return telefono;
+	}
+
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
 	}
 	
 }
