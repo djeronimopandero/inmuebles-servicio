@@ -359,7 +359,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 				
 		// Validar si existe liquidacion
-		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
 		
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
 			resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
@@ -563,12 +563,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String generarDocumentoDesembolso(String nroInversion, String usuarioSAFId)
+	public String generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
-		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
 		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			
@@ -781,7 +781,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
 						if(totalComprobantes>=montoMinimoDesembolso){
 							// Generar siguiente liquidacion
-							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+							int siguienteArmada=nroArmadaActual+1;
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
 							liquidacionAutomaticaExitosa = true;
 						}	
 					}
@@ -985,21 +986,37 @@ public class InversionBusinessImpl implements InversionBusiness{
 			throws Exception {
 		LiquidacionSAF ultimaLiquidacion = null;
 		
-		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
+		int ultimoNroArmada = obtenerUltimoNroArmada(listaLiquidacion);
 		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
 			ultimaLiquidacion = new LiquidacionSAF();
 			double liquidacionImporte = 0.00;
 			for(LiquidacionSAF liquidacion : listaLiquidacion){
-				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
-				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
-				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
-				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
-				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
-				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				if(liquidacion.getNroArmada()==ultimoNroArmada){
+					ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+					ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+					ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+					liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+					ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+					ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				}
 			}
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
 		return ultimaLiquidacion;
+	}
+	
+	private int obtenerUltimoNroArmada(List<LiquidacionSAF> listaLiquidacion){
+		int ultimoNroArmada=0;
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			for(LiquidacionSAF liquidacion:  listaLiquidacion){
+				if(liquidacion.getNroArmada()>ultimoNroArmada){
+					ultimoNroArmada=liquidacion.getNroArmada();
+				}
+			}
+		}
+		
+		return ultimoNroArmada;
 	}
 	
 	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId)
@@ -1011,17 +1028,20 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		
-		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
+		int ultimoNroArmada = obtenerUltimoNroArmada(listaLiquidacion);
 		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
 			ultimaLiquidacion = new LiquidacionSAF();
 			double liquidacionImporte = 0.00;
 			for(LiquidacionSAF liquidacion : listaLiquidacion){
-				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
-				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
-				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
-				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
-				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
-				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				if(liquidacion.getNroArmada()==ultimoNroArmada){
+					ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+					ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+					ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+					liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+					ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+					ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				}
 			}
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		

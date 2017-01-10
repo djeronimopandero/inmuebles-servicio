@@ -277,8 +277,9 @@ public class InversionController {
 		String result="1", detail="";
 		try{
 			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
-			result = liquidacionBusiness.confirmarLiquidacionInversion(nroInversion, usuarioId);
+			result = liquidacionBusiness.confirmarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
 			if(result.equals("")){
 				result = Constantes.Service.RESULTADO_EXITOSO;
 			}
@@ -314,14 +315,14 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
-	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}/{usuarioId}", method = RequestMethod.GET)
+	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
 	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero,
-			@PathVariable(value="usuarioId") String usuarioId){
+			@PathVariable(value="nroArmada") String nroArmada, @PathVariable(value="usuarioId") String usuarioId){
 		LOG.info("###ContratoController.solicitudDesembolso inversionNumero:"+inversionNumero);
 		String resultadoBean = null;
 		if(null!=inversionNumero ){
 			try {
-				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,usuarioId);
+				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,nroArmada,usuarioId);
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
 				return "ERROR";
