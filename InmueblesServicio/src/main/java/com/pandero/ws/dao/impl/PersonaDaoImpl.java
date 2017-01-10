@@ -85,6 +85,7 @@ public class PersonaDaoImpl implements PersonaDao {
 			p.setPersonaID(rs.getInt("PersonaID"));
 			p.setTipoDocumentoID(rs.getString("TipoDocumentoID"));
 			p.setPersonaCodigoDocumento(rs.getString("PersonaCodigoDocumento"));
+			p.setPersonaRelacionadaID(rs.getInt("PersonaRelacionadaID"));
 			return p;		    
 		}
 	}
