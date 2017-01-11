@@ -113,6 +113,17 @@ public class GarantiaServiceImpl implements GarantiaService{
 	}
 
 	@Override
+	public String eliminarSeguro(String serviceWhere) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		
+		String eliminarGarantiaURL = tableSeguroURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.deleteForObject(restTemplate,tokenCaspio,eliminarGarantiaURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+	
+	
+	@Override
 	public List<Seguro> obtenerSegurosPorGarantiaId(String garantiaId)
 			throws Exception {
 		List<Seguro> listaSeguros = null;	
@@ -142,5 +153,13 @@ public class GarantiaServiceImpl implements GarantiaService{
         
 		return listaSeguros;
 	}
+	
+	@Override
+	public String crearGarantiaInversionCaspio(Map<String, String> request)
+			throws Exception {		
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableGarantiaURL,Object.class,request,null);			
+		return null;
+	}
+	
 
 }

@@ -23,6 +23,7 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.EmailBean;
+import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.LiquidacionSAF;
@@ -36,11 +37,13 @@ import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
+import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
@@ -76,6 +79,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Autowired
 	LiquidacionBusiness liquidacionBusiness;
 	
+	@Autowired
+	GarantiaDao garantiaDAO;
+	
+	@Autowired
+	GarantiaService garantiaService;
+	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
 	@Value("${ruta.documentos.generados}")
@@ -96,6 +105,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String resultado = "";
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
 		
 		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
@@ -140,7 +150,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);				
-				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);								
+				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
+				
+				// ha pedido de debora... documentamos :D
+				//verificamos si el inmueble esta hipotecado
+				if(inversion.getInmuebleInversionHipotecado()){
+					//si es así creamos la garantia en CASPIO con los datos necesarios
+					Map<String,String> jsonRequest = new HashMap<String,String>();
+					jsonRequest.put("direccion", inversion.getDireccion());
+					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
+					jsonRequest.put("codigoProvincia", inversion.getProvinciaId());
+					jsonRequest.put("codigoDistrito", inversion.getDistritoId());
+					jsonRequest.put("partidaRegistral", inversion.getPartidaRegistral());
+					jsonRequest.put("categoriaConstruccion", "AQ");
+					jsonRequest.put("rangoPisos", "001");
+					jsonRequest.put("uso", "40");
+					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
+					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
+					// Completar objeto garantia SAF		
+					Garantia garantia = new Garantia();
+					garantia.setPedidoNumero(inversion.getPedidoId().toString());
+					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
+					garantia.setUsoBien("40");
+				
+					// Crear garantia en el SAF		
+					garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+				}
 			}
 		}
 		
@@ -161,6 +196,26 @@ public class InversionBusinessImpl implements InversionBusiness{
 			// Eliminar pedido-inversion en SAF
 			if(Util.esVacio(resultado)){
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
+				//eliminamos la garantia
+				List<Garantia> garantias = garantiaService.obtenerGarantiasPorPedido(inversion.getPedidoId().toString());
+				for(Garantia garantia : garantias){
+					if(garantia.getPartidaRegistral().equals(inversion.getPartidaRegistral())){
+						
+						String garantiaSAFId = String.valueOf(garantia.getGarantiaSAFId().intValue());
+						
+						//Eliminar seguro CASPIO
+						String serviceWhere = "{\"where\":\"idGarantia="+garantia.getIdGarantia()+"\"}";	
+						garantiaService.eliminarSeguro(serviceWhere);
+						
+						// Eliminar garantia en SAF
+						garantiaDAO.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+						
+						// Eliminar garantia en Caspio
+						garantiaService.eliminarGarantiaPorId(garantia.getIdGarantia().toString());
+						break;
+					}
+				}
+				
 			}
 		}
 		

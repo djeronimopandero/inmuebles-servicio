@@ -13,6 +13,7 @@ import com.pandero.ws.bean.Seguro;
 import com.pandero.ws.business.GarantiaBusiness;
 import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.service.GarantiaService;
+import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.ServiceRestTemplate;
 
@@ -27,6 +28,9 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	GarantiaService garantiaService;
 	@Autowired
 	PedidoService pedidoService;
+	
+	@Autowired
+	InversionService inversionService;
 
 	@Override
 	public String crearGarantiaSAF(String pedidoCaspioId,String partidaRegistral,String fichaConstitucion,
@@ -97,6 +101,8 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		// Obtener seguros por garantia
 		List<Seguro> listaSeguros = garantiaService.obtenerSegurosPorGarantiaId(garantiaId);
 		
+		
+		
 		if(listaSeguros!=null && listaSeguros.size()>0){
 			resultado = "Operación Cancelada: La Garantía cuenta con un seguro registrado.";
 		}else{
@@ -106,6 +112,8 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 			
 			// Eliminar garantia en Caspio
 			garantiaService.eliminarGarantiaPorId(garantiaId);
+			
+			inversionService.actualizarInversionGarantiaHipotecado(garantiaCaspio);
 		}
 	
 		return resultado;

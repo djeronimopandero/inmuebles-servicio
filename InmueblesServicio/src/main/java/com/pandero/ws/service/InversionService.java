@@ -3,6 +3,7 @@ package com.pandero.ws.service;
 import java.util.List;
 
 import com.pandero.ws.bean.ComprobanteCaspio;
+import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 
@@ -31,4 +32,5 @@ public interface InversionService {
 	
 	public String envioCargoContabilidadActualizSaldo(String inversionId,String fechaEnvio,String usuarioEnvio) throws Exception;
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
+	public String actualizarInversionGarantiaHipotecado(Garantia garantiaCaspio) throws Exception;
 }
