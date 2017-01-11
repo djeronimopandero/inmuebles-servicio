@@ -22,6 +22,7 @@ import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
+import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -40,6 +41,8 @@ public class InversionController {
 	LiquidacionBusiness liquidacionBusiness;
 	@Autowired
 	InversionService inversionService;
+	@Autowired
+	LiquidacionDao liquidacionDao;
 	
 	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
@@ -573,55 +576,55 @@ public class InversionController {
 		return resultadoBean;
 	}
 
-	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
-	@ResponseBody
-	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {
-		LOG.info("###obtenerUltimaLiquidacionInversion params:"+params);
-		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", detail="";
-		try{
-			String nroInversion = String.valueOf(params.get("nroInversion"));
-			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(nroInversion);
-			if(liquidacionSAF!=null){
-				result = "1";
-				detail = JsonUtil.toJson(liquidacionSAF);
-			}
-		}catch(Exception e){
-			LOG.error("Error inversion/obtenerUltimaLiquidacionInversion:: ",e);
-			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-			detail=e.getMessage();
-		}			
-		response.put("result",result);
-		response.put("detail",detail);
-		System.out.println("RESPONSE: " +  response);			
-		return response;
-	}	
+//	@RequestMapping(value = "/obtenerUltimaLiquidacionInversion", method = RequestMethod.POST, produces = "application/json")
+//	@ResponseBody
+//	public Map<String, Object> obtenerUltimaLiquidacionInversion(@RequestBody Map<String, Object> params) {
+//		LOG.info("###obtenerUltimaLiquidacionInversion params:"+params);
+//		Map<String, Object> response = new HashMap<String, Object>();
+//		String result="", detail="";
+//		try{
+//			String nroInversion = String.valueOf(params.get("nroInversion"));
+//			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(nroInversion);
+//			if(liquidacionSAF!=null){
+//				result = "1";
+//				detail = JsonUtil.toJson(liquidacionSAF);
+//			}
+//		}catch(Exception e){
+//			LOG.error("Error inversion/obtenerUltimaLiquidacionInversion:: ",e);
+//			e.printStackTrace();
+//			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+//			detail=e.getMessage();
+//		}			
+//		response.put("result",result);
+//		response.put("detail",detail);
+//		System.out.println("RESPONSE: " +  response);			
+//		return response;
+//	}	
 
-	@RequestMapping(value = "/obtenerUltimaLiquidacionInversionPorId", method = RequestMethod.POST, produces = "application/json")
-	@ResponseBody
-	public Map<String, Object> obtenerUltimaLiquidacionInversionPorId(@RequestBody Map<String, Object> params) {
-		LOG.info("###obtenerUltimaLiquidacionInversionPorId params:"+params);
-		Map<String, Object> response = new HashMap<String, Object>();
-		String result="", detail="";
-		try{
-			String inversionId = String.valueOf(params.get("inversionId"));
-			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversionPorId(inversionId);
-			if(liquidacionSAF!=null){
-				result = "1";
-				detail = JsonUtil.toJson(liquidacionSAF);
-			}
-		}catch(Exception e){
-			LOG.error("Error inversion/obtenerUltimaLiquidacionInversionPorId:: ",e);
-			e.printStackTrace();
-			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-			detail=e.getMessage();
-		}			
-		response.put("result",result);
-		response.put("detail",detail);
-		System.out.println("RESPONSE: " +  response);			
-		return response;
-	}	
+//	@RequestMapping(value = "/obtenerUltimaLiquidacionInversionPorId", method = RequestMethod.POST, produces = "application/json")
+//	@ResponseBody
+//	public Map<String, Object> obtenerUltimaLiquidacionInversionPorId(@RequestBody Map<String, Object> params) {
+//		LOG.info("###obtenerUltimaLiquidacionInversionPorId params:"+params);
+//		Map<String, Object> response = new HashMap<String, Object>();
+//		String result="", detail="";
+//		try{
+//			String inversionId = String.valueOf(params.get("inversionId"));
+//			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversionPorId(inversionId);
+//			if(liquidacionSAF!=null){
+//				result = "1";
+//				detail = JsonUtil.toJson(liquidacionSAF);
+//			}
+//		}catch(Exception e){
+//			LOG.error("Error inversion/obtenerUltimaLiquidacionInversionPorId:: ",e);
+//			e.printStackTrace();
+//			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+//			detail=e.getMessage();
+//		}			
+//		response.put("result",result);
+//		response.put("detail",detail);
+//		System.out.println("RESPONSE: " +  response);			
+//		return response;
+//	}	
 	
 	@RequestMapping(value = "/actualizarDesembolsoCaspio", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
@@ -648,23 +651,31 @@ public class InversionController {
 	}	
 	
 	
-	@RequestMapping(value = "obtenerSolicitudDesembolsoExcepcional/{inversionNumero}", method = RequestMethod.GET)
-	public @ResponseBody List<LinkedHashMap<String,Object>> getResumenComprobante(@PathVariable(value="inversionNumero") String inversionNumero){
+	@RequestMapping(value = "obtenerSolicitudDesembolsoExcepcional/{inversionNumero}/{nroArmada}", method = RequestMethod.GET)
+	public @ResponseBody List<LinkedHashMap<String,Object>> getResumenComprobante(@PathVariable(value="inversionNumero") String inversionNumero,
+			@PathVariable(value="nroArmada") String nroArmada){
 		
 		List<LinkedHashMap<String,Object>> result = new ArrayList<LinkedHashMap<String,Object>>();
 		LinkedHashMap<String,Object> element = new LinkedHashMap<String,Object>();
 		
 		if(null!=inversionNumero){
 			try {
-				LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversion(inversionNumero);
-				if(liquidacionSAF!=null){
+				List<LiquidacionSAF> liquidacionesSAF = liquidacionDao.obtenerLiquidacionPorInversionArmada(inversionNumero, nroArmada);
+				if(liquidacionesSAF!=null && liquidacionesSAF.size()>0){
+					LiquidacionSAF liquidacionSAF = new LiquidacionSAF();
+					double liquidacionImporte = 0.00;
+					for(LiquidacionSAF liquidacion : liquidacionesSAF){
+						liquidacionSAF.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+						liquidacionImporte+=liquidacion.getLiquidacionImporte();
+					}
+					liquidacionSAF.setLiquidacionImporte(liquidacionImporte);
+					
 					if("3".equals(liquidacionSAF.getLiquidacionEstado())){
 						element.put("fecha", liquidacionSAF.getLiquidacionFecha());
 						element.put("importe", liquidacionSAF.getLiquidacionImporte());
 						element.put("tipo", "DESEMBOLSO");
 						result.add(element);					
-						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,liquidacionSAF.getNroArmada()));
-						
+						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,liquidacionSAF.getNroArmada()));						
 					}else{
 						element.put("message", "Operación Cancelada. El estado de la liquidación consultada es diferente a DESEMBOLSADO.");
 						result.add(element);	
