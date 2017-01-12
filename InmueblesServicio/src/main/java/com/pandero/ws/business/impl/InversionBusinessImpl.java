@@ -380,6 +380,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
+		boolean existePendientes=false;
 		if(!StringUtils.isEmpty(inversionId)){
 			 List<InversionRequisito> list= inversionService.obtenerRequisitosPorInversion(inversionId);
 			 if(null!=list){
@@ -392,6 +393,16 @@ public class InversionBusinessImpl implements InversionBusiness{
 						 obs.setObservacion(irc.getObservacion());
 						 listObs.add(obs);
 					 }
+					 if(!existePendientes){
+						 if(Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE.equals(irc.getEstadoRequisito()!=null?irc.getEstadoRequisito():"")){
+							 existePendientes=true;
+						 }
+					 }
+				 }
+				 
+				 if(existePendientes){
+					 msg="No es posible generar la carta de validación por que existen requisitos PENDIENTES"; 
+					 return msg;
 				 }
 				 
 				 if(listObs.size()==0){
