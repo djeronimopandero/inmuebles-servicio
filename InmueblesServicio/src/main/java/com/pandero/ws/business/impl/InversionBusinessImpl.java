@@ -153,10 +153,22 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);				
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
 				
-				// ha pedido de debora... documentamos :D
 				//verificamos si el inmueble esta hipotecado
-				if(inversion.getInmuebleInversionHipotecado()){
-					//si es así creamos la garantia en CASPIO con los datos necesarios
+				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
+				if(inversion.getInmuebleInversionHipotecado()){					
+					// Obtener datos de la garantia	
+					Garantia garantia = new Garantia();
+					garantia.setPedidoNumero(pedido.getNroPedido());
+					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
+					garantia.setUsoBien("40");
+				
+					// Crear garantia en el SAF		
+					String garantiaSAFId = garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+					if(Util.esVacio(garantiaSAFId)){
+						garantiaSAFId="0";
+					}
+					
+					// Crear garantia en caspio
 					Map<String,String> jsonRequest = new HashMap<String,String>();
 					jsonRequest.put("direccion", inversion.getDireccion());
 					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
@@ -167,15 +179,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 					jsonRequest.put("rangoPisos", "001");
 					jsonRequest.put("uso", "40");
 					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
+					jsonRequest.put("garantiaSAFId", garantiaSAFId);
 					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
-					// Completar objeto garantia SAF		
-					Garantia garantia = new Garantia();
-					garantia.setPedidoNumero(inversion.getPedidoId().toString());
-					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
-					garantia.setUsoBien("40");
-				
-					// Crear garantia en el SAF		
-					garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+					
 				}
 			}
 		}
