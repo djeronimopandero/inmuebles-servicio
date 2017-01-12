@@ -642,11 +642,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
+		LOG.info("### InversionBusinessImpl.generarDocumentoDesembolso nroInversion:"+nroInversion+", nroArmada:"+nroArmada+", usuarioSAFId:"+usuarioSAFId);
+		
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
 		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
-			
+			LOG.info("### liquidaciones es null o el estado de sul ultima liquidacion no es 3 DESEMBOLSADO");
+			return "Ocurrió un error. La liquidación no se encuentra desembolsada";
 		}else{
+			LOG.info("### Se procede a generar el doc de desembolso");
 			LiquidacionSAF liquidacion = liquidaciones.get(0);
 			String armada = Constantes.ARMADAS_DOC_DESEMBOLSO.get(liquidacion.getNroArmada());
 			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
@@ -776,7 +780,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}
 			}
 		}
-		return null;
+		return "Se generó la carta de desembolso correctamente.";
 	}
 
 	@Override

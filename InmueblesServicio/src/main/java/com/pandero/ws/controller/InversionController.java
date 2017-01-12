@@ -328,7 +328,7 @@ public class InversionController {
 				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,nroArmada,usuarioId);
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
-				return "ERROR";
+				return "Ocurrió un error al generar la solicitud de desembolso";
 			}
 		}
 		return resultadoBean;
