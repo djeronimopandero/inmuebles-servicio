@@ -127,7 +127,7 @@ public class GarantiaServiceImpl implements GarantiaService{
 	public List<Seguro> obtenerSegurosPorGarantiaId(String garantiaId)
 			throws Exception {
 		List<Seguro> listaSeguros = null;	
-		String serviceWhere = "{\"where\":\"garantiaId=" + garantiaId + "\"}";	
+		String serviceWhere = "{\"where\":\"idGarantia=" + garantiaId + "\"}";	
 		String obtenerSegurosxGarantiaURL = tableSeguroURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerSegurosxGarantiaURL,Object.class,null,serviceWhere);

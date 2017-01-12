@@ -1164,8 +1164,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Double dblImporteTotalComprobantes = 0.0;
 		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
-		for(ComprobanteCaspio comprobante:listComprobantes){
-			dblImporteTotalComprobantes+=comprobante.getImporte();
+		if(listComprobantes!=null && listComprobantes.size()>0){
+			for(ComprobanteCaspio comprobante:listComprobantes){
+				dblImporteTotalComprobantes+=comprobante.getImporte();
+			}
 		}
 		
 		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
