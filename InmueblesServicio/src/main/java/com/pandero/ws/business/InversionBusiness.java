@@ -16,7 +16,7 @@ public interface InversionBusiness {
 	public ResultadoBean getImporteComprobante(String inversionNumero, Integer nroArmada)throws Exception;
 	
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
-	public String generarDocumentoDesembolso(String nroInversion, String usuarioSAFId) throws Exception;
+	public String generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
 	
 	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
@@ -30,7 +30,7 @@ public interface InversionBusiness {
 	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception;
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 
-	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
+//	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
 	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId) throws Exception;
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 	

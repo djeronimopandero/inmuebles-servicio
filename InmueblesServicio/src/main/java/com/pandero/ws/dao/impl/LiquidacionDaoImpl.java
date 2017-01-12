@@ -3,7 +3,7 @@ package com.pandero.ws.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.LiquidacionSAF;
-import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.LiquidacionDao;
 
 @Repository
@@ -40,7 +39,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 	}
 
 	@Override
-	public List<LiquidacionSAF> obtenerLiquidacionPorInversionSAF(String nroInversion) throws Exception{
+	public List<LiquidacionSAF> obtenerLiquidacionesPorInversionSAF(String nroInversion) throws Exception{
 		List<LiquidacionSAF> listaLiquidacion = null;
 		
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
@@ -59,6 +58,26 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		}
 		
 		return listaLiquidacion;
+	}
+	
+	@Override
+	public List<LiquidacionSAF> obtenerLiquidacionPorInversionArmada(
+			String nroInversion, String nroArmada) throws Exception {
+		List<LiquidacionSAF> listaLiquidacionArmada = null;
+		
+		List<LiquidacionSAF> listaLiquidacion=obtenerLiquidacionesPorInversionSAF(nroInversion);
+		
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){	
+			listaLiquidacionArmada = new ArrayList<LiquidacionSAF>();
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				if(liquidacion.getNroArmada()==Integer.parseInt(nroArmada)){
+					listaLiquidacionArmada.add(liquidacion);
+				}
+			}
+			if(listaLiquidacionArmada.size()==0) listaLiquidacionArmada=null;
+		}
+		
+		return listaLiquidacionArmada;
 	}
 	
 	@Override
@@ -162,7 +181,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
         parameters.addValue("@LiquidacionEstado", liquidacionSAF.getLiquidacionEstado());
 		parameters.addValue("@UsuarioID", usuarioId);
 		parameters.addValue("@NroArmada", liquidacionSAF.getNroArmada());
-				
+		
 		call.execute(parameters);
 		
 		return null;
@@ -260,4 +279,6 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			return e;		    
 			}
 		}
+
+	
 }

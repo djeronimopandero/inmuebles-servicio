@@ -35,12 +35,12 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String partidaRegistral = String.valueOf(params.get("partidaRegistral"));
 			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
 			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
-			String montoPrima = String.valueOf(params.get("montoPrima"));
+			String uso = String.valueOf(params.get("uso"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			LOG.info("datos: "+pedidoCaspioId+" - "+partidaRegistral+" - "+fichaConstitucion+" "+
-					fechaConstitucion+" - "+montoPrima+" - "+usuarioId);
+					fechaConstitucion+" - "+usuarioId);
 			
-			result = garantiaBusiness.crearGarantiaSAF(pedidoCaspioId, partidaRegistral, fichaConstitucion, fechaConstitucion, montoPrima, usuarioId);
+			result = garantiaBusiness.crearGarantiaSAF(pedidoCaspioId, partidaRegistral, fichaConstitucion, fechaConstitucion, uso, usuarioId);
 					
 		}catch(Exception e){
 			LOG.error("Error pedido/crearGarantiaSAF:: ",e);
@@ -66,12 +66,13 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String partidaRegistral = String.valueOf(params.get("partidaRegistral"));
 			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
 			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
-			String montoPrima = String.valueOf(params.get("montoPrima"));
+			String uso = String.valueOf(params.get("uso"));
+			String montoPrima = String.valueOf(params.get("montoPrima"));			
 			String modalidad = String.valueOf(params.get("modalidad"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
 			garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
-					fechaConstitucion, montoPrima, modalidad, usuarioId);
+					fechaConstitucion, montoPrima, modalidad, uso, usuarioId);
 			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
@@ -97,9 +98,10 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String garantiaId = String.valueOf(params.get("garantiaId"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			
-			garantiaBusiness.eliminarGarantia(garantiaId, usuarioId);
-			result = Constantes.Service.RESULTADO_EXITOSO;
-			
+			result = garantiaBusiness.eliminarGarantia(garantiaId, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
 		}catch(Exception e){
 			LOG.error("Error pedido/eliminarGarantia:: ",e);
 			e.printStackTrace();

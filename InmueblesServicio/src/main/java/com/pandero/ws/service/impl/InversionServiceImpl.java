@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.pandero.ws.bean.ComprobanteCaspio;
+import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.service.InversionService;
@@ -324,6 +325,18 @@ public class InversionServiceImpl implements InversionService {
 		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);
+		return null;
+	}
+	
+	@Override
+	public String actualizarInversionGarantiaHipotecado(Garantia garantiaCaspio) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("InmuebleInversionHipotecado", "0");
+		
+		String serviceWhere = "{\"where\":\"PartidaRegistral='"+garantiaCaspio.getPartidaRegistral()+"' and pedidoId=" + garantiaCaspio.getPedidoID() + "\"}";	
+		String actualizarGarantiaURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarGarantiaURL,Object.class,request,serviceWhere);	
 		return null;
 	}
 	

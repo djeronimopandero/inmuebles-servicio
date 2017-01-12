@@ -1,6 +1,6 @@
 package com.pandero.ws.business.impl;
 
-import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.Seguro;
 import com.pandero.ws.business.GarantiaBusiness;
 import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.service.GarantiaService;
+import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.ServiceRestTemplate;
-import com.pandero.ws.util.Util;
 
 @Service
 public class GarantiaBusinessImpl implements GarantiaBusiness{
@@ -27,10 +28,13 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	GarantiaService garantiaService;
 	@Autowired
 	PedidoService pedidoService;
+	
+	@Autowired
+	InversionService inversionService;
 
 	@Override
 	public String crearGarantiaSAF(String pedidoCaspioId,String partidaRegistral,String fichaConstitucion,
-			String fechaConstitucion, String montoPrima, String usuarioId)
+			String fechaConstitucion, String uso, String usuarioId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		pedidoService.setTokenCaspio(tokenCaspio);
@@ -44,8 +48,8 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		garantia.setPartidaRegistral(partidaRegistral.equals("")?null:partidaRegistral);		
 		garantia.setFichaConstitucion(fichaConstitucion.equals("")?null:fichaConstitucion);
 		garantia.setFechaConstitucion(fechaConstitucion.equals("")?null:fechaConstitucion);
-		garantia.setMontoPrima(montoPrima.equals("")?null:montoPrima);
-		
+		garantia.setUsoBien(uso.equals("")?null:uso);
+	
 		// Crear garantia en el SAF		
 		String garantiaSAFId = garantiaDao.crearGarantiaSAF(garantia, usuarioId);		
 		
@@ -54,7 +58,7 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 
 	@Override
 	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
-			String fechaConstitucion, String montoPrima, String modalidad, String usuarioId)
+			String fechaConstitucion, String montoPrima, String modalidad, String uso, String usuarioId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
@@ -71,6 +75,7 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		garantia.setPartidaRegistral((partidaRegistral.equals("")||partidaRegistral.equals("null"))?null:partidaRegistral);		
 		garantia.setFichaConstitucion((fichaConstitucion.equals("")||fichaConstitucion.equals("null"))?null:fichaConstitucion);
 		garantia.setFechaConstitucion((fechaConstitucion.equals("")||fechaConstitucion.equals("null"))?null:fechaConstitucion);
+		garantia.setUsoBien((uso.equals("") || uso.equals("null"))?null:uso);
 		garantia.setMontoPrima((montoPrima.equals("") || montoPrima.equals("null"))?null:montoPrima);
 		garantia.setModalidad((modalidad.equals("") || modalidad.equals("null"))?null:modalidad);
 		System.out.println("datos: "+garantia.getFichaConstitucion()+ " - "+garantia.getFechaConstitucion()+" -"+montoPrima+"-"+modalidad);
@@ -86,20 +91,32 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
 		
+		String resultado="";
 		// Obtener garantia por Id
 		Garantia garantiaCaspio = garantiaService.obtenerGarantiaPorId(garantiaId);		
 		if(garantiaCaspio!=null){
 			System.out.println("garantiaCaspio.getGarantiaSAFId():: "+garantiaCaspio.getGarantiaSAFId());
 		}
 		
-		// Eliminar garantia en SAF
-		String garantiaSAFId = String.valueOf(garantiaCaspio.getGarantiaSAFId().intValue());
-		garantiaDao.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+		// Obtener seguros por garantia
+		List<Seguro> listaSeguros = garantiaService.obtenerSegurosPorGarantiaId(garantiaId);
 		
-		// Eliminar garantia en Caspio
-		garantiaService.eliminarGarantiaPorId(garantiaId);
 		
-		return null;
+		
+		if(listaSeguros!=null && listaSeguros.size()>0){
+			resultado = "Operación Cancelada: La Garantía cuenta con un seguro registrado.";
+		}else{
+			// Eliminar garantia en SAF
+			String garantiaSAFId = String.valueOf(garantiaCaspio.getGarantiaSAFId().intValue());
+			garantiaDao.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+			
+			// Eliminar garantia en Caspio
+			garantiaService.eliminarGarantiaPorId(garantiaId);
+			
+			inversionService.actualizarInversionGarantiaHipotecado(garantiaCaspio);
+		}
+	
+		return resultado;
 	}
 	
 	

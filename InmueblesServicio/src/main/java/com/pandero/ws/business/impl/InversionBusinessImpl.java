@@ -23,6 +23,7 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.EmailBean;
+import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.LiquidacionSAF;
@@ -36,11 +37,13 @@ import com.pandero.ws.bean.Usuario;
 import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
+import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
@@ -76,6 +79,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Autowired
 	LiquidacionBusiness liquidacionBusiness;
 	
+	@Autowired
+	GarantiaDao garantiaDAO;
+	
+	@Autowired
+	GarantiaService garantiaService;
+	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
 	@Value("${ruta.documentos.generados}")
@@ -92,10 +101,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
+		garantiaService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
 		
 		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
@@ -140,7 +151,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);				
-				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);								
+				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
+				
+				// ha pedido de debora... documentamos :D
+				//verificamos si el inmueble esta hipotecado
+				if(inversion.getInmuebleInversionHipotecado()){
+					//si es así creamos la garantia en CASPIO con los datos necesarios
+					Map<String,String> jsonRequest = new HashMap<String,String>();
+					jsonRequest.put("direccion", inversion.getDireccion());
+					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
+					jsonRequest.put("codigoProvincia", inversion.getProvinciaId());
+					jsonRequest.put("codigoDistrito", inversion.getDistritoId());
+					jsonRequest.put("partidaRegistral", inversion.getPartidaRegistral());
+					jsonRequest.put("categoriaConstruccion", "AQ");
+					jsonRequest.put("rangoPisos", "001");
+					jsonRequest.put("uso", "40");
+					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
+					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
+					// Completar objeto garantia SAF		
+					Garantia garantia = new Garantia();
+					garantia.setPedidoNumero(inversion.getPedidoId().toString());
+					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
+					garantia.setUsoBien("40");
+				
+					// Crear garantia en el SAF		
+					garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+				}
 			}
 		}
 		
@@ -161,6 +197,27 @@ public class InversionBusinessImpl implements InversionBusiness{
 			// Eliminar pedido-inversion en SAF
 			if(Util.esVacio(resultado)){
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
+				//eliminamos la garantia
+				List<Garantia> garantias = garantiaService.obtenerGarantiasPorPedido(inversion.getPedidoId().toString());
+				if(garantias!=null && garantias.size()>0){
+					for(Garantia garantia : garantias){
+						if(garantia.getPartidaRegistral().equals(inversion.getPartidaRegistral())){
+							
+							String garantiaSAFId = String.valueOf(garantia.getGarantiaSAFId().intValue());
+							
+							//Eliminar seguro CASPIO
+							String serviceWhere = "{\"where\":\"idGarantia="+garantia.getIdGarantia()+"\"}";	
+							garantiaService.eliminarSeguro(serviceWhere);
+							
+							// Eliminar garantia en SAF
+							garantiaDAO.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+							
+							// Eliminar garantia en Caspio
+							garantiaService.eliminarGarantiaPorId(garantia.getIdGarantia().toString());
+							break;
+						}
+					}
+				}				
 			}
 		}
 		
@@ -359,7 +416,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 				
 		// Validar si existe liquidacion
-		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
 		
 		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
 			resultado = Constantes.Service.RESULTADO_EXISTE_LIQUIDACION;
@@ -574,12 +631,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String generarDocumentoDesembolso(String nroInversion, String usuarioSAFId)
+	public String generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId)
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
-		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
 		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			
@@ -792,7 +849,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
 						if(totalComprobantes>=montoMinimoDesembolso){
 							// Generar siguiente liquidacion
-							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(nroArmadaActual), usuarioId);
+							int siguienteArmada=nroArmadaActual+1;
+							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
 							liquidacionAutomaticaExitosa = true;
 						}	
 					}
@@ -996,21 +1054,37 @@ public class InversionBusinessImpl implements InversionBusiness{
 			throws Exception {
 		LiquidacionSAF ultimaLiquidacion = null;
 		
-		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(nroInversion);
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
+		int ultimoNroArmada = obtenerUltimoNroArmada(listaLiquidacion);
 		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
 			ultimaLiquidacion = new LiquidacionSAF();
 			double liquidacionImporte = 0.00;
 			for(LiquidacionSAF liquidacion : listaLiquidacion){
-				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
-				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
-				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
-				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
-				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
-				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				if(liquidacion.getNroArmada()==ultimoNroArmada){
+					ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+					ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+					ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+					liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+					ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+					ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				}
 			}
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
 		return ultimaLiquidacion;
+	}
+	
+	private int obtenerUltimoNroArmada(List<LiquidacionSAF> listaLiquidacion){
+		int ultimoNroArmada=0;
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			for(LiquidacionSAF liquidacion:  listaLiquidacion){
+				if(liquidacion.getNroArmada()>ultimoNroArmada){
+					ultimoNroArmada=liquidacion.getNroArmada();
+				}
+			}
+		}
+		
+		return ultimoNroArmada;
 	}
 	
 	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId)
@@ -1022,17 +1096,20 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		
-		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionSAF(inversion.getNroInversion());
+		List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroInversion());
+		int ultimoNroArmada = obtenerUltimoNroArmada(listaLiquidacion);
 		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
 			ultimaLiquidacion = new LiquidacionSAF();
 			double liquidacionImporte = 0.00;
 			for(LiquidacionSAF liquidacion : listaLiquidacion){
-				ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
-				ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
-				ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
-				liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
-				ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
-				ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				if(liquidacion.getNroArmada()==ultimoNroArmada){
+					ultimaLiquidacion.setLiquidacionEstado(liquidacion.getLiquidacionEstado());
+					ultimaLiquidacion.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+					ultimaLiquidacion.setLiquidacionFechaEstado(liquidacion.getLiquidacionFechaEstado());
+					liquidacionImporte += liquidacion.getLiquidacionImporte().doubleValue();
+					ultimaLiquidacion.setLiquidacionNumero(liquidacion.getLiquidacionNumero());
+					ultimaLiquidacion.setNroArmada(liquidacion.getNroArmada());
+				}
 			}
 			ultimaLiquidacion.setLiquidacionImporte(liquidacionImporte);
 		}		
