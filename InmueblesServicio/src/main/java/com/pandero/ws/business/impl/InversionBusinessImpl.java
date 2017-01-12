@@ -199,24 +199,25 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
 				//eliminamos la garantia
 				List<Garantia> garantias = garantiaService.obtenerGarantiasPorPedido(inversion.getPedidoId().toString());
-				for(Garantia garantia : garantias){
-					if(garantia.getPartidaRegistral().equals(inversion.getPartidaRegistral())){
-						
-						String garantiaSAFId = String.valueOf(garantia.getGarantiaSAFId().intValue());
-						
-						//Eliminar seguro CASPIO
-						String serviceWhere = "{\"where\":\"idGarantia="+garantia.getIdGarantia()+"\"}";	
-						garantiaService.eliminarSeguro(serviceWhere);
-						
-						// Eliminar garantia en SAF
-						garantiaDAO.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
-						
-						// Eliminar garantia en Caspio
-						garantiaService.eliminarGarantiaPorId(garantia.getIdGarantia().toString());
-						break;
+				if(garantias!=null && garantias.size()>0){
+					for(Garantia garantia : garantias){
+						if(garantia.getPartidaRegistral().equals(inversion.getPartidaRegistral())){
+							
+							String garantiaSAFId = String.valueOf(garantia.getGarantiaSAFId().intValue());
+							
+							//Eliminar seguro CASPIO
+							String serviceWhere = "{\"where\":\"idGarantia="+garantia.getIdGarantia()+"\"}";	
+							garantiaService.eliminarSeguro(serviceWhere);
+							
+							// Eliminar garantia en SAF
+							garantiaDAO.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
+							
+							// Eliminar garantia en Caspio
+							garantiaService.eliminarGarantiaPorId(garantia.getIdGarantia().toString());
+							break;
+						}
 					}
-				}
-				
+				}				
 			}
 		}
 		
