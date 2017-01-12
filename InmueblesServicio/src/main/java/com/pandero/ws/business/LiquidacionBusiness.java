@@ -14,6 +14,7 @@ public interface LiquidacionBusiness {
 	public String eliminarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	
 	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
+	public String eliminarConformidadLiquidacion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	public DetalleDiferenciaPrecio obtenerMontosDifPrecioInversion(String nroInversion) throws Exception;
 	
 	public String actualizarDesembolsoCaspio(String nroInversion, String nroArmada, String nroDesembolso) throws Exception;

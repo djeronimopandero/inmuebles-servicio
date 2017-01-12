@@ -16,6 +16,7 @@ public interface LiquidacionDao {
 	public String registrarLiquidacionInversionSAF(LiquidacionSAF liquidacionSAF, String usuarioId) throws Exception;
 	public String eliminarLiquidacionInversionSAF(String nroInversion, String nroArmada, String usuarioId) throws Exception;	
 	public String confirmarLiquidacionInversion(String nroInversion, String usuarioId) throws Exception;
+	public String eliminarConformidadInversion(String nroInversion, String usuarioId) throws Exception;
 	
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(String nroInversion) throws Exception;
 	

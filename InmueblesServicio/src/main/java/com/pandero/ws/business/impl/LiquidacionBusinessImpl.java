@@ -605,5 +605,45 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		
 		return resultado;
 	}
+
+	@Override
+	public String eliminarConformidadLiquidacion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		String resultado = "";
+		
+		// Obtener liquidaciones de la inversion
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
+		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
+			LOG.info("liquidacionInversion: "+liquidacionInversion.size());
+			String estadoLiquidacion="";
+			for(LiquidacionSAF liquidacion : liquidacionInversion){
+				estadoLiquidacion=liquidacion.getLiquidacionEstado();
+			}
+			LOG.info("ESTADO LIQUIDA: "+estadoLiquidacion);
+			// Verificar estado liquidacion
+			if(Util.esVacio(estadoLiquidacion)){
+				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
+				resultado = "";
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
+				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
+			}
+		}else{
+			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+			LOG.info("liquidacionInversion:. NULL");
+		}
+		
+		//Eliminar confirmacion de liquidacion
+		if(resultado.equals("")){
+			// Confirmar liquidacion es SAF
+			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
+			// Actualizar estado liquidacion Caspio
+			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
+		}
+		
+		return resultado;
+	}
 	
 }
