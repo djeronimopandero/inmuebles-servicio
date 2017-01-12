@@ -181,7 +181,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
         parameters.addValue("@LiquidacionEstado", liquidacionSAF.getLiquidacionEstado());
 		parameters.addValue("@UsuarioID", usuarioId);
 		parameters.addValue("@NroArmada", liquidacionSAF.getNroArmada());
-				
+		
 		call.execute(parameters);
 		
 		return null;

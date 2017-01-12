@@ -601,30 +601,30 @@ public class InversionController {
 //		return response;
 //	}	
 
-//	@RequestMapping(value = "/obtenerUltimaLiquidacionInversionPorId", method = RequestMethod.POST, produces = "application/json")
-//	@ResponseBody
-//	public Map<String, Object> obtenerUltimaLiquidacionInversionPorId(@RequestBody Map<String, Object> params) {
-//		LOG.info("###obtenerUltimaLiquidacionInversionPorId params:"+params);
-//		Map<String, Object> response = new HashMap<String, Object>();
-//		String result="", detail="";
-//		try{
-//			String inversionId = String.valueOf(params.get("inversionId"));
-//			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversionPorId(inversionId);
-//			if(liquidacionSAF!=null){
-//				result = "1";
-//				detail = JsonUtil.toJson(liquidacionSAF);
-//			}
-//		}catch(Exception e){
-//			LOG.error("Error inversion/obtenerUltimaLiquidacionInversionPorId:: ",e);
-//			e.printStackTrace();
-//			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
-//			detail=e.getMessage();
-//		}			
-//		response.put("result",result);
-//		response.put("detail",detail);
-//		System.out.println("RESPONSE: " +  response);			
-//		return response;
-//	}	
+	@RequestMapping(value = "/obtenerUltimaLiquidacionInversionPorId", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> obtenerUltimaLiquidacionInversionPorId(@RequestBody Map<String, Object> params) {
+		LOG.info("###obtenerUltimaLiquidacionInversionPorId params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			LiquidacionSAF liquidacionSAF = inversionBusiness.obtenerUltimaLiquidacionInversionPorId(inversionId);
+			if(liquidacionSAF!=null){
+				result = "1";
+				detail = JsonUtil.toJson(liquidacionSAF);
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerUltimaLiquidacionInversionPorId:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
 	
 	@RequestMapping(value = "/actualizarDesembolsoCaspio", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody

@@ -101,6 +101,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		constanteService.setTokenCaspio(tokenCaspio);
+		garantiaService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		// Obtener datos de la inversion
