@@ -859,7 +859,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 							System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
 							String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
 							System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
-							if(resultado.equals("")){
+							if(resultLiquidacion.equals("")){
 								liquidacionAutomaticaExitosa = true;
 							}
 						}	
