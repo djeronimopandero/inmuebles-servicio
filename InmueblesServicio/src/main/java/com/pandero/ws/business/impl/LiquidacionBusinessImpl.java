@@ -626,7 +626,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			if(Util.esVacio(estadoLiquidacion)){
 				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-				resultado = Constantes.Service.RESULTADO_INVERSION_VB_CONTABLE;
+				resultado = "";
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
 				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
 			}
