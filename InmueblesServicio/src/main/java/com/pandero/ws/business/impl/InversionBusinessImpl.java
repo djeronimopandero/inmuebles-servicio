@@ -860,8 +860,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 						if(totalComprobantes>=montoMinimoDesembolso){
 							// Generar siguiente liquidacion
 							int siguienteArmada=nroArmadaActual+1;
-							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
-							liquidacionAutomaticaExitosa = true;
+							System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
+							String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
+							System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
+							if(resultLiquidacion.equals("")){
+								liquidacionAutomaticaExitosa = true;
+							}
 						}	
 					}
 				}
