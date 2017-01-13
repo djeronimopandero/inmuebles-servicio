@@ -840,34 +840,35 @@ public class InversionBusinessImpl implements InversionBusiness{
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora()){				
 			if(ultimaLiquidacion!=null){
+				int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+				System.out.println("nroArmadaActual:: "+nroArmadaActual);
+				if(nroArmadaActual==2||nroArmadaActual==3){
+					liquidacionAutomatica = true;
+				}
 				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
-					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
-					System.out.println("nroArmadaActual:: "+nroArmadaActual);
-					if(nroArmadaActual==2||nroArmadaActual==3){
-						liquidacionAutomatica = true;
-						// Obtener monto de los comprobantes
-						List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
-						double totalComprobantes = 0;
-						if(comprobantes!=null && comprobantes.size()>0){
-							for(ComprobanteCaspio comprobante : comprobantes){
-								totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
-							}								
-						}
-						// Obtener monto del desembolso
-						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
-						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
-						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
-						if(totalComprobantes>=montoMinimoDesembolso){
-							// Generar siguiente liquidacion
-							int siguienteArmada=nroArmadaActual+1;
-							System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
-							String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
-							System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
-							if(resultLiquidacion.equals("")){
-								liquidacionAutomaticaExitosa = true;
-							}
-						}	
+					liquidacionAutomatica = true;
+					// Obtener monto de los comprobantes
+					List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+					double totalComprobantes = 0;
+					if(comprobantes!=null && comprobantes.size()>0){
+						for(ComprobanteCaspio comprobante : comprobantes){
+							totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
+						}								
 					}
+					// Obtener monto del desembolso
+					double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+					double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+					System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
+					if(totalComprobantes>=montoMinimoDesembolso){
+						// Generar siguiente liquidacion
+						int siguienteArmada=nroArmadaActual+1;
+						System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
+						String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
+						System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
+						if(resultLiquidacion.equals("")){
+							liquidacionAutomaticaExitosa = true;
+						}
+					}					
 				}
 			}
 		}

@@ -452,6 +452,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 						
@@ -511,6 +512,11 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);
+			
+			// Actualizar estado liquidacion-desembolso
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_VB_CONTABLE);
 		}
 		
 		return resultado;
@@ -610,6 +616,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	public String eliminarConformidadLiquidacion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 		
@@ -641,6 +648,10 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
+			// Actualizar estado liquidacion-desembolso
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_LIQUIDADO);
 		}
 		
 		return resultado;
