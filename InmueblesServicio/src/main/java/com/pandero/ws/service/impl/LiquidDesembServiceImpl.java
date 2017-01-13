@@ -103,5 +103,14 @@ public class LiquidDesembServiceImpl implements LiquidDesembService {
 		return null;
 	}
 
-
+	public String actualizarEstadoLiquDesembInversion(String inversionId, String nroArmada, String estado) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("Estado", estado);		
+		
+		String serviceWhere = "{\"where\":\"InversionId="+inversionId+" and NroArmada="+nroArmada+"\"}";	
+		String registrarDesembolsoURL = tableLiquidacionDesembolsoURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,registrarDesembolsoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
 }

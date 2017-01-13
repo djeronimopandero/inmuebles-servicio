@@ -11,5 +11,7 @@ public interface LiquidDesembService {
 	
 	public String eliminarLiquidacionInversion(String inversionId, String nroArmada) throws Exception;
 	
+	public String actualizarEstadoLiquDesembInversion(String inversionId, String nroArmada, String estado) throws Exception;
+	
 	public void setTokenCaspio(String token);
 }
