@@ -491,7 +491,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 							&& inversion.getServicioConstructora())
 						|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 							&& !inversion.getServicioConstructora() && Integer.parseInt(nroArmada)>2)){
-				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt(nroArmada));
+				int nroArmadaComprobante = Integer.parseInt(nroArmada);
+				if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+						&& !inversion.getServicioConstructora()){
+					nroArmadaComprobante=nroArmadaComprobante-1;
+				}
+				
+				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), nroArmadaComprobante);
 				if(listaComprobantes!=null && listaComprobantes.size()>0){
 					for(ComprobanteCaspio comprobante : listaComprobantes){
 						if(Util.esVacio(comprobante.getRecepContabilidadFecha())){
