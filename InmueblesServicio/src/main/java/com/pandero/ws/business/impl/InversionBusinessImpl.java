@@ -150,7 +150,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setPedidoInversionNumero(inversion.getNroInversion());
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
 				pedidoInversionSAF.setConfirmarID("1");
-				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);				
+				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
+				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
 				
 				// ha pedido de debora... documentamos :D

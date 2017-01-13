@@ -10,7 +10,7 @@ public class Inversion implements java.io.Serializable {
 	private String TipoInversion;
 	private Double ImporteInversion;
 	private String Observacion;
-	private Integer TipoInmuebleId;
+	private Integer TipoInmueble;
 	private String DepartamentoId;
 	private String ProvinciaId;
 	private String DistritoId;
@@ -101,11 +101,11 @@ public class Inversion implements java.io.Serializable {
 	public void setObservacion(String observacion) {
 		Observacion = observacion;
 	}
-	public Integer getTipoInmuebleId() {
-		return TipoInmuebleId;
+	public Integer getTipoInmueble() {
+		return TipoInmueble;
 	}
-	public void setTipoInmuebleId(Integer tipoInmuebleId) {
-		TipoInmuebleId = tipoInmuebleId;
+	public void setTipoInmueble(Integer tipoInmueble) {
+		TipoInmueble = tipoInmueble;
 	}
 	public String getDepartamentoId() {
 		return DepartamentoId;
