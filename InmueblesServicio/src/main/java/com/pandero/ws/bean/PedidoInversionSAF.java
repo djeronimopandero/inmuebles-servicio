@@ -16,8 +16,14 @@ public class PedidoInversionSAF implements java.io.Serializable {
 	private String usuarioIDCreacion;
 	private String nroPedido;
 	private String pedidoInversionID;
+	private String tipoInmuebleId;
 	
-	
+	public String getTipoInmuebleId() {
+		return tipoInmuebleId;
+	}
+	public void setTipoInmuebleId(String tipoInmuebleId) {
+		this.tipoInmuebleId = tipoInmuebleId;
+	}
 	public String getPedidoID() {
 		return pedidoID;
 	}

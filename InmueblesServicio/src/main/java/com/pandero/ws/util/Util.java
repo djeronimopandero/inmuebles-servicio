@@ -185,6 +185,22 @@ public class Util {
 		return tipoInversionId;
 	}
 	
+	public static String obtenerTipoInmuebleID(String tipoInmuebleCod){
+		String tipoInversionId = "1";
+		if(Constantes.TipoInmueble.CASA_COD.equals(tipoInmuebleCod)){
+			tipoInversionId = Constantes.TipoInmueble.CASA_ID;
+		}else if(Constantes.TipoInmueble.DEPARTAMENTO_COD.equals(tipoInmuebleCod)){
+			tipoInversionId = Constantes.TipoInmueble.DEPARTAMENTO_ID;
+		}else if(Constantes.TipoInmueble.TERRENO_COD.equals(tipoInmuebleCod)){
+			tipoInversionId = Constantes.TipoInmueble.TERRENO_ID;
+		}else if(Constantes.TipoInmueble.LOCAL_COMERCIAL_COD.equals(tipoInmuebleCod)){
+			tipoInversionId = Constantes.TipoInmueble.LOCAL_COMERCIAL_ID;
+		}else if(Constantes.TipoInmueble.OTROS_COD.equals(tipoInmuebleCod)){
+			tipoInversionId = Constantes.TipoInmueble.OTROS_ID;
+		}
+		return tipoInversionId;
+	}
+	
 	public static String obtenerTipoDocuIdenSAFPorCaspioId(List<Constante> listaTiposDocuIden, String tipoDocuCaspioId){
 		String resultado = "";
 		if(listaTiposDocuIden!=null && listaTiposDocuIden.size()>0){

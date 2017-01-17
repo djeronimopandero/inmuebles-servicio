@@ -80,6 +80,19 @@ public class Constantes {
 		public final static String CONSTRUCCION_ID="3";
 	}
 	
+	public class TipoInmueble{
+		public final static String CASA_COD="46";
+		public final static String DEPARTAMENTO_COD="47";
+		public final static String TERRENO_COD="48";
+		public final static String LOCAL_COMERCIAL_COD="49";
+		public final static String OTROS_COD="50";
+		public final static String CASA_ID="1";
+		public final static String DEPARTAMENTO_ID="2";
+		public final static String TERRENO_ID="3";
+		public final static String LOCAL_COMERCIAL_ID="4";
+		public final static String OTROS_ID="5";
+	}
+	
 	public class Contrato{
 		public final static String SITUACION_ADJUDICADO="ADJUDICADO";
 		public final static String SITUACION_NO_ADJUDICADO="NO ADJUDICADO";

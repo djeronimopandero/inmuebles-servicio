@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -276,13 +275,10 @@ public class UtilExcel {
 			}
 		}
 
-		
-
 		try {
 			// out = new FileOutputStream(new File(String.format("%s/%s.xlsx",
 			// folder, fileName)));
-			file = new File(
-					System.getProperty("java.io.tmpdir"), fileName);
+			file = new File(System.getProperty("java.io.tmpdir"), fileName);
 			out = new FileOutputStream(file);
 
 			workbook.write(out);

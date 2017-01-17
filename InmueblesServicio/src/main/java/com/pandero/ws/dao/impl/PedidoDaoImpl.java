@@ -149,7 +149,8 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.addDeclaredParameter(new SqlParameter("@InversionNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@TipoInversionID", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@ConfirmarID", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));				
+		call.addDeclaredParameter(new SqlParameter("@TipoInmuebleID", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 //		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
@@ -157,7 +158,8 @@ public class PedidoDaoImpl implements PedidoDao {
         parameters.addValue("@ProveedorID", pedidoInversionSAF.getProveedorID());		
 		parameters.addValue("@InversionNumero", pedidoInversionSAF.getPedidoInversionNumero());
 		parameters.addValue("@TipoInversionID", pedidoInversionSAF.getPedidoTipoInversionID());
-		parameters.addValue("@ConfirmarID", "1");		
+		parameters.addValue("@ConfirmarID", "1");
+		parameters.addValue("@TipoInmuebleID", pedidoInversionSAF.getTipoInmuebleId());
 		parameters.addValue("@UsuarioID", pedidoInversionSAF.getUsuarioIDCreacion());
 		
 		call.execute(parameters);	
