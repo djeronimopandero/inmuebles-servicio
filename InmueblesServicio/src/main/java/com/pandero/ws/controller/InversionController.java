@@ -670,16 +670,16 @@ public class InversionController {
 					}
 					liquidacionSAF.setLiquidacionImporte(liquidacionImporte);
 					
-					if("3".equals(liquidacionSAF.getLiquidacionEstado())){
+//					if("3".equals(liquidacionSAF.getLiquidacionEstado())){
 						element.put("fecha", liquidacionSAF.getLiquidacionFecha());
 						element.put("importe", liquidacionSAF.getLiquidacionImporte());
 						element.put("tipo", "DESEMBOLSO");
 						result.add(element);					
-						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,liquidacionSAF.getNroArmada()));						
-					}else{
-						element.put("message", "Operación Cancelada. El estado de la liquidación consultada es diferente a DESEMBOLSADO.");
-						result.add(element);	
-					}
+						result.add(inversionBusiness.getComprobanteResumen(inversionNumero,Integer.parseInt(nroArmada)));						
+//					}else{
+//						element.put("message", "Operación Cancelada. El estado de la liquidación consultada es diferente a DESEMBOLSADO.");
+//						result.add(element);	
+//					}
 				}else{
 					element.put("message", "Operación Cancelada. La liquidación consultada NO EXISTE.");
 					result.add(element);					

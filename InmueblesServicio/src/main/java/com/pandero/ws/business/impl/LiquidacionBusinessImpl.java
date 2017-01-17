@@ -244,16 +244,24 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 					double porcentajeArmada = Util.obtenerPorcentajeArmada(listaArmadasDesemb, nroArmada);
 					System.out.println("inversion.getImporteInversion(): "+inversion.getImporteInversion()+" - porcentajeArmada: "+porcentajeArmada);
 					
-					double montoUsadoLiquidacion = inversion.getImporteInversion().doubleValue();
-					if(!inversion.getServicioConstructora()){
+					double montoAUsarLiquidacion = inversion.getImporteInversion().doubleValue();
+					if(inversion.getServicioConstructora() || 
+							(!inversion.getServicioConstructora() && nroArmada.equals("2"))){
 						if(totalDisponibleContratos<inversion.getImporteInversion().doubleValue()){
-							montoUsadoLiquidacion = totalDisponibleContratos;
+							montoAUsarLiquidacion = totalDisponibleContratos;
 						}
 					}
+					if(!inversion.getServicioConstructora() &&
+							(nroArmada.equals("3") || nroArmada.equals("4"))){
+						List<LiquidacionSAF> liquidacion1 = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion, "2");
+						double montoLiquidacion1 = obtenerMontoTotalLiquidacion(liquidacion1);
+						montoAUsarLiquidacion = montoLiquidacion1*2;
+					}
 					
-					double porcentajeDecimal = porcentajeArmada/100;
-					System.out.println("montoUsadoLiquidacion:: "+montoUsadoLiquidacion+" - porcentajeDecimal:: "+porcentajeDecimal);
-					montoALiquidar = montoUsadoLiquidacion*porcentajeDecimal;					
+					double porcentajeDecimal = porcentajeArmada/100;					
+					montoALiquidar = montoAUsarLiquidacion*porcentajeDecimal;	
+					System.out.println("montoAUsarLiquidacion:: "+montoAUsarLiquidacion+" - porcentajeDecimal:: "+porcentajeDecimal);
+					System.out.println("MONTO LIQUIDAR:: "+montoALiquidar);
 				}else{
 					montoALiquidar = inversion.getImporteInversion();
 				}
@@ -661,6 +669,16 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 		
 		return resultado;
+	}
+	
+	private double obtenerMontoTotalLiquidacion(List<LiquidacionSAF> listaLiquidacion){
+		double montoLiquidacion = 0.00;
+		if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+			for(LiquidacionSAF liquidacion : listaLiquidacion){
+				montoLiquidacion+=liquidacion.getLiquidacionImporte();
+			}
+		}
+		return montoLiquidacion;
 	}
 	
 }
