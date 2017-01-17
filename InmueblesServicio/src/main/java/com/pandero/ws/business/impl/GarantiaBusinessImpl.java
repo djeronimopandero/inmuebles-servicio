@@ -90,6 +90,7 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);
+		inversionService.setTokenCaspio(tokenCaspio);
 		
 		String resultado="";
 		// Obtener garantia por Id
@@ -102,9 +103,8 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		List<Seguro> listaSeguros = garantiaService.obtenerSegurosPorGarantiaId(garantiaId);
 		
 		
-		
 		if(listaSeguros!=null && listaSeguros.size()>0){
-			resultado = "Operación Cancelada: La Garantía cuenta con un seguro registrado.";
+			resultado = "Operación Cancelada. La Garantía cuenta con un seguro registrado.";
 		}else{
 			// Eliminar garantia en SAF
 			String garantiaSAFId = String.valueOf(garantiaCaspio.getGarantiaSAFId().intValue());

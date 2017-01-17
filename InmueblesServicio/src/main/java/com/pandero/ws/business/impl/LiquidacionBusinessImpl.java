@@ -452,6 +452,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 						
@@ -490,7 +491,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 							&& inversion.getServicioConstructora())
 						|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 							&& !inversion.getServicioConstructora() && Integer.parseInt(nroArmada)>2)){
-				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt(nroArmada));
+				int nroArmadaComprobante = Integer.parseInt(nroArmada);
+				if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+						&& !inversion.getServicioConstructora()){
+					nroArmadaComprobante=nroArmadaComprobante-1;
+				}
+				
+				List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), nroArmadaComprobante);
 				if(listaComprobantes!=null && listaComprobantes.size()>0){
 					for(ComprobanteCaspio comprobante : listaComprobantes){
 						if(Util.esVacio(comprobante.getRecepContabilidadFecha())){
@@ -511,6 +518,11 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);
+			
+			// Actualizar estado liquidacion-desembolso
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_VB_CONTABLE);
 		}
 		
 		return resultado;
@@ -601,6 +613,51 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		
 		if(conceptoNoPagado==false){
 			resultado=true;
+		}
+		
+		return resultado;
+	}
+
+	@Override
+	public String eliminarConformidadLiquidacion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		liquidDesembService.setTokenCaspio(tokenCaspio);
+		
+		String resultado = "";
+		
+		// Obtener liquidaciones de la inversion
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
+		if(liquidacionInversion!=null && liquidacionInversion.size()>0){
+			LOG.info("liquidacionInversion: "+liquidacionInversion.size());
+			String estadoLiquidacion="";
+			for(LiquidacionSAF liquidacion : liquidacionInversion){
+				estadoLiquidacion=liquidacion.getLiquidacionEstado();
+			}
+			LOG.info("ESTADO LIQUIDA: "+estadoLiquidacion);
+			// Verificar estado liquidacion
+			if(Util.esVacio(estadoLiquidacion)){
+				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
+				resultado = "";
+			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
+				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
+			}
+		}else{
+			resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
+			LOG.info("liquidacionInversion:. NULL");
+		}
+		
+		//Eliminar confirmacion de liquidacion
+		if(resultado.equals("")){
+			// Confirmar liquidacion es SAF
+			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
+			// Actualizar estado liquidacion Caspio
+			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
+			// Actualizar estado liquidacion-desembolso
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			String inversionId = String.valueOf(inversion.getInversionId().intValue());
+			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_LIQUIDADO);
 		}
 		
 		return resultado;

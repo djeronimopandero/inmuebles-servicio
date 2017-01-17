@@ -328,7 +328,7 @@ public class InversionController {
 				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,nroArmada,usuarioId);
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
-				return "ERROR";
+				return "Ocurrió un error al generar la solicitud de desembolso";
 			}
 		}
 		return resultadoBean;
@@ -724,6 +724,33 @@ public class InversionController {
 			resultadoBean.setResultado("Ocurrio un error, parametro null");
 		}
 		return resultadoBean;
+	}
+	
+	@RequestMapping(value = "/elimiarConformidadLiquidacion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> elimiarConformidadLiquidacion(@RequestBody Map<String, Object> params) {	
+		LOG.info("###elimiarConformidadLiquidacion params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String nroInversion = String.valueOf(params.get("nroInversion"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			result = liquidacionBusiness.eliminarConformidadLiquidacion(nroInversion, nroArmada, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/confirmarLiquidacionInversion:: ",e);
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		LOG.info("RESPONSE: " +  response);
+			
+		return response;
 	}
 	
 }

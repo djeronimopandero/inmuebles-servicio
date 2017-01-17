@@ -154,10 +154,22 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
 				
-				// ha pedido de debora... documentamos :D
 				//verificamos si el inmueble esta hipotecado
-				if(inversion.getInmuebleInversionHipotecado()){
-					//si es así creamos la garantia en CASPIO con los datos necesarios
+				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
+				if(inversion.getInmuebleInversionHipotecado()){					
+					// Obtener datos de la garantia	
+					Garantia garantia = new Garantia();
+					garantia.setPedidoNumero(pedido.getNroPedido());
+					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
+					garantia.setUsoBien("40");
+				
+					// Crear garantia en el SAF		
+					String garantiaSAFId = garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+					if(Util.esVacio(garantiaSAFId)){
+						garantiaSAFId="0";
+					}
+					
+					// Crear garantia en caspio
 					Map<String,String> jsonRequest = new HashMap<String,String>();
 					jsonRequest.put("direccion", inversion.getDireccion());
 					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
@@ -168,15 +180,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 					jsonRequest.put("rangoPisos", "001");
 					jsonRequest.put("uso", "40");
 					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
+					jsonRequest.put("garantiaSAFId", garantiaSAFId);
 					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
-					// Completar objeto garantia SAF		
-					Garantia garantia = new Garantia();
-					garantia.setPedidoNumero(inversion.getPedidoId().toString());
-					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
-					garantia.setUsoBien("40");
-				
-					// Crear garantia en el SAF		
-					garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+					
 				}
 			}
 		}
@@ -438,6 +444,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
+		boolean existePendientes=false;
 		if(!StringUtils.isEmpty(inversionId)){
 			 List<InversionRequisito> list= inversionService.obtenerRequisitosPorInversion(inversionId);
 			 if(null!=list){
@@ -450,6 +457,16 @@ public class InversionBusinessImpl implements InversionBusiness{
 						 obs.setObservacion(irc.getObservacion());
 						 listObs.add(obs);
 					 }
+					 if(!existePendientes){
+						 if(Constantes.DocumentoRequisito.ESTADO_REQUISITO_PENDIENTE.equals(irc.getEstadoRequisito()!=null?irc.getEstadoRequisito():"")){
+							 existePendientes=true;
+						 }
+					 }
+				 }
+				 
+				 if(existePendientes){
+					 msg="No es posible generar la carta de validación por que existen requisitos PENDIENTES"; 
+					 return msg;
 				 }
 				 
 				 if(listObs.size()==0){
@@ -626,11 +643,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
+		LOG.info("### InversionBusinessImpl.generarDocumentoDesembolso nroInversion:"+nroInversion+", nroArmada:"+nroArmada+", usuarioSAFId:"+usuarioSAFId);
+		
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
 		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
-			
+			LOG.info("### liquidaciones es null o el estado de sul ultima liquidacion no es 3 DESEMBOLSADO");
+			return "Ocurrió un error. La liquidación no se encuentra desembolsada";
 		}else{
+			LOG.info("### Se procede a generar el doc de desembolso");
 			LiquidacionSAF liquidacion = liquidaciones.get(0);
 			String armada = Constantes.ARMADAS_DOC_DESEMBOLSO.get(liquidacion.getNroArmada());
 			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
@@ -760,7 +781,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}
 			}
 		}
-		return null;
+		return "Se generó la carta de desembolso correctamente.";
 	}
 
 	@Override
@@ -820,30 +841,35 @@ public class InversionBusinessImpl implements InversionBusiness{
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora()){				
 			if(ultimaLiquidacion!=null){
+				int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+				System.out.println("nroArmadaActual:: "+nroArmadaActual);
+				if(nroArmadaActual==2||nroArmadaActual==3){
+					liquidacionAutomatica = true;
+				}
 				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
-					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
-					System.out.println("nroArmadaActual:: "+nroArmadaActual);
-					if(nroArmadaActual==2||nroArmadaActual==3){
-						liquidacionAutomatica = true;
-						// Obtener monto de los comprobantes
-						List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
-						double totalComprobantes = 0;
-						if(comprobantes!=null && comprobantes.size()>0){
-							for(ComprobanteCaspio comprobante : comprobantes){
-								totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
-							}								
-						}
-						// Obtener monto del desembolso
-						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
-						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
-						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
-						if(totalComprobantes>=montoMinimoDesembolso){
-							// Generar siguiente liquidacion
-							int siguienteArmada=nroArmadaActual+1;
-							liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
-							liquidacionAutomaticaExitosa = true;
-						}	
+					liquidacionAutomatica = true;
+					// Obtener monto de los comprobantes
+					List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+					double totalComprobantes = 0;
+					if(comprobantes!=null && comprobantes.size()>0){
+						for(ComprobanteCaspio comprobante : comprobantes){
+							totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
+						}								
 					}
+					// Obtener monto del desembolso
+					double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+					double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+					System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
+					if(totalComprobantes>=montoMinimoDesembolso){
+						// Generar siguiente liquidacion
+						int siguienteArmada=nroArmadaActual+1;
+						System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
+						String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
+						System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
+						if(resultLiquidacion.equals("")){
+							liquidacionAutomaticaExitosa = true;
+						}
+					}					
 				}
 			}
 		}
@@ -1148,8 +1174,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Double dblImporteTotalComprobantes = 0.0;
 		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
-		for(ComprobanteCaspio comprobante:listComprobantes){
-			dblImporteTotalComprobantes+=comprobante.getImporte();
+		if(listComprobantes!=null && listComprobantes.size()>0){
+			for(ComprobanteCaspio comprobante:listComprobantes){
+				dblImporteTotalComprobantes+=comprobante.getImporte();
+			}
 		}
 		
 		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
