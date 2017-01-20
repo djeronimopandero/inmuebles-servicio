@@ -23,7 +23,7 @@ public class GeneralBusinessImpl implements GeneralBusiness {
 		
 		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.VENTA.getTexto(), fechaEmision);
 		
-		return montoDolares / dboTipoCambio;
+		return montoDolares * dboTipoCambio;
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class GeneralBusinessImpl implements GeneralBusiness {
 		LOG.info("###GeneralBusinessImpl.convertirDolares montoSoles:"+montoSoles);
 		
 		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.VENTA.getTexto(), fechaEmision);
-		return montoSoles * dboTipoCambio;
+		return montoSoles / dboTipoCambio;
 	}
 
 }
