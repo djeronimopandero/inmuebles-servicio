@@ -731,13 +731,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 					String docGenerado = sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString();
 					documentoUtil.saveDocument(doc, docGenerado);
 
-					/*Convertir a pdf*/
-//					sb=new StringBuilder();
-//					String strRutaGenerados=sb.append(rutaDocumentosGenerados).append("/").toString();
-//					DocumentoUtil.convertDocxToPdf(
-//							strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx",
-//					strRutaGenerados+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".pdf");
-					
 						/*Enviar por correo*/
 					 	Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
 				        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
@@ -822,64 +815,74 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
 		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=false;
-
-		Date date=Util.getFechaActual();
-		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
-		LOG.info("##strFecha:"+strFecha);
-		
-		// Actualizar estado de envio a contabilidad
-		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuario,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
-		
-		// Verificar si se debe generar liquidacion automatica
-		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);		
-
 		String resultado = "";
-		// Obtener la ultima liquidacion
-		LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
-		LOG.info("inversion.getTipoInversion():: "+inversion.getTipoInversion());
-		// Si es construccion sin constructora
-		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
-				&& !inversion.getServicioConstructora()){				
-			if(ultimaLiquidacion!=null){
-				int nroArmadaActual = ultimaLiquidacion.getNroArmada();
-				System.out.println("nroArmadaActual:: "+nroArmadaActual);
-				if(nroArmadaActual==2||nroArmadaActual==3){
-					liquidacionAutomatica = true;
-				}
-				if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
-					liquidacionAutomatica = true;
-					// Obtener monto de los comprobantes
-					List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
-					double totalComprobantes = 0;
-					if(comprobantes!=null && comprobantes.size()>0){
-						for(ComprobanteCaspio comprobante : comprobantes){
-							totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
-						}								
-					}
-					// Obtener monto del desembolso
-					double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
-					double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
-					System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
-					if(totalComprobantes>=montoMinimoDesembolso){
-						// Generar siguiente liquidacion
-						int siguienteArmada=nroArmadaActual+1;
-						System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
-						String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
-						System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
-						if(resultLiquidacion.equals("")){
-							liquidacionAutomaticaExitosa = true;
-						}
-					}					
-				}
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);	
+		
+		// Verificar si requiere registro de comprobantes
+		boolean requiereDocumentos = Util.requiereRegistrarDocumento(inversion, nroArmada);
+		if(requiereDocumentos){
+			// Obtener lista comprobantes
+			List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+			if(listaComprobantes==null || listaComprobantes.size()==0){
+				resultado=Constantes.Service.RESULTADO_SIN_COMPROBANTES;
 			}
 		}
-		
-		if(liquidacionAutomaticaExitosa){
-			resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automática.";
-		}else if(liquidacionAutomatica){
-			resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automática.";
-		}else{
-			resultado = "Se enviaron los documentos a contabilidad";
+				
+		if(resultado.equals("")){
+			// Actualizar estado de envio a contabilidad
+			Date date=Util.getFechaActual();
+			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+			inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,strFecha,usuario,UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());
+					
+			// Obtener la ultima liquidacion
+			LiquidacionSAF ultimaLiquidacion = obtenerUltimaLiquidacionInversion(inversion.getNroInversion());
+			LOG.info("inversion.getTipoInversion():: "+inversion.getTipoInversion());
+			// Si es construccion sin constructora
+			if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+					&& !inversion.getServicioConstructora()){				
+				if(ultimaLiquidacion!=null){
+					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
+					System.out.println("nroArmadaActual:: "+nroArmadaActual);
+					if(nroArmadaActual==2||nroArmadaActual==3){
+						liquidacionAutomatica = true;
+					}
+					if(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO.equals(ultimaLiquidacion.getLiquidacionEstado())){
+						liquidacionAutomatica = true;
+						// Obtener monto de los comprobantes
+						List<ComprobanteCaspio> comprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+						double totalComprobantes = 0;
+						if(comprobantes!=null && comprobantes.size()>0){
+							for(ComprobanteCaspio comprobante : comprobantes){
+								totalComprobantes += (comprobante.getImporte()==null?0.00:comprobante.getImporte().doubleValue());
+							}								
+						}
+						// Obtener monto del desembolso
+						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
+						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
+						if(totalComprobantes>=montoMinimoDesembolso){
+							// Generar siguiente liquidacion
+							int siguienteArmada=nroArmadaActual+1;
+							System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
+							String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
+							System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
+							if(resultLiquidacion.equals("")){
+								liquidacionAutomaticaExitosa = true;
+							}
+						}					
+					}
+				}
+			}
+			
+			if(liquidacionAutomaticaExitosa){
+				resultado = "Se enviaron los documentos a contabilidad y se generó la liquidación automática.";
+			}else if(liquidacionAutomatica){
+				resultado = "Se enviaron los documentos a contabilidad, pero no se generó la liquidación automática.";
+			}else{
+				resultado = "Se enviaron los documentos a contabilidad";
+			}
 		}
 		LOG.info("RESULTADO ENVIO CONTABILIDAD: "+resultado);
 		
@@ -914,15 +917,35 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		String resultado = "";
-				
-		// lista comprobantes
-		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
 		
-		if(listaComprobantes!=null && listaComprobantes.size()>0){
-			// Recepcionar cargo
-			inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		// Verificar si requiere registro de comprobantes
+		boolean requiereDocumentos = Util.requiereRegistrarDocumento(inversion, nroArmada);
+		if(requiereDocumentos){
+			// Obtener lista de comprobantes
+			List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+			
+			if(listaComprobantes!=null && listaComprobantes.size()>0){
+				boolean envioDocumentos = false;
+				for(ComprobanteCaspio comprobante : listaComprobantes){
+					if(!Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+						envioDocumentos=true;
+						break;
+					}
+				}
+				if(envioDocumentos){
+					// Recepcionar cargo
+					inversionService.recepcionarCargoContabilidad(inversionId, nroArmada, fechaRecepcion, usuarioRecepcion);
+				}else{
+					resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+				}
+			}else{
+				resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+			}			
 		}else{
-			resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+			resultado=Constantes.Service.RESULTADO_NO_REQUIERE_COMPROBANTES;
 		}
 		
 		return resultado;
@@ -934,11 +957,22 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		
-		Date date=Util.getFechaActual();
-		String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
-		LOG.info("##strFecha:"+strFecha);
-		inversionService.envioCargoContabilidadActualizSaldo(inversionId, strFecha, usuarioEnvio);
-		return "";
+		String resultado="";
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		// Verificar si registro la actualizacion de saldo de deuda
+		if(inversion.getImporteInversionInicial()!=null && !Util.esVacio(inversion.getFechaActualizacionSaldo())){
+			// Enviar cargo contabilidad
+			Date date=Util.getFechaActual();
+			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
+			inversionService.envioCargoContabilidadActualizSaldo(inversionId, strFecha, usuarioEnvio);
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+		}
+		
+		return resultado;
 	}
 
 	@Override
@@ -948,13 +982,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		String resultado = "";
 		
+		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		
-		if(inversion.getImporteInversionInicial()!=null && !Util.esVacio(inversion.getFechaActualizacionSaldo())){
+		// Validar si se enviaron los documentos
+		if(!Util.esVacio(inversion.getRecepContabilidadFecha())){			
 			// Recepcionar cargo contabilidad
-			inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);
+			inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);		
 		}else{
-			resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+			resultado = Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
 		}
 		return resultado;
 	}
@@ -1189,6 +1225,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 		
 	}
+	
 
 	
 }

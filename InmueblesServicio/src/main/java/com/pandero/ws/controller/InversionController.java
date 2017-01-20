@@ -466,15 +466,18 @@ public class InversionController {
 		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuario:"+usuario);
 		ResultadoBean resultadoBean = null;
 		try{
-			inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuario);
+			String resultado = inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuario);
+			if(resultado.equals("")){
+				resultado = "Se enviaron los documentos a contabilidad.";
+			}
 			resultadoBean = new ResultadoBean();
-			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-			resultadoBean.setResultado("Se enviaron los documentos a contabilidad.");
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());			
+			resultadoBean.setResultado(resultado);
 		}catch(Exception e){
 			LOG.error("Error inversion/envioCargoContabilidadActualizSaldo:: ",e);
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-			resultadoBean.setResultado("Ocurrió un error al enviar los documentos a contabilidad");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 			LOG.error("###enviarCartaContabilidad:",e);
 		}	
 		return resultadoBean;
@@ -493,7 +496,7 @@ public class InversionController {
 			LOG.error("Error inversion/anularEnvioCargoContabilidadActualizSaldo:: ",e);
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-			resultadoBean.setResultado("Ocurrió un error al anular el envío de documentos a contabilidad");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 			LOG.error("###enviarCartaContabilidad:",e);
 		}	
 		return resultadoBean;
