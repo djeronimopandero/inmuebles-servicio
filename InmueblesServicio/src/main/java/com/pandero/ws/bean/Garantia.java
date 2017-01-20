@@ -15,7 +15,15 @@ public class Garantia implements java.io.Serializable {
 	private String pedidoNumero;
 	private String modalidad;
 	private String usoBien;
+	private String nroContrato;
 	
+	
+	public String getNroContrato() {
+		return nroContrato;
+	}
+	public void setNroContrato(String nroContrato) {
+		this.nroContrato = nroContrato;
+	}
 	public Integer getIdGarantia() {
 		return idGarantia;
 	}
