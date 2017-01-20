@@ -140,6 +140,9 @@ public class PedidoDaoImpl implements PedidoDao {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_Inmb_AgregarPedidoInversion");
 		call.withoutProcedureColumnMetaDataAccess();	
+		System.out.println("agregarPedidoInversionSAF:: PedidoNumero="+pedidoInversionSAF.getNroPedido()+" - ProveedorID="+pedidoInversionSAF.getProveedorID()
+				+" - InversionNumero="+pedidoInversionSAF.getPedidoInversionNumero()+" - TipoInversionID="+pedidoInversionSAF.getPedidoTipoInversionID()
+				+" - UsuarioID="+pedidoInversionSAF.getUsuarioIDCreacion());
 		
 		call.addDeclaredParameter(new SqlParameter("@PedidoNumero", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@ProveedorID", Types.VARCHAR));

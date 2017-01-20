@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.LiquidacionSAF;
+import com.pandero.ws.bean.SolicitudAutorizacion;
 
 public interface LiquidacionDao {
 
@@ -19,6 +20,7 @@ public interface LiquidacionDao {
 	public String eliminarConformidadInversion(String nroInversion, String usuarioId) throws Exception;
 	
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(String nroInversion) throws Exception;
+	public List<SolicitudAutorizacion> obtenerSolicitudesAutorizacionPorInversion(String nroInversion) throws Exception;
 	
 	public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName);
 }

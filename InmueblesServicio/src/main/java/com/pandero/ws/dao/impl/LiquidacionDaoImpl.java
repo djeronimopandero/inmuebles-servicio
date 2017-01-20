@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.LiquidacionSAF;
+import com.pandero.ws.bean.SolicitudAutorizacion;
 import com.pandero.ws.dao.LiquidacionDao;
 
 @Repository
@@ -298,5 +299,39 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		return null;
 	}
 
-	
+	@Override
+	public List<SolicitudAutorizacion> obtenerSolicitudesAutorizacionPorInversion(
+			String nroInversion) throws Exception {
+		List<SolicitudAutorizacion> listaSolicitudes = null;
+		
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_GEN_ObtenerSolicitudAutorizacionPorInversion");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NroInversion", Types.VARCHAR));
+		call.returningResultSet("solicitud", new SolicitudAutorizacionMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NroInversion", nroInversion);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("solicitud");
+		if (resultado != null && resultado.size() > 0) {
+			listaSolicitudes = (List<SolicitudAutorizacion>) resultado;
+		}
+		
+		return listaSolicitudes;
+	}
+
+	private static final class SolicitudAutorizacionMapper implements RowMapper<SolicitudAutorizacion>{
+		public SolicitudAutorizacion mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			SolicitudAutorizacion e = new SolicitudAutorizacion();	
+			e.setSolicitudID(rs.getInt("SolicitudID"));
+			e.setProcesoID(rs.getString("ProcesoID"));
+			e.setPedidoInversionID(rs.getInt("CodigoID"));
+			e.setNroArmada(rs.getString("SolicitudNumeroCuota"));
+			e.setNroInversion(rs.getString("PedidoInversionNumero"));
+			e.setSolicitudEstadoID(rs.getString("SolicitudEstadoID"));
+			return e;		    
+			}
+		}
 }
