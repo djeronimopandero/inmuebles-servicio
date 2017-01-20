@@ -55,6 +55,40 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		return response;
 	}
 	
+	@RequestMapping(value = "/editarGarantiaSAFV2", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> editarGarantiaSAFV2(@RequestBody Map<String, Object> params) {
+		LOG.info("###editarGarantiaSAF params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			String garantiaId = String.valueOf(params.get("garantiaId"));
+			String partidaRegistral = String.valueOf(params.get("partidaRegistral"));
+			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
+			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
+			String uso = String.valueOf(params.get("uso"));
+			String montoPrima = String.valueOf(params.get("montoPrima"));			
+			String modalidad = String.valueOf(params.get("modalidad"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			String nroContrato = String.valueOf(params.get("contratoNro"));
+			
+			garantiaBusiness.editarGarantiaSAFV2(garantiaId, partidaRegistral, fichaConstitucion, 
+					fechaConstitucion, montoPrima, modalidad, uso, usuarioId,nroContrato);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			
+		}catch(Exception e){
+			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
 	@RequestMapping(value = "/editarGarantiaSAF", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> editarGarantiaSAF(@RequestBody Map<String, Object> params) {
@@ -70,9 +104,10 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String montoPrima = String.valueOf(params.get("montoPrima"));			
 			String modalidad = String.valueOf(params.get("modalidad"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
+			String nroContrato = String.valueOf(params.get("contratoNro"));
 			
 			garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
-					fechaConstitucion, montoPrima, modalidad, uso, usuarioId);
+					fechaConstitucion, montoPrima, modalidad, uso, usuarioId, nroContrato);
 			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
