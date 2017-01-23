@@ -838,8 +838,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		/***********/
 		//La enviar los documentos a contabilidad no está validando que la sumatoria de comprobantes registrados
 		//sea igual al importe de la inversión (validación aplica SÓLO para ADQUSICIÓN PJ y CONSTRUCCIÓN CON CONSTRUCTORA)
-		if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getEstado()) || 
-		(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getEstado()) && inversion.getServicioConstructora())){
+		if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getTipoInversion()) || 
+		(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion()) && inversion.getServicioConstructora())){
 			if(!inversion.getImporteInversion().equals(totalFacturas)){
 				resultado = Constantes.Service.RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION;
 			}
@@ -1033,8 +1033,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
 		if(null!=inversion){
-			if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getEstado()) || 
-			(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getEstado()) && inversion.getServicioConstructora() )){
+			LOG.info("###Estado:"+inversion.getEstado());
+			LOG.info("###Servicio Cons:"+inversion.getServicioConstructora());
+			LOG.info("###Confirmado:"+inversion.getConfirmado());
+			if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getTipoInversion()) || 
+			(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion()) && inversion.getServicioConstructora() )){
 				if(!inversion.getConfirmado().equalsIgnoreCase(Constantes.Inversion.SITUACION_CONFIRMADO)){
 					resultadoBean = new ResultadoBean();
 					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
