@@ -18,7 +18,7 @@ public class Constantes {
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";
-		public final static String RESULTADO_ERROR_INESPERADO = "Ocurrio un error inesperado";
+		public final static String RESULTADO_ERROR_INESPERADO = "Ocurrió un error inesperado";
 		public final static String RESULTADO_EXITOSO = "OPERACION_EXITOSA";		
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
@@ -32,16 +32,18 @@ public class Constantes {
 		public final static String RESULTADO_INVERSION_LIQUIDADA = "INVERSION_LIQUIDADA";
 		public final static String RESULTADO_INVERSION_VB_CONTABLE = "INVERSION_VB_CONTABLE";
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "INVERSION_DESEMBOLSADA";
-		//public final static String RESULTADO_PASO_LIQUIDACION = "PASO_LIQUIDACION";
 		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
-		public final static String RESULTADO_SI_LIQUIDACION_AUTO = "SI_LIQUIDACION_AUTO";
-		public final static String RESULTADO_NO_LIQUIDACION_AUTO = "NO_LIQUIDACION_AUTO";
+//		public final static String RESULTADO_SI_LIQUIDACION_AUTO = "SI_LIQUIDACION_AUTO";
+//		public final static String RESULTADO_NO_LIQUIDACION_AUTO = "NO_LIQUIDACION_AUTO";
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
-		public final static String RESULTADO_PENDIENTE_COBROS = "PENDIENTE_COBROS";
+		public final static String RESULTADO_PENDIENTE_COBROS = "Operación cancelada. Existen cobros pendientes.";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "INVERSION_NO_CONFIRMADA";
-		public final static String RESULTADO_SIN_COMPROBANTES= "SIN_COMPROBANTES";
-		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "SIN_ACTUALZ_SALDO_DEUDA";
-		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "SIN_RECEPCION_CARGO_CONTABILIDAD";
+		public final static String RESULTADO_SIN_COMPROBANTES= "Operación cancelada. No se han registrado los comprobantes.";
+		public final static String RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION= "Operación cancelada. La suma no es igual al importe de la inversión.";
+		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "Operación cancelada. No se ha actualizado el saldo de la deuda.";
+		public final static String RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD= "Operación cancelada. No se han enviado los documentos a contabilidad.";
+		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. No se han recepcionado los documentos enviados.";
+		public final static String RESULTADO_NO_REQUIERE_COMPROBANTES="Operación cancelada. No se requiere recepcionar documentos.";
 	}
 	
 	public class Pedido {

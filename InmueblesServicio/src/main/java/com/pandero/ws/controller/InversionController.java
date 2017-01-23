@@ -466,15 +466,18 @@ public class InversionController {
 		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuario:"+usuario);
 		ResultadoBean resultadoBean = null;
 		try{
-			inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuario);
+			String resultado = inversionBusiness.envioCargoContabilidadActualizSaldo(inversionId, usuario);
+			if(resultado.equals("")){
+				resultado = "Se enviaron los documentos a contabilidad.";
+			}
 			resultadoBean = new ResultadoBean();
-			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-			resultadoBean.setResultado("Se enviaron los documentos a contabilidad.");
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());			
+			resultadoBean.setResultado(resultado);
 		}catch(Exception e){
 			LOG.error("Error inversion/envioCargoContabilidadActualizSaldo:: ",e);
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-			resultadoBean.setResultado("Ocurrió un error al enviar los documentos a contabilidad");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 			LOG.error("###enviarCartaContabilidad:",e);
 		}	
 		return resultadoBean;
@@ -493,7 +496,7 @@ public class InversionController {
 			LOG.error("Error inversion/anularEnvioCargoContabilidadActualizSaldo:: ",e);
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
-			resultadoBean.setResultado("Ocurrió un error al anular el envío de documentos a contabilidad");
+			resultadoBean.setResultado(Constantes.Service.RESULTADO_ERROR_INESPERADO);
 			LOG.error("###enviarCartaContabilidad:",e);
 		}	
 		return resultadoBean;
@@ -696,18 +699,19 @@ public class InversionController {
 		return result;
 	}
 	
-	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}", method = RequestMethod.GET)
+	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}/{importeIngresar}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean validarImporteComprobantesNoExcedaInversion(
 			@PathVariable(value="inversionId") String inversionId,
-			@PathVariable(value="nroArmada") String nroArmada){
-		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada);
+			@PathVariable(value="nroArmada") String nroArmada,
+			@PathVariable(value="importeIngresar") Double importeIngresar){
+		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+", importeIngresar:"+importeIngresar);
 		
 		ResultadoBean resultadoBean = null;
 		boolean resultado=false;
-		if(null!=inversionId && null!=nroArmada){
+		if(null!=inversionId && null!=nroArmada && null!=importeIngresar){
 			try {
 				
-				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada));
+				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada),importeIngresar);
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 				resultadoBean.setResultado(resultado);

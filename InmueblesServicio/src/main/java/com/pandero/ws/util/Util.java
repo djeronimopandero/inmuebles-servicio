@@ -307,4 +307,22 @@ public class Util {
 	    return (double) tmp / factor;
 	}
 
+	public static boolean requiereRegistrarDocumento(Inversion inversion, String nroArmada){
+		boolean resultado=false;
+		if( (Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())
+				&& Constantes.DocumentoIdentidad.RUC_ID.equals(inversion.getPropietarioTipoDocId())) ||
+			(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+				&& inversion.getServicioConstructora()) ||
+			(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())) ){
+			resultado=true;
+		}
+		
+		if( (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+				&& !inversion.getServicioConstructora())  
+			&& (nroArmada.equals("3") || nroArmada.equals("4")) ){
+			resultado=true;
+		}
+		
+		return resultado;
+	}
 }
