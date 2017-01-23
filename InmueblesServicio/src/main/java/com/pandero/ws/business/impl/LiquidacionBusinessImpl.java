@@ -191,6 +191,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(listaComprobantes==null || listaComprobantes.size()==0){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+				}else{
+					for(ComprobanteCaspio comprobante : listaComprobantes){
+						if(Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+							resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+							break;
+						}
+					}
 				}
 			}
 								
