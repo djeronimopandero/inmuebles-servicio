@@ -165,8 +165,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			totalDisponible=totalDisponibleContratos+montoDifPrecio;
 			System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 			
-			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
-					&& !inversion.getServicioConstructora()){
+			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
 			}else{
 				if(validacionLiquidacion){				
 					// Verficar si hay monto para liquidar

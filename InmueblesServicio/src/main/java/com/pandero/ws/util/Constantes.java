@@ -33,8 +33,6 @@ public class Constantes {
 		public final static String RESULTADO_INVERSION_VB_CONTABLE = "INVERSION_VB_CONTABLE";
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "INVERSION_DESEMBOLSADA";
 		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
-//		public final static String RESULTADO_SI_LIQUIDACION_AUTO = "SI_LIQUIDACION_AUTO";
-//		public final static String RESULTADO_NO_LIQUIDACION_AUTO = "NO_LIQUIDACION_AUTO";
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
 		public final static String RESULTADO_PENDIENTE_COBROS = "Operación cancelada. Existen cobros pendientes.";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "INVERSION_NO_CONFIRMADA";
