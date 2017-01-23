@@ -47,7 +47,6 @@ public class Test {
 		
 //		test2();
 //		
-		
 	}
 	
 	public static String getFechaFormateada(Date date, String format){

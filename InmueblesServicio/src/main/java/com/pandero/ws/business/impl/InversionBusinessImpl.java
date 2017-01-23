@@ -816,6 +816,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		ResultadoBean resultadoBean  = new ResultadoBean();
 		boolean liquidacionAutomatica=false, liquidacionAutomaticaExitosa=false;
 		String resultado = "";
+		Double totalFacturas = 0.0;
 		
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);	
@@ -827,9 +828,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 			List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
 			if(listaComprobantes==null || listaComprobantes.size()==0){
 				resultado=Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+			}else{
+				for(ComprobanteCaspio com:listaComprobantes){
+					totalFacturas +=com.getImporte();
+				}
 			}
 		}
-				
+		
+		/***********/
+		//La enviar los documentos a contabilidad no está validando que la sumatoria de comprobantes registrados
+		//sea igual al importe de la inversión (validación aplica SÓLO para ADQUSICIÓN PJ y CONSTRUCCIÓN CON CONSTRUCTORA)
+		if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getTipoInversion()) || 
+		(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion()) && inversion.getServicioConstructora())){
+			if(!inversion.getImporteInversion().equals(totalFacturas)){
+				resultado = Constantes.Service.RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION;
+			}
+		}
+		/***********/
+		
 		if(resultado.equals("")){
 			// Actualizar estado de envio a contabilidad
 			Date date=Util.getFechaActual();
@@ -844,7 +860,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 					&& !inversion.getServicioConstructora()){				
 				if(ultimaLiquidacion!=null){
 					int nroArmadaActual = ultimaLiquidacion.getNroArmada();
-					System.out.println("nroArmadaActual:: "+nroArmadaActual);
+					LOG.info("nroArmadaActual:: "+nroArmadaActual);
 					if(nroArmadaActual==2||nroArmadaActual==3){
 						liquidacionAutomatica = true;
 					}
@@ -861,13 +877,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 						// Obtener monto del desembolso
 						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
 						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
-						System.out.println("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
+						LOG.info("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
 						if(totalComprobantes>=montoMinimoDesembolso){
 							// Generar siguiente liquidacion
 							int siguienteArmada=nroArmadaActual+1;
-							System.out.println("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
+							LOG.info("LIQUIDACION AUTOMATICA - NRO:: "+siguienteArmada);
 							String resultLiquidacion = liquidacionBusiness.generarLiquidacionPorInversion(inversion.getNroInversion(), String.valueOf(siguienteArmada), usuarioId);
-							System.out.println("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
+							LOG.info("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
 							if(resultLiquidacion.equals("")){
 								liquidacionAutomaticaExitosa = true;
 							}
@@ -1010,7 +1026,28 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+		
+		/*****/
+		//Para el tipo de inversión ADQUISICIÓN PJ y CONSTRUCCIÓN CON CONSTRUCTORA se debe considerar la siguiente validación: 
+		//(i) No se debe permitir registrar el comprobante del proveedor de la inversión si no se encuentra CONFIRMADA
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			LOG.info("###Estado:"+inversion.getEstado());
+			LOG.info("###Servicio Cons:"+inversion.getServicioConstructora());
+			LOG.info("###Confirmado:"+inversion.getConfirmado());
+			if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getTipoInversion()) || 
+			(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion()) && inversion.getServicioConstructora() )){
+				if(!inversion.getConfirmado().equalsIgnoreCase(Constantes.Inversion.SITUACION_CONFIRMADO)){
+					resultadoBean = new ResultadoBean();
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setResultado("Operación cancelada. La inversión no ha sido confirmada.");
+					return resultadoBean;
+				}
+			}
+		}
+		/*****/
+		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
 		
 		if(null!=listComprobantes){
@@ -1032,7 +1069,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			resultadoBean.setResultado("Proceder al registro de facturas");
 		}
-		
 		
 		return resultadoBean;
 	}
@@ -1201,13 +1237,21 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada) throws Exception {
+	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar) throws Exception {
 		LOG.info("###InversionBusinessImpl.validarImporteComprobantesNoExcedaInversion inversionId:"+inversionId);
 	
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
 		Double dblImporteTotalComprobantes = 0.0;
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion())){
+			if(!inversion.getServicioConstructora()){//Sin constructora
+				return true;
+			}
+		}
+		
 		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
 		if(listComprobantes!=null && listComprobantes.size()>0){
@@ -1216,12 +1260,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		
-		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		LOG.info("###dblImporteTotalComprobantes:"+dblImporteTotalComprobantes);
+		LOG.info("###Importe de inversion:"+inversion.getImporteInversion());
 		
 		if(dblImporteTotalComprobantes > inversion.getImporteInversion()){
-			return false;
+			LOG.info("### dblImporteTotalComprobantes es mayor");
+			return false; //Invalido
 		}else{
-			return true;
+			if(null!=importeIngresar){
+				if(importeIngresar>inversion.getImporteInversion()){
+					LOG.info("### validarImporteComprobantesNoExcedaInversion return false");
+					return false;
+				}else{
+					LOG.info("### validarImporteComprobantesNoExcedaInversion return true");
+					return true;//Invalido
+				}
+			}else{
+				return false;
+			}
 		}
 		
 	}
