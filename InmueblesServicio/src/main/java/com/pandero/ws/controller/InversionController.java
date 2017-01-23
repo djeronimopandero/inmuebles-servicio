@@ -699,18 +699,19 @@ public class InversionController {
 		return result;
 	}
 	
-	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}", method = RequestMethod.GET)
+	@RequestMapping(value = "validarImporteComprobantesNoExcedaInversion/{inversionId}/{nroArmada}/{importeIngresar}", method = RequestMethod.GET)
 	public @ResponseBody ResultadoBean validarImporteComprobantesNoExcedaInversion(
 			@PathVariable(value="inversionId") String inversionId,
-			@PathVariable(value="nroArmada") String nroArmada){
-		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada);
+			@PathVariable(value="nroArmada") String nroArmada,
+			@PathVariable(value="importeIngresar") Double importeIngresar){
+		LOG.info("###ContratoController.grabarComprobantes inversionId:"+inversionId+", nroArmada:"+nroArmada+", importeIngresar:"+importeIngresar);
 		
 		ResultadoBean resultadoBean = null;
 		boolean resultado=false;
-		if(null!=inversionId && null!=nroArmada){
+		if(null!=inversionId && null!=nroArmada && null!=importeIngresar){
 			try {
 				
-				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada));
+				resultado = inversionBusiness.validarImporteComprobantesNoExcedaInversion(inversionId, Integer.parseInt(nroArmada),importeIngresar);
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 				resultadoBean.setResultado(resultado);

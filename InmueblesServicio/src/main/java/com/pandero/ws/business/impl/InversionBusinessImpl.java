@@ -1237,13 +1237,21 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada) throws Exception {
+	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar) throws Exception {
 		LOG.info("###InversionBusinessImpl.validarImporteComprobantesNoExcedaInversion inversionId:"+inversionId);
 	
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
 		Double dblImporteTotalComprobantes = 0.0;
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getTipoInversion())){
+			if(!inversion.getServicioConstructora()){//Sin constructora
+				return true;
+			}
+		}
+		
 		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), nroArmada);
 		if(listComprobantes!=null && listComprobantes.size()>0){
@@ -1252,16 +1260,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		
-		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
 		LOG.info("###dblImporteTotalComprobantes:"+dblImporteTotalComprobantes);
 		LOG.info("###Importe de inversion:"+inversion.getImporteInversion());
 		
 		if(dblImporteTotalComprobantes > inversion.getImporteInversion()){
 			LOG.info("### dblImporteTotalComprobantes es mayor");
-			return false;
+			return false; //Invalido
 		}else{
-			LOG.info("### dblImporteTotalComprobantes es menor");
-			return true;
+			if(null!=importeIngresar){
+				if(importeIngresar>inversion.getImporteInversion()){
+					LOG.info("### validarImporteComprobantesNoExcedaInversion return false");
+					return false;
+				}else{
+					LOG.info("### validarImporteComprobantesNoExcedaInversion return true");
+					return true;//Invalido
+				}
+			}else{
+				return false;
+			}
 		}
 		
 	}
