@@ -21,7 +21,7 @@ public class GeneralBusinessImpl implements GeneralBusiness {
 	public Double convertirSoles(Double montoDolares,String fechaEmision) throws Exception {
 		LOG.info("###GeneralBusinessImpl.convertirSoles montoDolares:"+montoDolares);
 		
-		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.VENTA.getTexto(), fechaEmision);
+		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.CONTABLE.getTexto(), fechaEmision);
 		
 		return montoDolares * dboTipoCambio;
 	}
@@ -30,7 +30,7 @@ public class GeneralBusinessImpl implements GeneralBusiness {
 	public Double convertirDolares(Double montoSoles,String fechaEmision) throws Exception {
 		LOG.info("###GeneralBusinessImpl.convertirDolares montoSoles:"+montoSoles);
 		
-		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.VENTA.getTexto(), fechaEmision);
+		Double dboTipoCambio = generalDao.obtenerTipoCambio(UtilEnum.TIPO_CAMBIO.CONTABLE.getTexto(), fechaEmision);
 		return montoSoles / dboTipoCambio;
 	}
 

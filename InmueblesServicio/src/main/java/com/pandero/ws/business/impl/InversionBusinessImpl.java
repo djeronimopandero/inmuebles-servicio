@@ -1010,7 +1010,25 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
-	
+		
+		/*****/
+		//Para el tipo de inversión ADQUISICIÓN PJ y CONSTRUCCIÓN CON CONSTRUCTORA se debe considerar la siguiente validación: 
+		//(i) No se debe permitir registrar el comprobante del proveedor de la inversión si no se encuentra CONFIRMADA
+		
+		Inversion inversion= inversionService.obtenerInversionCaspioPorId(inversionId);
+		if(null!=inversion){
+			if(Constantes.TipoInversion.ADQUISICION_COD.equalsIgnoreCase(inversion.getEstado()) || 
+			(Constantes.TipoInversion.CONSTRUCCION_COD.equalsIgnoreCase(inversion.getEstado()) && inversion.getServicioConstructora() )){
+				if(!inversion.getConfirmado().equalsIgnoreCase(Constantes.Inversion.SITUACION_CONFIRMADO)){
+					resultadoBean = new ResultadoBean();
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setResultado("Operación cancelada. La inversión no ha sido confirmada.");
+					return resultadoBean;
+				}
+			}
+		}
+		/*****/
+		
 		List<ComprobanteCaspio> listComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
 		
 		if(null!=listComprobantes){
@@ -1032,7 +1050,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			resultadoBean.setResultado("Proceder al registro de facturas");
 		}
-		
 		
 		return resultadoBean;
 	}
