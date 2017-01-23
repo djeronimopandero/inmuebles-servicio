@@ -557,7 +557,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 			// Obtener monto pagado dif. precio			
 			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-			ddp.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
+			ddp.setTipoInversion(inversion.getTipoInversion());
 		}else{
 			ddp = null;
 		}
