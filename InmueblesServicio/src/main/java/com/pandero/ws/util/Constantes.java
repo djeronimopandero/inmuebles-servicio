@@ -39,6 +39,7 @@ public class Constantes {
 		public final static String RESULTADO_PENDIENTE_COBROS = "Operación cancelada. Existen cobros pendientes.";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "INVERSION_NO_CONFIRMADA";
 		public final static String RESULTADO_SIN_COMPROBANTES= "Operación cancelada. No se han registrado los comprobantes.";
+		public final static String RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION= "Operación cancelada. La suma no es igual al importe de la inversión.";
 		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "Operación cancelada. No se ha actualizado el saldo de la deuda.";
 		public final static String RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD= "Operación cancelada. No se han enviado los documentos a contabilidad.";
 		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. No se han recepcionado los documentos enviados.";
