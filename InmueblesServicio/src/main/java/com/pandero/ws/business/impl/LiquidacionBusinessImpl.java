@@ -194,6 +194,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				}else{
 					for(ComprobanteCaspio comprobante : listaComprobantes){
 						if(Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+							validacionLiquidacion = false;
 							resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
 							break;
 						}
@@ -528,7 +529,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Confirmar liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.confirmarLiquidacionInversion(nroInversion, usuarioId);
+			liquidacionDao.confirmarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);
@@ -665,7 +666,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		//Eliminar confirmacion de liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
+			liquidacionDao.eliminarConformidadInversion(nroInversion, nroArmada, usuarioId);
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
 			// Actualizar estado liquidacion-desembolso

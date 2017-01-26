@@ -48,10 +48,12 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.Constantes.TipoInversion;
 import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -149,6 +151,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setProveedorID(String.valueOf(proveedor.getProveedorID().intValue()));
 				pedidoInversionSAF.setPedidoInversionNumero(inversion.getNroInversion());
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
+				if(inversion.getServicioConstructora()){
+					pedidoInversionSAF.setServicioConstructora("1");
+				}
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
@@ -917,12 +922,31 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-			
-		inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
+		
+		String resultado = "";
+		
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+		if(listaComprobantes!=null && listaComprobantes.size()>0){
+			for(ComprobanteCaspio comprobante : listaComprobantes){
+				if(Util.esVacio(comprobante.getRecepContabilidadFecha())){
+					resultado = Constantes.Service.RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD;
+					break;
+				}else if(Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+					resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+					break;
+				}
+			}
+			if(resultado.equals("")){
+				inversionService.actualizarComprobanteEnvioCartaContabilidad(inversionId,nroArmada,"","","");
+				resultado = "Se anuló el envío de documentos a contabilidad.";
+			}
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+		}
 		
 		ResultadoBean resultadoBean  = new ResultadoBean();
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-		resultadoBean.setResultado("Se anuló el envío de documentos a contabilidad.");
+		resultadoBean.setResultado(resultado);
 		
 		return resultadoBean;
 	}
@@ -966,6 +990,60 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		return resultado;
 	}
+	
+	public String anularRecepcionCargoContabilidad(String inversionId,
+			String nroArmada, String usuario) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		String resultado = "";
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+				
+		// Obtener lista de comprobantes
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
+				
+		if(listaComprobantes!=null && listaComprobantes.size()>0){
+			boolean envioDocumentos = false;
+			for(ComprobanteCaspio comprobante : listaComprobantes){
+				if(!Util.esVacio(comprobante.getRecepContabilidadFecha())){
+					resultado=Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
+					break;
+				}
+			}
+			
+			// Obtener liquidacion
+			List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(inversion.getNroLiquidacion());
+			if(listaLiquidacion!=null && listaLiquidacion.size()>0){
+				// Obtener el nroArmada
+				int nroArmadaLiquidacion = Integer.parseInt(nroArmada);
+				if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+						&& !inversion.getServicioConstructora()){
+					nroArmadaLiquidacion = nroArmadaLiquidacion+1;
+				}				
+				for(LiquidacionSAF liquidacion : listaLiquidacion){
+					if(liquidacion.getNroArmada()==nroArmadaLiquidacion){
+						if(liquidacion.getLiquidacionEstado().equals("2")){
+							resultado = Constantes.Service.RESULTADO_INVERSION_VB_CONTABLE;
+							break;
+						}else if(liquidacion.getLiquidacionEstado().equals("3")){
+							resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
+							break;
+						}
+					}
+				}
+			}
+			
+			if(resultado.equals("")){
+				// Anular recepcion cargo
+				inversionService.anularRecepcionCargoContabilidad(inversionId, nroArmada, usuario);
+			}
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+		}
+		
+		return resultado;
+	}
 
 	@Override
 	public String envioCargoContabilidadActualizSaldo(String inversionId, String usuarioEnvio) throws Exception {
@@ -1002,9 +1080,43 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		
 		// Validar si se enviaron los documentos
-		if(!Util.esVacio(inversion.getRecepContabilidadFecha())){			
+		if(!Util.esVacio(inversion.getEnvioContabilidadFecha())){			
 			// Recepcionar cargo contabilidad
 			inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, fechaRecepcion, usuarioRecepcion);		
+		}else{
+			resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+		}
+		return resultado;
+	}
+	
+	@Override
+	public String anularRecepcionCargoContabilidadActualizSaldo(String inversionId, String usuario) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		String resultado = "";
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		// Validar si se enviaron los documentos
+		if(!Util.esVacio(inversion.getRecepContabilidadFecha())){			
+			// Obtener liquidacion
+			List<LiquidacionSAF> listaLiquidacion = liquidacionDao.obtenerLiquidacionPorInversionArmada(inversion.getNroInversion(), "1");
+			if(listaLiquidacion!=null && listaLiquidacion.size()>0){			
+				for(LiquidacionSAF liquidacion : listaLiquidacion){					
+					if(liquidacion.getLiquidacionEstado().equals("2")){
+						resultado = Constantes.Service.RESULTADO_INVERSION_VB_CONTABLE;
+						break;
+					}else if(liquidacion.getLiquidacionEstado().equals("3")){
+						resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
+						break;
+					}
+				}
+			}			
+			if(resultado.equals("")){
+				// Recepcionar cargo contabilidad
+				inversionService.recepcionarCargoContabilidadActualizSaldo(inversionId, "", "");
+			}
 		}else{
 			resultado = Constantes.Service.RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD;
 		}
@@ -1015,8 +1127,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		inversionService.envioCargoContabilidadActualizSaldo(inversionId, null, null);
-		return "";
+		
+		String resultado = "";
+		
+		// Obtener datos de la inversion
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		
+		if(Util.esVacio(inversion.getEnvioContabilidadFecha())){
+			resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+		}else{
+			if(Util.esVacio(inversion.getRecepContabilidadFecha())){
+				resultado = Constantes.Service.RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD;
+			}else{
+				// Anular envio cargo contabilidad
+				inversionService.envioCargoContabilidadActualizSaldo(inversionId, null, null);
+			}
+		}
+		
+		return resultado;
 	}
 	
 	public ResultadoBean verificarRegistrarFacturas(String inversionId, String nroArmada) throws Exception {
