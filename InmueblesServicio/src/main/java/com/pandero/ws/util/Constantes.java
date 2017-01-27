@@ -20,6 +20,7 @@ public class Constantes {
 		public final static String URL_WHERE = "?q={serviceWhere}";
 		public final static String RESULTADO_ERROR_INESPERADO = "Ocurrió un error inesperado";
 		public final static String RESULTADO_EXITOSO = "OPERACION_EXITOSA";		
+		public final static String RESULTADO_OPERACION_YA_REGISTRADA = "Operación cancelada. La operación ya fue registrada.";		
 		public final static String RESULTADO_INVERSIONES_CONFIRMADAS = "INVERSIONES_CONFIRMADAS";
 		public final static String RESULTADO_PENDIENTE_DOCUMENTOS = "PENDIENTE_DOCUMENTOS";
 		public final static String RESULTADO_DATOS_PENDIENTES = "DATOS_PENDIENTES";
@@ -30,6 +31,7 @@ public class Constantes {
 		public final static String RESULTADO_EXISTE_LIQUIDACION = "Operación cancelada. Existe una liquidación para la inversión.";
 		public final static String RESULTADO_NO_EXISTE_LIQUIDACION = "Operación cancelada. No existe liquidación para la inversión.";
 		public final static String RESULTADO_INVERSION_LIQUIDADA = "Operación cancelada. La inversión ya ha sido liquidada.";
+		public final static String RESULTADO_LIQUIDACION_NO_CONFIRMADA = "Operación cancelada. La liquidación no ha sido confirmada.";
 		public final static String RESULTADO_INVERSION_VB_CONTABLE = "Operacion cancelada. La inversión ya ha sido confirmada por contabilidad.";
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "Operación cancelada. La inversión ya ha sido desembolsada.";
 		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
@@ -43,6 +45,7 @@ public class Constantes {
 		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. No se han recepcionado los documentos enviados.";
 		public final static String RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. Los documentos se encuentran recepcionados.";
 		public final static String RESULTADO_NO_REQUIERE_COMPROBANTES="Operación cancelada. No se requiere recepcionar documentos.";
+		
 	}
 	
 	public class Pedido {

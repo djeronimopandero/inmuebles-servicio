@@ -651,10 +651,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			LOG.info("ESTADO LIQUIDA: "+estadoLiquidacion);
 			// Verificar estado liquidacion
-			if(Util.esVacio(estadoLiquidacion)){
-				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
-			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-				resultado = "";
+			if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
+				resultado = Constantes.Service.RESULTADO_LIQUIDACION_NO_CONFIRMADA;
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
 				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
 			}
