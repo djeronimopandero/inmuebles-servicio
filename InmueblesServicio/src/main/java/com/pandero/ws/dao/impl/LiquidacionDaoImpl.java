@@ -210,17 +210,19 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 	}
 
 	@Override
-	public String confirmarLiquidacionInversion(String nroInversion, String usuarioId)
+	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId)
 			throws Exception {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_Inmb_ConfirmarLiquidacionInversion");
 		call.withoutProcedureColumnMetaDataAccess();	
 				
 		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@NroArmada", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 						
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
         parameters.addValue("@NumeroInversion", nroInversion);
+        parameters.addValue("@NroArmada", nroArmada);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);
@@ -282,16 +284,18 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		}
 
 	@Override
-	public String eliminarConformidadInversion(String nroInversion, String usuarioId) throws Exception {
+	public String eliminarConformidadInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_LOG_Inmb_EliminarConformidadLiquidacion");
 		call.withoutProcedureColumnMetaDataAccess();	
 				
 		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@NroArmada", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 						
 		MapSqlParameterSource parameters = new MapSqlParameterSource();		
         parameters.addValue("@NumeroInversion", nroInversion);
+        parameters.addValue("@NroArmada", nroArmada);
 		parameters.addValue("@UsuarioID", usuarioId);
 				
 		call.execute(parameters);

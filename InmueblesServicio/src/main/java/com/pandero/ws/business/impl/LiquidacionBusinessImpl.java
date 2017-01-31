@@ -165,8 +165,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			totalDisponible=totalDisponibleContratos+montoDifPrecio;
 			System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 			
-			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
-					&& !inversion.getServicioConstructora()){
+			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
 			}else{
 				if(validacionLiquidacion){				
 					// Verficar si hay monto para liquidar
@@ -192,6 +191,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(listaComprobantes==null || listaComprobantes.size()==0){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+				}else{
+					for(ComprobanteCaspio comprobante : listaComprobantes){
+						if(Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+							validacionLiquidacion = false;
+							resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+							break;
+						}
+					}
 				}
 			}
 								
@@ -522,7 +529,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Confirmar liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.confirmarLiquidacionInversion(nroInversion, usuarioId);
+			liquidacionDao.confirmarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);
@@ -557,7 +564,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 			// Obtener monto pagado dif. precio			
 			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-			ddp.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
+			ddp.setTipoInversion(inversion.getTipoInversion());
 		}else{
 			ddp = null;
 		}
@@ -644,10 +651,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			LOG.info("ESTADO LIQUIDA: "+estadoLiquidacion);
 			// Verificar estado liquidacion
-			if(Util.esVacio(estadoLiquidacion)){
-				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
-			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-				resultado = "";
+			if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
+				resultado = Constantes.Service.RESULTADO_LIQUIDACION_NO_CONFIRMADA;
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
 				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
 			}
@@ -659,7 +664,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		//Eliminar confirmacion de liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
+			liquidacionDao.eliminarConformidadInversion(nroInversion, nroArmada, usuarioId);
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
 			// Actualizar estado liquidacion-desembolso

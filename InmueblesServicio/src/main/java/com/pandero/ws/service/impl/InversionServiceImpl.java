@@ -339,5 +339,21 @@ public class InversionServiceImpl implements InversionService {
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarGarantiaURL,Object.class,request,serviceWhere);	
 		return null;
 	}
+
+	@Override
+	public String anularRecepcionCargoContabilidad(String inversionId,
+			String nroArmada, String usuario) throws Exception {
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("RecepContabilidadFecha", null);	
+		request.put("RecepContabilidadUsuario", null);	
+		request.put("EstadoContabilidad", UtilEnum.ESTADO_COMPROBANTE.ENVIADO.getTexto());	
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";
+		
+		String actualizarComprobanteRequisitoURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);
+		return null;
+	}
 	
 }
