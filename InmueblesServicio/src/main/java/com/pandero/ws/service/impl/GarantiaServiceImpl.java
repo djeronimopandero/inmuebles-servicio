@@ -161,5 +161,16 @@ public class GarantiaServiceImpl implements GarantiaService{
 		return null;
 	}
 	
+	
+	@Override
+	public String anularSeguroCaspio(Map<String,Object> params) throws Exception {		
+		String serviceWhere = "{\"where\":\"creditoSeguroIdSAF="+params.get("seguroId")+"\"}";		
+		String actualizarGarantiaURL = tableSeguroURL+Constantes.Service.URL_WHERE;
+		params.remove("seguroId");
+		params.remove("usuarioId");		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarGarantiaURL,Object.class,params,serviceWhere);	
+		return null;
+	}
+	
 
 }

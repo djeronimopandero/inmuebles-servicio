@@ -229,11 +229,11 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 	}
 	
 	@Override
-    public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName){
+    public Map<String,Object> executeProcedure(Map<String,Object> parameters, String procedureName){
     	SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
     	call.withProcedureName(procedureName);
     	MapSqlParameterSource in = new MapSqlParameterSource();
-    	for(Map.Entry<String, String> parameter:parameters.entrySet()){
+    	for(Map.Entry<String, Object> parameter:parameters.entrySet()){
     		in.addValue(parameter.getKey(), parameter.getValue());
     	}
     	Map<String,Object> procedureResult = call.execute(in);

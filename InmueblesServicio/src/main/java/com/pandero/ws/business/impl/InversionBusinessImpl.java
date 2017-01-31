@@ -693,7 +693,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 					}
 				}
 								
-				Map<String,String> parameters = new HashMap<String, String>();
+				Map<String,Object> parameters = new HashMap<String, Object>();
 				parameters.put("PagoTesoreriaID", liquidacion.getLiquidacionPagoTesoreria());
 				Map<String,Object> pagoTesoreria = liquidacionDao.executeProcedure(parameters, "USP_LOG_ReportePagoTesoreria_Dos");
 				

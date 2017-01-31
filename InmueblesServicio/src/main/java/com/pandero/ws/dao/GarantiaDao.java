@@ -7,7 +7,6 @@ import com.pandero.ws.bean.Garantia;
 public interface GarantiaDao {
 
 	public String crearGarantiaSAF(Garantia garantia, String usuarioId) throws Exception;
-	public Map<String,Object> editarGarantiaSAFV2(Garantia garantia, String usuarioId) throws Exception;
 	public String editarGarantiaSAF(Garantia garantia, String usuarioId) throws Exception;
 	public String eliminarGarantiaSAF(String garantiaSAFId, String usuarioId) throws Exception;
 	

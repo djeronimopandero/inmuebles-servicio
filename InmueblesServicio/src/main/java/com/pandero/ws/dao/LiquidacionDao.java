@@ -22,5 +22,5 @@ public interface LiquidacionDao {
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(String nroInversion) throws Exception;
 	public List<SolicitudAutorizacion> obtenerSolicitudesAutorizacionPorInversion(String nroInversion) throws Exception;
 	
-	public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName);
+	public Map<String,Object> executeProcedure(Map<String,Object> parameters, String procedureName);
 }

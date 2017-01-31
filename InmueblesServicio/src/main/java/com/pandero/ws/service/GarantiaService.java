@@ -17,4 +17,5 @@ public interface GarantiaService {
 	public List<Seguro> obtenerSegurosPorGarantiaId(String garantiaId) throws Exception;
 	public String crearGarantiaInversionCaspio(Map<String, String> request) throws Exception;
 	public String eliminarSeguro(String serviceWhere) throws Exception;
+	public String anularSeguroCaspio(Map<String,Object> request) throws Exception;
 }

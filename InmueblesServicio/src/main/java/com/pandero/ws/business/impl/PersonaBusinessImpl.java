@@ -165,7 +165,7 @@ public class PersonaBusinessImpl implements PersonaBusiness{
 	
 	@SuppressWarnings("unchecked")
 	private Map<String,Object> obtenerDatosCorrespondeciaSAF(String personaId){
-		Map<String,String> parameters = new HashMap<String,String>();
+		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("personaId", personaId);
 		Map<String,Object> datosCorrespondencia = liquidacionDao.executeProcedure(parameters, "USP_PER_obtenerDatosCorrespondencia");
 		List<Map<String,Object>> data = (List<Map<String,Object>>)datosCorrespondencia.get("#result-set-1");
