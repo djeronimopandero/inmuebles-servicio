@@ -8,6 +8,8 @@ public interface GarantiaBusiness {
 			String fechaConstitucion, String uso, String usuarioId) throws Exception;
 	public Map<String, Object> registrarSeguro(Map<String, Object> params)
 			throws Exception;
+	public Map<String, Object> generarSeguro(Map<String, Object> params)
+			throws Exception;
 	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
 			String fechaConstitucion, String montoPrima, String modalidad, String uso, String usuarioId, String nroContrato) throws Exception;
 	public String eliminarGarantia(String garantiaId, String usuarioId) throws Exception;

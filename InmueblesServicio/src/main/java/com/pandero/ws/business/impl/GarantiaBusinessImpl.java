@@ -74,6 +74,18 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		return out;
 	}
 	
+	@Override
+	public Map<String, Object> generarSeguro(Map<String, Object> params)
+			throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		if(params.get("fechaInicioVigencia")!=null){
+			params.put("fechaInicioVigencia", sdf.parse(params.get("fechaInicioVigencia").toString()));
+			params.put("fechaFinVigencia", sdf.parse(params.get("fechaFinVigencia").toString()));
+		}		
+		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_generarSeguro");		
+		return out;
+	}
+	
 	
 	@Override
 	public Map<String, Object> anularSeguro(Map<String, Object> params)

@@ -157,6 +157,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
+				pedidoInversionSAF.setMontoInversion(String.valueOf(inversion.getImporteInversion()));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
 				
 				//verificamos si el inmueble esta hipotecado
