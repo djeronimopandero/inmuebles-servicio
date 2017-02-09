@@ -65,6 +65,26 @@ public class InversionController {
 		return response;
 	}
 	
+	@RequestMapping(value = "actualizarInversion/{nroInversion}/{montoInversion}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody   
+	public ResultadoBean actualizarInversion(@PathVariable(value="nroInversion") String nroInversion,@PathVariable(value="montoInversion") Double montoInversion) {
+		LOG.info("###obtenerInversion nroInversion:"+nroInversion);
+		LOG.info("###obtenerInversion montoInversion:"+montoInversion);
+		ResultadoBean response = new ResultadoBean();
+		try{
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("nroInversion", nroInversion);
+			params.put("montoInversion", montoInversion);
+			inversionBusiness.actualizarInversionMonto(params);
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerInversion:: ",e);
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+		}
+		return response;
+	}
+	
 	@RequestMapping(value = "/confirmarInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> confirmarInversion(@RequestBody Map<String, Object> params) {
@@ -488,10 +508,13 @@ public class InversionController {
 		LOG.info("###envioCargoContabilidadActualizSaldo inversionId:"+inversionId+", usuario:"+usuario);
 		ResultadoBean resultadoBean = null;
 		try{
-			inversionBusiness.anularEnvioCargoContabilidadActualizSaldo(inversionId, usuario);
+			String resultado = inversionBusiness.anularEnvioCargoContabilidadActualizSaldo(inversionId, usuario);
 			resultadoBean = new ResultadoBean();
 			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
-			resultadoBean.setResultado("Se anuló el envio de documentos a contabilidad.");
+			if(resultado.equals("")){
+				resultado="Se anuló el envio de documentos a contabilidad.";
+			}
+			resultadoBean.setResultado(resultado);
 		}catch(Exception e){
 			LOG.error("Error inversion/anularEnvioCargoContabilidadActualizSaldo:: ",e);
 			resultadoBean = new ResultadoBean();
@@ -757,6 +780,60 @@ public class InversionController {
 		return response;
 	}
 	
+	@RequestMapping(value = "/anularRecepcionCargoContabilidad", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> anularRecepcionCargoContabilidad(@RequestBody Map<String, Object> params) {	
+		LOG.info("###anularRecepcionCargoContabilidad params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			String nroArmada = String.valueOf(params.get("nroArmada"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			result = inversionBusiness.anularRecepcionCargoContabilidad(inversionId, nroArmada, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/anularRecepcionCargoContabilidad:: ",e);
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		LOG.info("RESPONSE: " +  response);
+			
+		return response;
+	}
+	
+	@RequestMapping(value = "/anularRecepcionCargoContabilidadActualizSaldo", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> anularRecepcionCargoContabilidadActualizSaldo(@RequestBody Map<String, Object> params) {	
+		LOG.info("###anularRecepcionCargoContabilidadActualizSaldo params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="1", detail="";
+		try{
+			String inversionId = String.valueOf(params.get("inversionId"));
+			String usuarioId = String.valueOf(params.get("usuarioId"));
+			result = inversionBusiness.anularRecepcionCargoContabilidadActualizSaldo(inversionId, usuarioId);
+			if(result.equals("")){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/anularRecepcionCargoContabilidadActualizSaldo:: ",e);
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}
+			
+		response.put("result",result);
+		response.put("detail",detail);
+		LOG.info("RESPONSE: " +  response);
+			
+		return response;
+	}
+	
+	
 	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
 	public ResultadoBean obtenerInversionPorNumero(@PathVariable(value="nroInversion") String nroInversion) {
@@ -777,5 +854,4 @@ public class InversionController {
 		}
 		return response;
 	}
-	
 }

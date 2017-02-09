@@ -2,6 +2,7 @@ package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +166,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			totalDisponible=totalDisponibleContratos+montoDifPrecio;
 			System.out.println("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 			
-			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())
-					&& !inversion.getServicioConstructora()){
+			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
 			}else{
 				if(validacionLiquidacion){				
 					// Verficar si hay monto para liquidar
@@ -183,7 +183,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(inversion.getImporteInversionInicial()==null || Util.esVacio(inversion.getFechaActualizacionSaldo())){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+				}else{
+					if(Util.esVacio(inversion.getEnvioContabilidadFecha())){
+						validacionLiquidacion = false;
+						resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+					}
 				}
+				
 			}else if((Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())
 					&& Constantes.DocumentoIdentidad.RUC_ID.equals(inversion.getPropietarioTipoDocId())) 
 					|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
@@ -192,6 +198,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(listaComprobantes==null || listaComprobantes.size()==0){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_SIN_COMPROBANTES;
+				}else{
+					for(ComprobanteCaspio comprobante : listaComprobantes){
+						if(Util.esVacio(comprobante.getEnvioContabilidadFecha())){
+							validacionLiquidacion = false;
+							resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+							break;
+						}
+					}
 				}
 			}
 								
@@ -522,7 +536,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		// Confirmar liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.confirmarLiquidacionInversion(nroInversion, usuarioId);
+			liquidacionDao.confirmarLiquidacionInversion(nroInversion, nroArmada, usuarioId);
 			
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_VB_CONTABLE);
@@ -557,7 +571,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 			// Obtener monto pagado dif. precio			
 			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
-			ddp.setTipoInversion(inversion.getTipoInversion()+"-"+Util.obtenerBooleanString(inversion.getServicioConstructora()));
+			ddp.setTipoInversion(inversion.getTipoInversion());
 		}else{
 			ddp = null;
 		}
@@ -601,21 +615,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 
 		// Obtener cancelacion diferencia precio
-		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
-		if(ddp!=null){
-			if(!inversion.getTipoInversion().equals(Constantes.TipoInversion.CONSTRUCCION_COD)){
-				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
-				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
-				if(montoDiferenciaPrecio<0){
-					// Obtener datos del pedido
-					Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
-					// Obtener montos a comparar
-					montoDiferenciaPrecio= montoDiferenciaPrecio*-1;
-					double montoPagado = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto().doubleValue();
-					if(montoPagado<montoDiferenciaPrecio){
-						conceptoNoPagado=true;
-					}
-				}
+		DetalleDiferenciaPrecio detalleDifPrecio = obtenerMontosDifPrecioInversion(inversion.getNroInversion());
+		if(detalleDifPrecio!=null){
+			double montoSaldoDiferencia = Double.parseDouble(detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
+			double montoPagado = Double.parseDouble(detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
+			double totalPendiente = montoSaldoDiferencia-montoPagado;
+			if (totalPendiente > 0){
+				System.out.println("DiferenciaPrecio no pagada: "+montoPagado+" < "+montoSaldoDiferencia);
+				conceptoNoPagado=true;
 			}
 		}
 		
@@ -644,10 +651,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			LOG.info("ESTADO LIQUIDA: "+estadoLiquidacion);
 			// Verificar estado liquidacion
-			if(Util.esVacio(estadoLiquidacion)){
-				resultado = Constantes.Service.RESULTADO_NO_EXISTE_LIQUIDACION;
-			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-				resultado = "";
+			if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
+				resultado = Constantes.Service.RESULTADO_LIQUIDACION_NO_CONFIRMADA;
 			}else if(estadoLiquidacion.equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
 				resultado = Constantes.Service.RESULTADO_INVERSION_DESEMBOLSADA;
 			}
@@ -659,7 +664,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		//Eliminar confirmacion de liquidacion
 		if(resultado.equals("")){
 			// Confirmar liquidacion es SAF
-			liquidacionDao.eliminarConformidadInversion(nroInversion, usuarioId);
+			liquidacionDao.eliminarConformidadInversion(nroInversion, nroArmada, usuarioId);
 			// Actualizar estado liquidacion Caspio
 			inversionService.actualizarEstadoInversionCaspioPorNro(nroInversion, Constantes.Inversion.ESTADO_LIQUIDADO);
 			// Actualizar estado liquidacion-desembolso
@@ -680,5 +685,6 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 		return montoLiquidacion;
 	}
+	
 	
 }

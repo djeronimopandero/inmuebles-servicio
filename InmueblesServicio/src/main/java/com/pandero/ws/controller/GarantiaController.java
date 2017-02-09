@@ -55,26 +55,62 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		return response;
 	}
 	
-	@RequestMapping(value = "/editarGarantiaSAFV2", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/registrarSeguro", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
-	public Map<String, Object> editarGarantiaSAFV2(@RequestBody Map<String, Object> params) {
+	public Map<String, Object> registrarSeguro(@RequestBody Map<String, Object> params) {
 		LOG.info("###editarGarantiaSAF params:"+params);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
-		try{
-			String garantiaId = String.valueOf(params.get("garantiaId"));
-			String partidaRegistral = String.valueOf(params.get("partidaRegistral"));
-			String fichaConstitucion = String.valueOf(params.get("fichaConstitucion"));
-			String fechaConstitucion = String.valueOf(params.get("fechaConstitucion"));
-			String uso = String.valueOf(params.get("uso"));
-			String montoPrima = String.valueOf(params.get("montoPrima"));			
-			String modalidad = String.valueOf(params.get("modalidad"));
-			String usuarioId = String.valueOf(params.get("usuarioId"));
-			String nroContrato = String.valueOf(params.get("contratoNro"));
-			
-			garantiaBusiness.editarGarantiaSAFV2(garantiaId, partidaRegistral, fichaConstitucion, 
-					fechaConstitucion, montoPrima, modalidad, uso, usuarioId,nroContrato);
+		try{			
+			response = garantiaBusiness.registrarSeguro(params);
 			result = Constantes.Service.RESULTADO_EXITOSO;
+			
+		}catch(Exception e){
+			LOG.error("Error pedido/registrarSeguro:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/generarSeguro", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> generarSeguro(@RequestBody Map<String, Object> params) {
+		LOG.info("###editarGarantiaSAF params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = garantiaBusiness.generarSeguro(params);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			
+		}catch(Exception e){
+			LOG.error("Error pedido/generarSeguro:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/anularSeguro", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> anularSeguro(@RequestBody Map<String, Object> params) {
+		LOG.info("###editarGarantiaSAF params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = garantiaBusiness.anularSeguro(params);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			response.put("mensaje", "El seguro se anuló satisfactoriamente");
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
@@ -105,6 +141,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String modalidad = String.valueOf(params.get("modalidad"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			String nroContrato = String.valueOf(params.get("contratoNro"));
+			System.out.println("modalidad="+modalidad+" - montoPrima="+montoPrima);
 			
 			garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
 					fechaConstitucion, montoPrima, modalidad, uso, usuarioId, nroContrato);

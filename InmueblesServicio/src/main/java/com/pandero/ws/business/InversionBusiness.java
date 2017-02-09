@@ -1,6 +1,7 @@
 package com.pandero.ws.business;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
@@ -19,22 +20,24 @@ public interface InversionBusiness {
 	public String generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId) throws Exception;
 	public String getURLCancelarComprobante(String inversionId)throws Exception;
 	
+	public ResultadoBean grabarComprobantes(String inversionId,String nroArmada,String usuarioId) throws Exception;
 	public ResultadoBean verificarRegistrarFacturas(String inversionId,String nroArmada) throws Exception;
 	
 	public ResultadoBean enviarCargoContabilidad(String inversionId,String nroArmada,String usuario, String usuarioId) throws Exception;
-	public ResultadoBean anularCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;	
-	public ResultadoBean grabarComprobantes(String inversionId,String nroArmada,String usuarioId) throws Exception;
+	public ResultadoBean anularCargoContabilidad(String inversionId,String nroArmada,String usuarioId) throws Exception;		
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
+	public String anularRecepcionCargoContabilidad(String inversionId, String nroArmada, String usuario)  throws Exception ;
 	
 	public String envioCargoContabilidadActualizSaldo(String inversionId,String usuarioEnvio) throws Exception;
 	public String anularEnvioCargoContabilidadActualizSaldo(String inversionId,String usuario) throws Exception;
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
-
-//	public LiquidacionSAF obtenerUltimaLiquidacionInversion(String nroInversion) throws Exception;
+	public String anularRecepcionCargoContabilidadActualizSaldo(String inversionId, String usuario) throws Exception;
+	
 	public LiquidacionSAF obtenerUltimaLiquidacionInversionPorId(String inversionId) throws Exception;
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 	
 	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar)throws Exception;
+	public void actualizarInversionMonto(Map<String,Object> params);
 
 }
 	

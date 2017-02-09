@@ -29,7 +29,8 @@ public interface InversionService {
 	
 	public String actualizarComprobanteEnvioCartaContabilidad(String inversionId,String nroArmada,String fechaEnvio,String usuarioEnvio, String estado) throws Exception;
 	public String recepcionarCargoContabilidad(String inversionId,String nroArmada, String fechaRecepcion,String usuarioRecepcion) throws Exception;
-	
+	public String anularRecepcionCargoContabilidad(String inversionId,String nroArmada, String usuario) throws Exception;
+
 	public String envioCargoContabilidadActualizSaldo(String inversionId,String fechaEnvio,String usuarioEnvio) throws Exception;
 	public String recepcionarCargoContabilidadActualizSaldo(String inversionId,String fechaRecepcion,String usuarioRecepcion) throws Exception;
 	public String actualizarInversionGarantiaHipotecado(Garantia garantiaCaspio) throws Exception;

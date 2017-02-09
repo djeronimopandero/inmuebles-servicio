@@ -16,11 +16,11 @@ public interface LiquidacionDao {
 	public String obtenerCorrelativoLiquidacionSAF(String pedidoId) throws Exception;
 	public String registrarLiquidacionInversionSAF(LiquidacionSAF liquidacionSAF, String usuarioId) throws Exception;
 	public String eliminarLiquidacionInversionSAF(String nroInversion, String nroArmada, String usuarioId) throws Exception;	
-	public String confirmarLiquidacionInversion(String nroInversion, String usuarioId) throws Exception;
-	public String eliminarConformidadInversion(String nroInversion, String usuarioId) throws Exception;
+	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
+	public String eliminarConformidadInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception;
 	
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(String nroInversion) throws Exception;
 	public List<SolicitudAutorizacion> obtenerSolicitudesAutorizacionPorInversion(String nroInversion) throws Exception;
 	
-	public Map<String,Object> executeProcedure(Map<String,String> parameters, String procedureName);
+	public Map<String,Object> executeProcedure(Map<String,Object> parameters, String procedureName);
 }
