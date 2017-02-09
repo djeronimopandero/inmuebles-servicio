@@ -66,7 +66,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
+			LOG.error("Error pedido/registrarSeguro:: ",e);
 			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();
@@ -89,7 +89,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
-			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
+			LOG.error("Error pedido/generarSeguro:: ",e);
 			e.printStackTrace();
 			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
 			detail=e.getMessage();

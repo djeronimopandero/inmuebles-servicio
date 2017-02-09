@@ -14,11 +14,14 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 import com.pandero.ws.bean.Inversion;
+import com.pandero.ws.bean.LiquidacionSAF;
+import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.PersonaCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.InversionService;
@@ -45,6 +48,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	PedidoService pedidoService;
 	@Autowired
 	InversionService inversionService;
+	@Autowired
+	LiquidacionDao liquidacionDAO;
 	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
@@ -206,12 +211,28 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
 				ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 				resultadoBean.setResultado(ddp);
+				if(!verificarDiferenciaPrecio(String.valueOf(pedidoId))){
+					resultadoBean.setEstado(3);
+				}
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 				resultadoBean.setMensajeError("No existe diferencia de precio, por lo tanto no se podrá registrar la cancelación");
 			}			
 		}
 		return resultadoBean;
+	}
+	
+	private boolean verificarDiferenciaPrecio(String pedidoId) throws Exception{
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoId);
+		if(pedido.getCancelacionDiferenciaPrecioMonto()!= null && pedido.getCancelacionDiferenciaPrecioMonto()>0){
+			List<LiquidacionSAF> liquidaciones = liquidacionDAO.obtenerLiquidacionPorPedidoSAF(pedido.getNroPedido());
+			if(liquidaciones.size()>0){
+				return false;
+			}
+		}else{
+			return false;			
+		}
+		return true;
 	}
 	
 	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {		

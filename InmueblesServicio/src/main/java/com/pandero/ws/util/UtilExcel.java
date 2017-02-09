@@ -22,7 +22,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * @author alcabrera
- * 
  */
 public class UtilExcel {
 	private static Logger logger = Logger.getLogger(UtilExcel.class);
@@ -75,10 +74,7 @@ public class UtilExcel {
 			file = new FileInputStream(new File(path));
 			// Create Workbook instance holding reference to .xlsx file
 			workbook = new XSSFWorkbook(file);
-		} catch (FileNotFoundException e) {
-			logger.error(e, e);
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error(e, e);
 			e.printStackTrace();
 		}
@@ -86,7 +82,6 @@ public class UtilExcel {
 		XSSFSheet sheet = workbook.getSheetAt(sheetNumber); // first sheet = 0
 		Iterator<Row> rowIterator = sheet.iterator();
 		List<List<Object>> rowValues = new ArrayList<List<Object>>();
-
 		while (rowIterator.hasNext()) {
 			Row row = rowIterator.next();
 			// For each row, iterate through all the columns
@@ -110,7 +105,6 @@ public class UtilExcel {
 			}
 			rowValues.add(columnValues);
 		}
-
 		return rowValues;
 	}
 
@@ -142,27 +136,23 @@ public class UtilExcel {
 					cell.setCellType(Cell.CELL_TYPE_STRING);
 					if (rowCount == 0) {
 						// if current row is the first row variables name of
-						// current column are obtained and stored in the
-						// variable list
+						// current column are obtained and stored in the variable list
 						variableList.add(cell.getStringCellValue());
 					} else {
 						if (countCellValue >= variableList.size()) {
 							break;
 						}
 						countCellValue++;
-						// otherwise add value of current column to the value
-						// list
+						// otherwise add value of current column to the value list
 						columnValues.add(cell.getStringCellValue());
 					}
 				}
 				if (rowCount != 0) {
-					// if not is the first row add list of value of the current
-					// row to value list
+					// if not is the first row add list of value of the current row to value list
 					valuesList.add(columnValues);
 				}
 				rowCount++;
 			}
-
 			for (List<String> row : valuesList) {
 				Map<String, Object> map = new LinkedHashMap<String, Object>();
 				for (int i = 0; i < row.size(); i++) {
@@ -175,7 +165,6 @@ public class UtilExcel {
 		} catch (Exception ex) {
 			logger.error(ex, ex);
 		}
-
 		return listOfMaps;
 	}
 
@@ -187,34 +176,23 @@ public class UtilExcel {
 		int count = 0;
 		while (scanner.hasNextLine()) {
 			count++;
-
 			String arr[] = scanner.nextLine().split(",", -1);
-
 			Map<String, String> map = new HashMap<String, String>();
 			int colCont = 0;
-
 			for (String current : arr) {
-
 				String value = current;
-
 				if (1 == count) {
 					keys.add(value);
 				}
-
 				if (1 < count) {
 					map.put(keys.get(colCont), value);
 				}
-
 				colCont++;
-
 			}
-
 			if (!map.isEmpty()) {
 				data.add(map);
 			}
-
 		}
-
 		return data;
 	}
 
@@ -222,26 +200,17 @@ public class UtilExcel {
 		// TODO Auto-generated method stub
 		List<List<String>> data = new ArrayList<List<String>>();
 		Scanner scanner = new Scanner(inputStream);
-
 		while (scanner.hasNextLine()) {
-
 			String arr[] = scanner.nextLine().split(",", -1);
-
 			List<String> values = new ArrayList<String>();
-
 			for (String current : arr) {
-
 				String value = current;
-
 				values.add(value);
 			}
-
 			if (!values.isEmpty()) {
 				data.add(values);
 			}
-
 		}
-
 		return data;
 	}
 
@@ -274,13 +243,11 @@ public class UtilExcel {
 				j++;
 			}
 		}
-
 		try {
 			// out = new FileOutputStream(new File(String.format("%s/%s.xlsx",
 			// folder, fileName)));
 			file = new File(System.getProperty("java.io.tmpdir"), fileName);
 			out = new FileOutputStream(file);
-
 			workbook.write(out);
 			out.close();
 		} catch (Exception ex) {
@@ -288,5 +255,4 @@ public class UtilExcel {
 		}
 		return file;
 	}
-
 }

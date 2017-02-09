@@ -1439,6 +1439,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 	}
 	
+	@Override
+	public void actualizarInversionMonto(Map<String,Object> params){
+		liquidacionDao.executeProcedure(params, "USP_LOG_ActualizarMontoInversion");
+	}
+	
+	
 
 	
 }

@@ -65,6 +65,26 @@ public class InversionController {
 		return response;
 	}
 	
+	@RequestMapping(value = "actualizarInversion/{nroInversion}/{montoInversion}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody   
+	public ResultadoBean actualizarInversion(@PathVariable(value="nroInversion") String nroInversion,@PathVariable(value="montoInversion") Double montoInversion) {
+		LOG.info("###obtenerInversion nroInversion:"+nroInversion);
+		LOG.info("###obtenerInversion montoInversion:"+montoInversion);
+		ResultadoBean response = new ResultadoBean();
+		try{
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("nroInversion", nroInversion);
+			params.put("montoInversion", montoInversion);
+			inversionBusiness.actualizarInversionMonto(params);
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerInversion:: ",e);
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+		}
+		return response;
+	}
+	
 	@RequestMapping(value = "/confirmarInversion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> confirmarInversion(@RequestBody Map<String, Object> params) {

@@ -1,6 +1,7 @@
 package com.pandero.ws.business;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
@@ -36,6 +37,7 @@ public interface InversionBusiness {
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 	
 	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar)throws Exception;
+	public void actualizarInversionMonto(Map<String,Object> params);
 
 }
 	
