@@ -757,4 +757,25 @@ public class InversionController {
 		return response;
 	}
 	
+	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody   
+	public ResultadoBean obtenerInversionPorNumero(@PathVariable(value="nroInversion") String nroInversion) {
+		LOG.info("###obtenerInversionPorNumero nroInversion:"+nroInversion);
+		ResultadoBean response = null;
+		try{
+			String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+			inversionService.setTokenCaspio(tokenCaspio);
+			
+			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			response.setResultado(inversion);
+		}catch(Exception e){
+			LOG.error("Error inversion/obtenerInversion:: ",e);
+			response = new ResultadoBean();
+			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+		}
+		return response;
+	}
+	
 }
