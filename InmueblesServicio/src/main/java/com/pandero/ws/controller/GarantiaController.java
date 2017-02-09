@@ -141,6 +141,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 			String modalidad = String.valueOf(params.get("modalidad"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
 			String nroContrato = String.valueOf(params.get("contratoNro"));
+			System.out.println("modalidad="+modalidad+" - montoPrima="+montoPrima);
 			
 			garantiaBusiness.editarGarantiaSAF(garantiaId, partidaRegistral, fichaConstitucion, 
 					fechaConstitucion, montoPrima, modalidad, uso, usuarioId, nroContrato);

@@ -182,7 +182,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(inversion.getImporteInversionInicial()==null || Util.esVacio(inversion.getFechaActualizacionSaldo())){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_SIN_ACTUALZ_SALDO_DEUDA;
+				}else{
+					if(Util.esVacio(inversion.getEnvioContabilidadFecha())){
+						validacionLiquidacion = false;
+						resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
+					}
 				}
+				
 			}else if((Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())
 					&& Constantes.DocumentoIdentidad.RUC_ID.equals(inversion.getPropietarioTipoDocId())) 
 					|| (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
@@ -608,21 +614,14 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 
 		// Obtener cancelacion diferencia precio
-		DetalleDiferenciaPrecio ddp = contratoBusiness.obtenerMontoDiferenciaPrecio(inversion.getPedidoId());
-		if(ddp!=null){
-			if(!inversion.getTipoInversion().equals(Constantes.TipoInversion.CONSTRUCCION_COD)){
-				Double montoDiferenciaPrecio = Double.parseDouble(ddp.getDiferenciaPrecio());
-				System.out.println("montoDiferenciaPrecio:: "+montoDiferenciaPrecio);
-				if(montoDiferenciaPrecio<0){
-					// Obtener datos del pedido
-					Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
-					// Obtener montos a comparar
-					montoDiferenciaPrecio= montoDiferenciaPrecio*-1;
-					double montoPagado = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto().doubleValue();
-					if(montoPagado<montoDiferenciaPrecio){
-						conceptoNoPagado=true;
-					}
-				}
+		DetalleDiferenciaPrecio detalleDifPrecio = obtenerMontosDifPrecioInversion(inversion.getNroInversion());
+		if(detalleDifPrecio!=null){
+			double montoSaldoDiferencia = Double.parseDouble(detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
+			double montoPagado = Double.parseDouble(detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
+			double totalPendiente = montoSaldoDiferencia-montoPagado;
+			if (totalPendiente > 0){
+				System.out.println("DiferenciaPrecio no pagada: "+montoPagado+" < "+montoSaldoDiferencia);
+				conceptoNoPagado=true;
 			}
 		}
 		
