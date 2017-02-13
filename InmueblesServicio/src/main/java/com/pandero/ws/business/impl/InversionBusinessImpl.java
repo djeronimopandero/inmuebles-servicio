@@ -1378,7 +1378,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				for(ComprobanteCaspio comprobante:listComprobante){
 					importe += (null!=comprobante.getImporte()?comprobante.getImporte().doubleValue():0);
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");  
-					Date d = sdf.parse(comprobante.getFechaEmision());
+					Date d = sdf.parse(comprobante.getFechaCreacion());
 					sdf.applyPattern("dd/MM/yyyy");
 					fecha = sdf.format(d);
 				}
