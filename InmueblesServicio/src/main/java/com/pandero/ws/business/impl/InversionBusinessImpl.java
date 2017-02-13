@@ -1165,7 +1165,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		if(Util.esVacio(inversion.getEnvioContabilidadFecha())){
 			resultado = Constantes.Service.RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD;
 		}else{
-			if(Util.esVacio(inversion.getRecepContabilidadFecha())){
+			if(!Util.esVacio(inversion.getRecepContabilidadFecha())){
 				resultado = Constantes.Service.RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD;
 			}else{
 				// Anular envio cargo contabilidad

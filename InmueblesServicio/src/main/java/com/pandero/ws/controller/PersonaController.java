@@ -70,8 +70,10 @@ public class PersonaController {
 				resultadoBean = new ResultadoBean();
 				PersonaSAF personaSAF=personaDAO.obtenerPersonaSAF(String.valueOf(personaId));
 				resultadoBean.setResultado(personaSAF);
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 			} catch (Exception e) {
 				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
 				resultadoBean.setResultado("Ocurrio un error al obtener persona por id");
 				LOG.error("###getPersonaPorId:",e);
 			}
