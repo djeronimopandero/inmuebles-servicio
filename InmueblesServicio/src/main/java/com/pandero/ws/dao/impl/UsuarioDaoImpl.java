@@ -41,7 +41,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withCatalogName("dbo");
-		call.withProcedureName("USP_LOG_Inmb_ObtenerDatosUsuarioCelula");
+		call.withProcedureName("USP_SEC_ObtenerDatosUsuarioCelula");
 		call.withoutProcedureColumnMetaDataAccess();
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		call.returningResultSet("p_recordset", new UsuarioMapper());
