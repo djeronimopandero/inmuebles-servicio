@@ -27,7 +27,16 @@ public class ComprobanteCaspio implements java.io.Serializable {
 	private String RecepContabilidadFecha;
 	private String RecepContabilidadUsuario;
 	private String EstadoContabilidad;
+	private String FechaCreacion;
 	
+	
+	
+	public String getFechaCreacion() {
+		return FechaCreacion;
+	}
+	public void setFechaCreacion(String fechaCreacion) {
+		FechaCreacion = fechaCreacion;
+	}
 	public String getDocumento() {
 		return Documento;
 	}
