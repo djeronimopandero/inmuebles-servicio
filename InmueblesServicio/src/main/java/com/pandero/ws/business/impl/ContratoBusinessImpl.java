@@ -16,17 +16,20 @@ import com.pandero.ws.bean.DetalleDiferenciaPrecio;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.PedidoContrato;
 import com.pandero.ws.bean.PersonaCaspio;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.LiquidacionDao;
+import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.service.PersonaService;
+import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
@@ -50,6 +53,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	InversionService inversionService;
 	@Autowired
 	LiquidacionDao liquidacionDAO;
+	@Autowired
+	PedidoDao pedidoDao;
 	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
@@ -91,6 +96,41 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 						contratoService.actualizarSituacionContratoCaspio(contratoSAF.getNroContrato(),
 								String.valueOf(contratoSAF.getSituacionContratoID()),
 								contratoSAF.getSituacionContrato(), contratoSAF.getFechaAdjudicacion());
+						
+						// Verificar si es retiro de adjudicacion
+						if(UtilEnum.ADJUDICACION.NO.getCodigo().intValue() == contratoSAF.getEsAdjudicado().intValue()){
+							// Verificar si el contrato tiene un pedido
+							PedidoContrato pedidoContrato = pedidoService.obtenerPedidoPorNroContrato(contratoSAF.getNroContrato());
+							if(pedidoContrato!=null){
+								// Si existe pedido, eliminarlo de SAF y Caspio
+								String nroPedido="", pedidoCaspioId="";
+								nroPedido = pedidoContrato.getNroPedido();
+								pedidoCaspioId = String.valueOf(pedidoContrato.getPedidoId().intValue());
+								
+								// Eliminar pedido SAF
+								pedidoDao.eliminarPedidoSAF(nroPedido, "1");
+								
+								// Caspio - cambiar estado pedido a anulado
+								pedidoService.actualizarEstadoPedidoCaspio(nroPedido, Constantes.Pedido.ESTADO_ANULADO);
+											
+								// Caspio - desasociar los contratos del pedido
+								List<Contrato> listaContratos = pedidoService.obtenerContratosxPedidoCaspio(pedidoCaspioId);
+								if(listaContratos!=null && listaContratos.size()>0){
+									for(Contrato contrato : listaContratos){
+										contratoService.actualizarAsociacionContrato(contrato.getNroContrato(), Constantes.Contrato.ESTADO_NO_ASOCIADO);
+									}
+								}
+								
+								// Anular las inversiones
+								List<Inversion> listaInversiones = pedidoService.obtenerInversionesxPedidoCaspio(pedidoCaspioId);
+								if(listaInversiones!=null && listaInversiones.size()>0){
+									for(Inversion inversion : listaInversiones){
+										inversionService.actualizarEstadoInversionCaspio(String.valueOf(inversion.getInversionId().intValue()), Constantes.Inversion.ESTADO_ANULADO);
+									}
+								}
+							}
+						}
+						
 					} else {
 						
 							//Solo registar los contratos ADJUDICADOS

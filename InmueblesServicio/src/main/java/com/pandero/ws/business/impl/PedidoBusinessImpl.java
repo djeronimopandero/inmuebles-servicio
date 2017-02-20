@@ -160,7 +160,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				
 		return resultado;
 	}
-
+	
 	public String agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);

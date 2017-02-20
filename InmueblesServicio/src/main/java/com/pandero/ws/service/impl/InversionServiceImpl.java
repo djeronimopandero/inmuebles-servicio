@@ -240,7 +240,7 @@ public class InversionServiceImpl implements InversionService {
 	@Override
 	public List<ComprobanteCaspio> getComprobantes(Integer inversionId, Integer nroArmada) throws Exception {
 		List<ComprobanteCaspio> listaComprobantes = null;	
-		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\"}";	
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' and NroArmada='"+nroArmada+"'\" , \"order by\" : \"FechaCreacion\"}";	
 		String obtenerRequisitosxInversionURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
 		
         Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);

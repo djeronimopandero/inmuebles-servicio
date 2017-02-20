@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.Pedido;
+import com.pandero.ws.bean.PedidoContrato;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -108,6 +109,32 @@ public class PedidoServiceImpl implements PedidoService{
         }
         
 		return listaContratos;
+	}
+	
+	public PedidoContrato obtenerPedidoPorNroContrato(String nroContrato) throws Exception{
+		PedidoContrato pedidoContrato = null;	
+		String serviceWhere = "{\"where\":\"NroContrato="+nroContrato+" and PedidoContratoEstado="+"'1'"+"\"}";
+		String obtenerPedidoxContratoURL = viewTablaPedidoContratoURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerPedidoxContratoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapPedido = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapPedido!=null && mapPedido.size()>0){
+	        			pedidoContrato = new PedidoContrato();
+	        			for(Object bean : mapPedido){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				pedidoContrato =  JsonUtil.fromJson(beanString, PedidoContrato.class);
+	        			}
+	        		}        		
+	        	}
+	        }
+        }
+        return pedidoContrato;
 	}
 
 	@Override
