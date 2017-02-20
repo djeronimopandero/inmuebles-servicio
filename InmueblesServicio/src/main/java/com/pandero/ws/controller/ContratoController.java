@@ -26,9 +26,9 @@ public class ContratoController {
 	@Autowired
 	ContratoDao contratoDao;
 	
-	@RequestMapping(value = "actualizarCaspio", method = RequestMethod.GET)
-	public @ResponseBody ResultadoBean sincronizarContratosyAsociadosSafACaspio() {
-		LOG.info("###ContratoController.sincronizarContratosyAsociadosSafACaspio ");
+	@RequestMapping(value = "actualizarCaspio/{proveedor}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean sincronizarContratosyAsociadosSafACaspio(@PathVariable(value="proveedor") String proveedor) {
+		LOG.info("###ContratoController.sincronizarContratosyAsociadosSafACaspio proveedor:"+proveedor);
 		
 		ResultadoBean resultadoBean=null;
 		try{
@@ -36,7 +36,7 @@ public class ContratoController {
 			resultadoBean = contratoBusiness.sincronizarContratosyAsociadosSafACaspio();
 			
 		}catch(Exception e){
-			LOG.error("###getContratosPorDocumento:",e);
+			LOG.error("###Exception:",e);
 		}
 		return resultadoBean;
 	}

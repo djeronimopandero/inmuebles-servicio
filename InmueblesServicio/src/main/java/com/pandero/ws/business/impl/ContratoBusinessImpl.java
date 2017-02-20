@@ -53,7 +53,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
-		LOGGER.info("###sincronizarContratosyAsociadosSafACaspio execute "
+		LOGGER.info("###sincronizarContratosyAsociadosSafACaspio execute Inicio "
 				+ new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()));
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
@@ -65,7 +65,20 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			List<ContratoSAF> listContratosSAF = null;
 
 			listContratosSAF = contratoDao.getListContratoAlDia();
-
+			
+			LOGGER.info("##Se obtuvieron los contratos al dia:");
+			if(null!=listContratosSAF){
+				LOGGER.info("###Existen Contratos al dia depues de finalizar una asamblea");
+				for(ContratoSAF con:listContratosSAF){
+					LOGGER.info("------------------------------------------");
+					LOGGER.info("###Nro Contrato:"+con.getNroContrato());
+					LOGGER.info("###Situacion Contrato:"+con.getSituacionContrato());
+					LOGGER.info("------------------------------------------");
+				}
+			}else{
+				LOGGER.info("###No Existen Contratos al dia depues de finalizar una asamblea");
+			}
+			
 			int countContratos = 0;
 			if (null != listContratosSAF) {
 				countContratos = listContratosSAF.size();
@@ -153,6 +166,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				resultadoBean = new ResultadoBean();
 				resultadoBean.setResultado("No se encuentran contratos");
 			}
+			LOGGER.info("###sincronizarContratosyAsociadosSafACaspio execute Fin "
+					+ new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date()));
 		} catch (Exception e) {
 			LOGGER.error("###Sincronizacion manual de contratos y asociados:", e);
 		}

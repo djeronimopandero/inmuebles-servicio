@@ -314,12 +314,16 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         
 		         // Obtener correo para enviar documento
 		         String emailTo = documentoEmailTo;
-		         Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);		         
+		         Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
+		         
+		         LOG.info("Enviar a:"+usuario.getCelulaCorreo());
+		         
 		         if(!Util.esVacio(usuario.getCelulaCorreo())){
 		        	 emailTo = usuario.getCelulaCorreo();
 		         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
 		        	 emailTo = usuario.getEmpleadoCorreo();
 		         }	 
+		         LOG.info("emailTo:"+emailTo);
 		         // Enviar orden irrevocable a correo
 		         String asunto = "Orden Irrevocable - "+listaAsociados.get(0).getNombreCompleto();
 		         String textoEmail = "Se adjunta la orden irrevocable correspondiente";
