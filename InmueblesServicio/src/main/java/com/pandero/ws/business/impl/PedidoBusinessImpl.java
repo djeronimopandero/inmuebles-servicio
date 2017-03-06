@@ -330,7 +330,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		         
 		         
 		         EmailBean emailBean=new EmailBean();
-		         emailBean.setEmailFrom("desarrollo@pandero.com.pe");
+		         emailBean.setEmailFrom("saf@pandero.com.pe");
 		         emailBean.setEmailTo(emailTo);
 		         emailBean.setSubject(asunto);
 		         emailBean.setDocumento(nombreDocumento);
