@@ -1,6 +1,7 @@
 package com.pandero.ws.business.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,24 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		garantiaService.setTokenCaspio(tokenCaspio);		
 		garantiaService.anularSeguroCaspio(params);
+		return out;
+	}
+	
+	@Override
+	public Map<String, Object> renovarSeguro(Map<String, Object> params)
+			throws Exception {		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		if(params.get("fechaInicioVigencia")!=null){
+			params.put("fechaInicioVigencia", sdf.parse(params.get("fechaInicioVigencia").toString()));
+			params.put("fechaFinVigencia", sdf.parse(params.get("fechaFinVigencia").toString()));
+		}
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		garantiaService.setTokenCaspio(tokenCaspio);	
+		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_renovarSeguro");	
+		List resultset = (ArrayList) out.get("#result-set-1");
+		Map<String,Object> map = (Map<String, Object>)resultset.get(0);
+		params.putAll(map);
+		garantiaService.renovarSeguroCaspio(params);
 		return out;
 	}
 	

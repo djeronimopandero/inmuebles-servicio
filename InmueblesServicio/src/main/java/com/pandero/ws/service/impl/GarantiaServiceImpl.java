@@ -172,5 +172,26 @@ public class GarantiaServiceImpl implements GarantiaService{
 		return null;
 	}
 	
+	@Override
+	public String renovarSeguroCaspio(Map<String,Object> params) throws Exception {		
+		String serviceWhere = "{\"where\":\"creditoSeguroIdSAF="+params.get("seguroId")+"\"}";		
+		String actualizarGarantiaURL = tableSeguroURL+Constantes.Service.URL_WHERE;	
+		Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,actualizarGarantiaURL,Object.class,params,serviceWhere);
+		String response = JsonUtil.toJson(jsonResult);	
+		Map<String,Object> mapResult = JsonUtil.jsonToMap(response);
+		List list = (ArrayList)mapResult.get("Result");
+		Map<String,Object> map = (Map<String, Object>)list.get(0);
+		params.remove("seguroId");
+		map.putAll(params);
+		map.put("creditoSeguroIdSAF", map.get("idGenerado"));
+		map.remove("PK_ID");
+		map.remove("idGenerado");
+		map.remove("idSeguro");
+		map.remove("FechaCreacion");
+		map.remove("FechaActualizacion");
+        ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableSeguroURL,Object.class,map,null);	
+		return null;
+	}
+	
 
 }

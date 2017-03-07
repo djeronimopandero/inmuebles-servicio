@@ -125,6 +125,30 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		return response;
 	}
 	
+	@RequestMapping(value = "/renovarSeguro", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> renovarSeguro(@RequestBody Map<String, Object> params) {
+		LOG.info("###editarGarantiaSAF params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = garantiaBusiness.renovarSeguro(params);
+			result = Constantes.Service.RESULTADO_EXITOSO;
+			response.put("mensaje", "El seguro se renovó satisfactoriamente");
+			
+		}catch(Exception e){
+			LOG.error("Error pedido/editarGarantiaSAF:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
 	@RequestMapping(value = "/editarGarantiaSAF", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   
 	public Map<String, Object> editarGarantiaSAF(@RequestBody Map<String, Object> params) {

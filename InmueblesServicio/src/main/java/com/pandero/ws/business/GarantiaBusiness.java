@@ -15,5 +15,7 @@ public interface GarantiaBusiness {
 	public String eliminarGarantia(String garantiaId, String usuarioId) throws Exception;
 	public Map<String, Object> anularSeguro(Map<String, Object> params)
 			throws Exception;
+	public Map<String, Object> renovarSeguro(Map<String, Object> params)
+			throws Exception;
 	
 }
