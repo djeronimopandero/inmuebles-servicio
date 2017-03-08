@@ -45,6 +45,7 @@ import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
+import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
@@ -80,6 +81,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	LiquidacionDao liquidacionDao;
 	@Autowired
 	LiquidacionBusiness liquidacionBusiness;
+	
+	@Autowired
+	LiquidDesembService liquidacionDesembolsoService;
 	
 	@Autowired
 	GarantiaDao garantiaDAO;
@@ -648,7 +652,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
-		
+		liquidacionDesembolsoService.setTokenCaspio(tokenCaspio);
 		LOG.info("### InversionBusinessImpl.generarDocumentoDesembolso nroInversion:"+nroInversion+", nroArmada:"+nroArmada+", usuarioSAFId:"+usuarioSAFId);
 		
 		List<LiquidacionSAF> liquidaciones = liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
@@ -777,6 +781,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 				         emailBean.setFormatHtml(true);
 				         emailBean.setEnviarArchivo(true);
 				         mailService.sendMail(emailBean);
+				         Map<String,Object> params = new HashMap<String,Object>();
+				         params.put("InversionId", pic.getInversionId());
+				         params.put("NroArmada", nroArmada);
+				         params.put("ConstanciaGenerada", "1");
+				         liquidacionDesembolsoService.setGenerarConstanciaInversioPedido(params);
 				}
 			}
 		}

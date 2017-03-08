@@ -1,5 +1,7 @@
 package com.pandero.ws.service;
 
+import java.util.Map;
+
 import com.pandero.ws.bean.Desembolso;
 
 public interface LiquidDesembService {
@@ -12,6 +14,9 @@ public interface LiquidDesembService {
 	public String eliminarLiquidacionInversion(String inversionId, String nroArmada) throws Exception;
 	
 	public String actualizarEstadoLiquDesembInversion(String inversionId, String nroArmada, String estado) throws Exception;
+	
+
+	public String setGenerarConstanciaInversioPedido(Map<String,Object> params) throws Exception;
 	
 	public void setTokenCaspio(String token);
 }
