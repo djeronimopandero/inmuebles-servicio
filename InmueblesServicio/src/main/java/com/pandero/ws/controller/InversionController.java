@@ -70,13 +70,13 @@ public class InversionController {
 	public ResultadoBean actualizarInversion(@PathVariable(value="nroInversion") String nroInversion,@PathVariable(value="montoInversion") Double montoInversion) {
 		LOG.info("###obtenerInversion nroInversion:"+nroInversion);
 		LOG.info("###obtenerInversion montoInversion:"+montoInversion);
-		ResultadoBean response = new ResultadoBean();
+		ResultadoBean response = null;
 		try{
 			Map<String,Object> params = new HashMap<String,Object>();
 			params.put("nroInversion", nroInversion);
 			params.put("montoInversion", montoInversion);
-			inversionBusiness.actualizarInversionMonto(params);
-			response.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+			response=inversionBusiness.actualizarInversionMonto(params);
+			
 		}catch(Exception e){
 			LOG.error("Error inversion/obtenerInversion:: ",e);
 			response = new ResultadoBean();
