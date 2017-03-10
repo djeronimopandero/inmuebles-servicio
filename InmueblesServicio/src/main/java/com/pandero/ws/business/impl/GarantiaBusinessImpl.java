@@ -180,5 +180,13 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		return resultado;
 	}
 	
+	@Override
+	public List<Map<String,Object>> obtenerDatosDescargaSeguro(Map<String,Object> params)throws Exception{
+		List<Map<String,Object>> resultado = new ArrayList<Map<String,Object>>();
+		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_obtenerDatosDescargaSeguroInmuebles");
+		List lout = (List)out.get("#result-set-1");
+		resultado.add((Map<String,Object>)lout.get(0));
+		return resultado;
+	}
 	
 }
