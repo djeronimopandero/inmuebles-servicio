@@ -834,7 +834,7 @@ public class InversionController {
 	}
 	
 	
-	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "obtenerInversionPorNro/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
 	public ResultadoBean obtenerInversionPorNumero(@PathVariable(value="nroInversion") String nroInversion) {
 		LOG.info("###obtenerInversionPorNumero nroInversion:"+nroInversion);
@@ -853,5 +853,22 @@ public class InversionController {
 			response.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
 		}
 		return response;
+	}
+	
+	
+	@RequestMapping(value = "generarActaEntrega/{inversionNumero}/{usuarioId}", method = RequestMethod.GET)
+	public @ResponseBody String generarActaEntrega(@PathVariable(value="inversionNumero") String inversionNumero,
+			@PathVariable(value="usuarioId") String usuarioId){
+		LOG.info("###ContratoController.generarActaEntrega inversionNumero:"+inversionNumero);
+		String resultadoBean = null;
+		if(null!=inversionNumero ){
+			try {
+				resultadoBean=inversionBusiness.generarActaEntrega(inversionNumero,usuarioId);
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
+				return "Ocurrió un error al generar el acta de entrega";
+			}
+		}
+		return resultadoBean;
 	}
 }
