@@ -1,6 +1,7 @@
 package com.pandero.ws.business.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,24 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	}
 	
 	@Override
+	public Map<String, Object> renovarSeguro(Map<String, Object> params)
+			throws Exception {		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		if(params.get("fechaInicioVigencia")!=null){
+			params.put("fechaInicioVigencia", sdf.parse(params.get("fechaInicioVigencia").toString()));
+			params.put("fechaFinVigencia", sdf.parse(params.get("fechaFinVigencia").toString()));
+		}
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		garantiaService.setTokenCaspio(tokenCaspio);	
+		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_renovarSeguro");	
+		List resultset = (ArrayList) out.get("#result-set-1");
+		Map<String,Object> map = (Map<String, Object>)resultset.get(0);
+		params.putAll(map);
+		garantiaService.renovarSeguroCaspio(params);
+		return out;
+	}
+	
+	@Override
 	public String editarGarantiaSAF(String garantiaId,String partidaRegistral,String fichaConstitucion,
 			String fechaConstitucion, String montoPrima, String modalidad, String uso, String usuarioId, String nroContrato)
 			throws Exception {
@@ -161,5 +180,13 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		return resultado;
 	}
 	
+	@Override
+	public List<Map<String,Object>> obtenerDatosDescargaSeguro(Map<String,Object> params)throws Exception{
+		List<Map<String,Object>> resultado = new ArrayList<Map<String,Object>>();
+		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_obtenerDatosDescargaSeguroInmuebles");
+		List lout = (List)out.get("#result-set-1");
+		resultado.add((Map<String,Object>)lout.get(0));
+		return resultado;
+	}
 	
 }

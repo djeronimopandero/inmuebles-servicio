@@ -39,5 +39,6 @@ public interface InversionBusiness {
 	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar)throws Exception;
 	public ResultadoBean actualizarInversionMonto(Map<String,Object> params)throws Exception;
 
+	public String generarActaEntrega(String nroInversion, String usuarioSAFId) throws Exception;
 }
 	

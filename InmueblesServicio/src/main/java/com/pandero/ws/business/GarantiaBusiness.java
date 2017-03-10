@@ -1,5 +1,6 @@
 package com.pandero.ws.business;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GarantiaBusiness {
@@ -15,5 +16,8 @@ public interface GarantiaBusiness {
 	public String eliminarGarantia(String garantiaId, String usuarioId) throws Exception;
 	public Map<String, Object> anularSeguro(Map<String, Object> params)
 			throws Exception;
+	public Map<String, Object> renovarSeguro(Map<String, Object> params)
+			throws Exception;
+	public List<Map<String,Object>> obtenerDatosDescargaSeguro(Map<String,Object> params)throws Exception;
 	
 }

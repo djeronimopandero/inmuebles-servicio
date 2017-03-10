@@ -1,6 +1,7 @@
 package com.pandero.ws.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Garantia;
