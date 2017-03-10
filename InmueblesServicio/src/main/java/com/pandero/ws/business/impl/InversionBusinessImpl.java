@@ -1454,6 +1454,150 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public String generarActaEntrega(String nroInversion, String usuarioSAFId)
+			throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		liquidacionDesembolsoService.setTokenCaspio(tokenCaspio);
+		LOG.info("### InversionBusinessImpl.generarDocumentoDesembolso nroInversion:"+nroInversion+", usuarioSAFId:"+usuarioSAFId);
+		
+		List<LiquidacionSAF> liquidaciones = null; // liquidacionDao.obtenerLiquidacionPorInversionArmada(nroInversion,nroArmada);
+		
+		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
+			LOG.info("### liquidaciones es null o el estado de sul ultima liquidacion no es 3 DESEMBOLSADO");
+			return "Ocurrió un error. La liquidación no se encuentra desembolsada";
+		}else{
+			LOG.info("### Se procede a generar el doc de desembolso");
+			LiquidacionSAF liquidacion = liquidaciones.get(0);
+			String armada = Constantes.ARMADAS_DOC_DESEMBOLSO.get(liquidacion.getNroArmada());
+			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
+			List<Contrato> contratos =pedidoDao.obtenerContratosxPedidoSAF(pedidoInversion.getNroPedido());
+			if(contratos!=null){
+				List<Contrato> contratosLiquidacion = new ArrayList<Contrato>();
+				for(LiquidacionSAF liquidacionContrato:liquidaciones){
+					for(Contrato contrato:contratos){
+						if(liquidacionContrato.getContratoID().intValue()==contrato.getContratoId().intValue()){
+							contratosLiquidacion.add(contrato);
+							break;
+						}
+					}
+				}
+				
+				Double dblImporteDesembolsoParcial=0.00;
+				List<String> asociadosLiquidacion = new ArrayList<String>();
+				String asociadosDocumento = "";
+				String contratoDocumento = "";
+				List<Asociado> asociados=new ArrayList<>();
+				
+				for(Contrato contrato:contratosLiquidacion){
+					asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
+					
+					for(int i=0; i<asociados.size();i++){
+						Asociado asociado = asociados.get(i);
+						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
+						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
+							asociadosLiquidacion.add(asociadoImpresion);
+							asociadosDocumento+=asociadoImpresion;
+							
+							if(i==asociados.size()-1){
+								contratoDocumento+= contrato.getNroContrato();
+							}else{
+								contratoDocumento+= contrato.getNroContrato() + ", ";
+							}
+							
+						}
+					}
+				}
+								
+				Map<String,Object> parameters = new HashMap<String, Object>();
+				parameters.put("PagoTesoreriaID", liquidacion.getLiquidacionPagoTesoreria());
+				Map<String,Object> pagoTesoreria = liquidacionDao.executeProcedure(parameters, "USP_LOG_ReportePagoTesoreria_Dos");
+				
+				LOG.info("pago tesoreria: "+pagoTesoreria);
+				LOG.info("asociadosLiquidacion: "+asociadosLiquidacion);
+				
+				String desembolso = "";
+				if(!asociadosLiquidacion.isEmpty()){
+					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
+//					for(Map<String,Object> current:data){
+					for(int i=0;i<data.size();i++){
+						Map<String,Object> current=data.get(i);
+						
+						dblImporteDesembolsoParcial += (current.get("Importe")!=null?Double.parseDouble(current.get("Importe").toString()):0.00);
+						
+						if(i==asociados.size()-1){
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe");
+						}else{
+							desembolso +=  " mediante " +  current.get("Tipo")  + " Nro. "  + current.get("NumeroReferencia") + ", la suma de US$ " +  current.get("Importe") + ", ";
+						}
+						
+					}
+				}
+				
+				DocumentoUtil documentoUtil=new DocumentoUtil();	
+				XWPFDocument doc = documentoUtil.openDocument(rutaDocumentosTemplates+"/gestion_inversion_inmobiliaria_desembolso/Declaracion-Jurada-de-conformidad-de-desembolso-TEMPLATE.docx");
+				if (doc != null) {
+					List<Parametro> parametros = new ArrayList<Parametro>();
+					parametros.add(new Parametro("$asociados", asociadosDocumento));
+					parametros.add(new Parametro("$contratos", contratoDocumento));
+					parametros.add(new Parametro("$desembolsos", desembolso));
+					parametros.add(new Parametro("$armada", armada));
+					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros,asociados);
+					StringBuilder sb=new StringBuilder();
+					String docGenerado = sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString();
+					documentoUtil.saveDocument(doc, docGenerado);
 
+						/*Enviar por correo*/
+					 	Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
+				        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
+				         
+				         String emailTo = documentoEmailTo;
+				         if(!Util.esVacio(usuario.getCelulaCorreo())){
+				        	 emailTo = usuario.getCelulaCorreo();
+				         }else if(!Util.esVacio(usuario.getEmpleadoCorreo())){
+				        	 emailTo = usuario.getEmpleadoCorreo();
+				         }
+				         
+				         String strNroContratos = Util.getContratosFromList(contratosLiquidacion);
+				         
+				         Inversion pic= inversionService.obtenerInversionCaspioPorNro(nroInversion);
+				         
+				         String speech = DocumentoUtil.getHtmlConstanciaDesembolsoParcial(
+				        		 nroInversion,
+				        		 strNroContratos,
+				        		 asociados.get(0).getNombreCompleto(), 
+				        		 StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion(), 
+				        		 StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
+				        		 StringUtils.isEmpty(pic.getGravamen())?"":pic.getGravamen(), 
+				        		 Util.getMontoFormateado(pic.getAreaTotal()), 
+				        		 StringUtils.isEmpty(pic.getPartidaRegistral())?"":pic.getPartidaRegistral(), 
+				        		 Util.getMontoFormateado(pic.getImporteInversion()), 
+				        		 Util.getMontoFormateado(dblImporteDesembolsoParcial));
+				         
+				         LOG.info("###emailTo :"+emailTo);
+				         LOG.info("###speech :"+speech);
+				         LOG.info("###docGenerado :"+"Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
+				         
+				         EmailBean emailBean=new EmailBean();
+				         emailBean.setEmailFrom(emailDesarrolloPandero);
+				         emailBean.setEmailTo(emailTo);
+				         emailBean.setSubject("Constancia de desembolso parcial - "+asociados.get(0).getNombreCompleto());
+				         emailBean.setDocumento("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx");
+				         emailBean.setTextoEmail(speech);
+				         emailBean.setFormatHtml(true);
+				         emailBean.setEnviarArchivo(true);
+				         mailService.sendMail(emailBean);
+				         Map<String,Object> params = new HashMap<String,Object>();
+				         params.put("InversionId", pic.getInversionId());
+				        // params.put("NroArmada", nroArmada);
+				         params.put("ConstanciaGenerada", "1");
+				         liquidacionDesembolsoService.setGenerarConstanciaInversioPedido(params);
+				}
+			}
+		}
+		return "Se generó la carta de desembolso correctamente.";
+	}
 	
 }

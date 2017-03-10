@@ -18,7 +18,7 @@ public class Contrato implements java.io.Serializable {
 	private Double TotalDisponible;
 	private Double MontoLiquidacionContrato;
 	private Double MontoLiquidacionDifPrecio;
-	private Integer PedidoContrato_ContratoId;
+	//private Integer PedidoContrato_ContratoId;
 	
 	public String getNroContrato() {
 		return NroContrato;
@@ -104,11 +104,11 @@ public class Contrato implements java.io.Serializable {
 	public void setNroPedido(String nroPedido) {
 		NroPedido = nroPedido;
 	}
-	public Integer getPedidoContrato_ContratoId() {
-		return PedidoContrato_ContratoId;
-	}
-	public void setPedidoContrato_ContratoId(Integer pedidoContrato_ContratoId) {
-		PedidoContrato_ContratoId = pedidoContrato_ContratoId;
-	}	
+//	public Integer getPedidoContrato_ContratoId() {
+//		return PedidoContrato_ContratoId;
+//	}
+//	public void setPedidoContrato_ContratoId(Integer pedidoContrato_ContratoId) {
+//		PedidoContrato_ContratoId = pedidoContrato_ContratoId;
+//	}	
 	
 }

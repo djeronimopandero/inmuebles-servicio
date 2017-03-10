@@ -290,7 +290,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		return true;
 	}
 	
-	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {		
+	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {	
 		Double sumMontoCertificado=0.00;
 		//1.- Suma de los certificados
 		//Consultar listado de PedidoContrato por pedidoId y obtener los contratos, capturar cada contratoId
@@ -298,9 +298,12 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		List<Contrato> listPedidoContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(pedidoId));
 		if(null!=listPedidoContrato){
 			for(Contrato pc:listPedidoContrato){
-				Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getPedidoContrato_ContratoId()));
+				System.out.println("obtener contrato de: "+pc.getContratoId());
+				Contrato contrato= contratoService.obtenerContratoCaspioPorId(String.valueOf(pc.getContratoId()));
 				sumMontoCertificado += contrato.getMontoCertificado();
 			}
+		}else{
+			System.out.println("no hay contratos");
 		}
 		
 		Double sumImporteTotalInversion=0.00;
