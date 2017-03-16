@@ -266,28 +266,26 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
 				ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 				resultadoBean.setResultado(ddp);
-				if(!verificarDiferenciaPrecio(String.valueOf(pedidoId))){
-					resultadoBean.setEstado(3);
+				if(verificarExisteLiquidacion(String.valueOf(pedidoId))){
+					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+					resultadoBean.setMensajeError("Operacion Cancelada. Ya existe una liquidación generada, por lo tanto no se podrá registrar la cancelación");
 				}
+				
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setMensajeError("No existe diferencia de precio, por lo tanto no se podrá registrar la cancelación");
+				resultadoBean.setMensajeError("Operacion Cancelada. No existe diferencia de precio, por lo tanto no se podrá registrar la cancelación");
 			}			
 		}
 		return resultadoBean;
 	}
 	
-	private boolean verificarDiferenciaPrecio(String pedidoId) throws Exception{
+	private boolean verificarExisteLiquidacion(String pedidoId) throws Exception{
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoId);
-		if(pedido.getCancelacionDiferenciaPrecioMonto()!= null && pedido.getCancelacionDiferenciaPrecioMonto()>0){
-			List<LiquidacionSAF> liquidaciones = liquidacionDAO.obtenerLiquidacionPorPedidoSAF(pedido.getNroPedido());
-			if(liquidaciones.size()>0){
-				return false;
-			}
-		}else{
-			return false;			
+		List<LiquidacionSAF> liquidaciones = liquidacionDAO.obtenerLiquidacionPorPedidoSAF(pedido.getNroPedido());
+		if(liquidaciones!= null && liquidaciones.size()>0){
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception {	
