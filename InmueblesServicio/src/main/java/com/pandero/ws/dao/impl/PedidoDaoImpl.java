@@ -22,8 +22,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import com.pandero.ws.bean.Contrato;
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.PedidoInversionSAF;
-import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.dao.PedidoDao;
 
@@ -153,10 +153,7 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.addDeclaredParameter(new SqlParameter("@ServicioConstructora", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 		call.addDeclaredParameter(new SqlParameter("@montoInversion", Types.DECIMAL));
-		
-		
-//		call.addDeclaredParameter(new SqlOutParameter("@MensajeError", Types.VARCHAR));
-		
+				
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
 		parameters.addValue("@PedidoNumero", pedidoInversionSAF.getNroPedido());
         parameters.addValue("@ProveedorID", pedidoInversionSAF.getProveedorID());		
@@ -167,6 +164,40 @@ public class PedidoDaoImpl implements PedidoDao {
 		parameters.addValue("@ServicioConstructora", pedidoInversionSAF.getServicioConstructora());
 		parameters.addValue("@UsuarioID", pedidoInversionSAF.getUsuarioIDCreacion());
 		parameters.addValue("@montoInversion", pedidoInversionSAF.getMontoInversion());
+		
+		call.execute(parameters);	
+	}
+	
+	public void registrarInmuebleInversionSAF(Inversion inversion, String usuarioID) throws Exception {
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withProcedureName("dbo.USP_LOG_Inmb_RegistrarInmuebleInversion");
+		call.withoutProcedureColumnMetaDataAccess();	
+		System.out.println("NumeroInversion="+inversion.getNroInversion()+", PropietarioTipoDocu="+inversion.getPropietarioTipoDocId()
+				+", PropietarioNroDocu="+inversion.getPropietarioNroDoc()+", InmuebleDireccion="+inversion.getDireccion()
+				+", InmuebleUbigeo="+inversion.getDistritoId()+"UsuarioID="+usuarioID);
+		
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioTipoDocu", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioNroDocu", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioApePaterno", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioApeMaterno", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioNombres", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PropietarioRazonSocial", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@InmuebleDireccion", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@InmuebleUbigeo", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
+				
+		MapSqlParameterSource parameters = new MapSqlParameterSource();	
+		parameters.addValue("@NumeroInversion", inversion.getNroInversion());
+        parameters.addValue("@PropietarioTipoDocu", inversion.getPropietarioTipoDocId());		
+		parameters.addValue("@PropietarioNroDocu", inversion.getPropietarioNroDoc());
+		parameters.addValue("@PropietarioApePaterno", inversion.getPropietarioApePaterno());
+		parameters.addValue("@PropietarioApeMaterno", inversion.getPropietarioApeMaterno());
+		parameters.addValue("@PropietarioNombres", inversion.getPropietarioNombres());
+		parameters.addValue("@PropietarioRazonSocial", inversion.getPropietarioRazonSocial());
+		parameters.addValue("@InmuebleDireccion", inversion.getDireccion());
+		parameters.addValue("@InmuebleUbigeo", inversion.getDistritoId());
+		parameters.addValue("@UsuarioID", usuarioID);
 		
 		call.execute(parameters);	
 	}
