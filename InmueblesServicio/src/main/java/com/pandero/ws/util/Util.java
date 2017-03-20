@@ -4,9 +4,12 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
@@ -324,5 +327,23 @@ public class Util {
 		}
 		
 		return resultado;
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Map<String,Object> getResulsetsFromProcedureResult(Map<String,Object> procedureResult, String ... resulsetNames){
+		Map<String,Object> result = new HashMap<String, Object>();
+		List resultSetList = new ArrayList();
+		for(String resultSet:resulsetNames){
+			resultSetList = (ArrayList) procedureResult.get(resultSet);
+			if(resultSetList != null && resultSetList.size()>0)
+				result.put(resultSet, (Map<String, Object>)resultSetList.get(0));
+		}
+		return result;
+	}
+	
+	public static void removeKeysFromMap(Map<String,Object> mapToRemoveKeys, String ... keysToRemove){
+		for(String key:keysToRemove){
+			mapToRemoveKeys.remove(key);
+		}
 	}
 }

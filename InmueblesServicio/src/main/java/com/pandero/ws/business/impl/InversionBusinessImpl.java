@@ -110,8 +110,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		String resultado = "";
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
-		
-		
+				
 		// Confirmar Inversion
 		if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
 			System.out.println("inversion:: "+inversion);
@@ -155,12 +154,17 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setPedidoTipoInversionID(Util.obtenerTipoInversionID(inversion.getTipoInversion()));
 				if(inversion.getServicioConstructora()){
 					pedidoInversionSAF.setServicioConstructora("1");
+				}else{
+					pedidoInversionSAF.setServicioConstructora("");
 				}
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
 				pedidoInversionSAF.setMontoInversion(String.valueOf(inversion.getImporteInversion()));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
+				
+				// Sincroniza informacion de inmueble a SAF
+				registrarInmuebleInversion(inversion, usuarioId);
 				
 				//verificamos si el inmueble esta hipotecado
 				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
@@ -248,6 +252,21 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultado;
 	}
 	
+	private void registrarInmuebleInversion(Inversion inversion, String usuarioId){
+		try{
+			LOG.error("EN registrarInmuebleInversion");
+			// Obtener tipos de documento
+			List<Constante> listaTiposDocuIden = constanteService.obtenerListaDocumentosIdentidad();
+			// Obtener tipo de documento SAF
+			String tipoDocuIdenSAF = Util.obtenerTipoDocuIdenSAFPorCaspioId(listaTiposDocuIden, inversion.getPropietarioTipoDocId());			
+			inversion.setPropietarioTipoDocId(tipoDocuIdenSAF);
+			
+			pedidoDao.registrarInmuebleInversionSAF(inversion, usuarioId);
+		}catch(Exception e){
+			LOG.error("ERROR registrarInmuebleInversion: ", e);
+		}
+	}
+	
 	private PersonaSAF obtenerProveedor(Inversion inversion, Integer asociadoId) throws Exception{		
 		Integer proveedorId = null, personaId = null;
 		String tipoDocuProv="", nroDocuProv="", tipoProveedor="";
@@ -278,9 +297,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 		// Obtener proveedor SAF	
 		String tipoDocuIdenSAF = Util.obtenerTipoDocuIdenSAFPorCaspioId(listaTiposDocuIden, tipoDocuProv);
-		System.out.println("TIPO_DOCU_CASPIO:: "+tipoDocuProv);
-		System.out.println("TIPO_DOCU_SAF:: "+tipoDocuIdenSAF);
-		System.out.println("TIPO_PROVEEDOR: "+tipoProveedor);
 		PersonaSAF proveedor = personaDao.obtenerProveedorSAF(proveedorId, tipoProveedor, personaId, tipoDocuIdenSAF, nroDocuProv);
 		if(proveedor==null){
 			PersonaSAF proveedorSAF = new PersonaSAF();

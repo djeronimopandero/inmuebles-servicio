@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -241,6 +242,10 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
     	Map<String,Object> procedureResult = call.execute(in);
 		return procedureResult;
     }
+	
+	
+	
+	
 
 	@Override
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(
