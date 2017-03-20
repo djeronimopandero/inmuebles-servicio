@@ -834,7 +834,7 @@ public class InversionController {
 	}
 	
 	
-	@RequestMapping(value = "obtenerInversionPorNro/{inversionId}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "obtenerInversionPorNro/{nroInversion}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
 	public ResultadoBean obtenerInversionPorNumero(@PathVariable(value="nroInversion") String nroInversion) {
 		LOG.info("###obtenerInversionPorNumero nroInversion:"+nroInversion);
