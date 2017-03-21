@@ -3,8 +3,8 @@ package com.pandero.ws.business.impl;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,12 +49,10 @@ import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
-import com.pandero.ws.util.Constantes.TipoInversion;
 import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
-import com.sun.org.apache.regexp.internal.RESyntaxException;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -1465,8 +1463,33 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	@Override
-	public void actualizarInversionMonto(Map<String,Object> params){
-		liquidacionDao.executeProcedure(params, "USP_LOG_ActualizarMontoInversion");
+	public ResultadoBean actualizarInversionMonto(Map<String,Object> params)throws Exception{
+		LOG.info("###actualizarInversionMonto, params:"+params);
+		
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean= new ResultadoBean();
+		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
+		
+		if(null!=params){
+			String nroInversion = params.get("nroInversion")!=null?params.get("nroInversion").toString():"0";
+			List<LiquidacionSAF> list= liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
+			System.out.println("###Se obtuvo la lista de liquidaciones.");
+			if(null!=list){
+				System.out.println("###Error, La Inversion ya fue liquidada.");
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setMensajeError("Error, La Inversión ya fué liquidada.");
+			}else{
+				System.out.println("###Por llamar al procedure USP_LOG_ActualizarMontoInversion");
+				liquidacionDao.executeProcedure(params, "USP_LOG_ActualizarMontoInversion");
+			}
+		}else{
+			System.out.println("###Los parametros son nulos");
+		}
+		
+		
+		return resultadoBean;
 	}
 	
 	
