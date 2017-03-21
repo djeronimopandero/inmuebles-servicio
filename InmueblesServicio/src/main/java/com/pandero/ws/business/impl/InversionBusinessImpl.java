@@ -854,8 +854,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		// Verificar si requiere registro de comprobantes
 		boolean comprobanteEnviado = false;
-		boolean requiereDocumentos = Util.requiereRegistrarDocumento(inversion, nroArmada);
-		if(requiereDocumentos){
+		//boolean requiereDocumentos = Util.requiereRegistrarDocumento(inversion, nroArmada);
+		//if(requiereDocumentos){
 			// Obtener lista comprobantes
 			List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(Integer.parseInt(inversionId), Integer.parseInt(nroArmada));
 			if(listaComprobantes==null || listaComprobantes.size()==0){
@@ -869,7 +869,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 					totalFacturas +=comprobante.getImporte();
 				}
 			}
-		}
+		//}
 		
 		// Verificar si ya se enviaron los documentos
 		if(comprobanteEnviado){
