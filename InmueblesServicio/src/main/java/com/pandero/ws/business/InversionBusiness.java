@@ -40,5 +40,8 @@ public interface InversionBusiness {
 	public void actualizarInversionMonto(Map<String,Object> params);
 
 	public String generarActaEntrega(String nroInversion, String usuarioSAFId) throws Exception;
+	
+	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params) throws Exception;
+	public Map<String,Object> verificarConfirmacionEntrega(Map<String,Object> params)throws Exception;
 }
 	

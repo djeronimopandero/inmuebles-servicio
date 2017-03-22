@@ -330,11 +330,11 @@ public class Util {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map<String,Object> getResulsetsFromProcedureResult(Map<String,Object> procedureResult, String ... resulsetNames){
+	public static Map<String,Object> getResultFromListMap(Map<String,Object> mapToEvaluate, String ... resulsetNames){
 		Map<String,Object> result = new HashMap<String, Object>();
 		List resultSetList = new ArrayList();
 		for(String resultSet:resulsetNames){
-			resultSetList = (ArrayList) procedureResult.get(resultSet);
+			resultSetList = (ArrayList) mapToEvaluate.get(resultSet);
 			if(resultSetList != null && resultSetList.size()>0)
 				result.put(resultSet, (Map<String, Object>)resultSetList.get(0));
 		}

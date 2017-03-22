@@ -123,4 +123,13 @@ public class LiquidDesembServiceImpl implements LiquidDesembService {
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarGarantiaURL,Object.class,params,serviceWhere);	
 		return null;
 	}
+	
+	@Override
+	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params)throws Exception{
+		String serviceWhere = "{\"where\":\"" + params.get("where") + "\"}";		
+		String obtenerInversionesxPedidoURL = tableLiquidacionDesembolsoURL+Constantes.Service.URL_WHERE;		
+        Map<String,Object> callResult=(Map<String,Object>)ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+        callResult = Util.getResultFromListMap(callResult, "Result");
+        return callResult;
+	}
 }
