@@ -219,22 +219,22 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			
 			// Validar garantias
-			if(validacionLiquidacion){			
-				// Obtener garantias del pedido
-				List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
-				if(listaGarantias!=null && listaGarantias.size()>0){
-					for(Garantia garantia : listaGarantias){
-						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
-						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-							validacionLiquidacion=false;
-						}
-					}
-				}else{
-					validacionLiquidacion=false;
-				}
-				// Verificar si existen garantias
-				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
-			}
+//			if(validacionLiquidacion){			
+//				// Obtener garantias del pedido
+//				List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
+//				if(listaGarantias!=null && listaGarantias.size()>0){
+//					for(Garantia garantia : listaGarantias){
+//						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
+//						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+//							validacionLiquidacion=false;
+//						}
+//					}
+//				}else{
+//					validacionLiquidacion=false;
+//				}
+//				// Verificar si existen garantias
+//				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+//			}
 						
 			// Validar el estado de la liquidacion
 			if(validacionLiquidacion){

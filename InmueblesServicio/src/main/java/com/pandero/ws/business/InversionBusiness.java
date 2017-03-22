@@ -37,7 +37,7 @@ public interface InversionBusiness {
 	public LinkedHashMap<String,Object> getComprobanteResumen(String inversionNumero, Integer nroArmada) throws Exception;
 	
 	public boolean validarImporteComprobantesNoExcedaInversion(String inversionId, Integer nroArmada, Double importeIngresar)throws Exception;
-	public void actualizarInversionMonto(Map<String,Object> params);
+	public ResultadoBean actualizarInversionMonto(Map<String,Object> params)throws Exception;
 
 	public String generarActaEntrega(String nroInversion, String usuarioSAFId) throws Exception;
 	
