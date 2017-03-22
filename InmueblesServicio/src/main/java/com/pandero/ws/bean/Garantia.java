@@ -4,6 +4,7 @@ public class Garantia implements java.io.Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private Integer creditoGarantiaId;
 	private Integer idGarantia;
 	private Integer garantiaSAFId;
 	private Integer pedidoID;
@@ -89,6 +90,12 @@ public class Garantia implements java.io.Serializable {
 	}
 	public void setUsoBien(String usoBien) {
 		this.usoBien = usoBien;
+	}
+	public Integer getCreditoGarantiaId() {
+		return creditoGarantiaId;
+	}
+	public void setCreditoGarantiaId(Integer creditoGarantiaId) {
+		this.creditoGarantiaId = creditoGarantiaId;
 	}
 		
 }

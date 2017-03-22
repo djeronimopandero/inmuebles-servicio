@@ -2,7 +2,6 @@ package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,7 @@ import com.pandero.ws.bean.PedidoInversionSAF;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
@@ -59,6 +59,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	LiquidacionDao liquidacionDao;
 	@Autowired
 	ContratoBusiness contratoBusiness;
+	@Autowired
+	GarantiaDao garantiaDao;
 	
 	public List<Contrato> obtenerTablaContratosPedidoActualizado(String nroPedido) throws Exception{		
 		// Obtener contratos del pedido
@@ -219,22 +221,22 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			
 			// Validar garantias
-//			if(validacionLiquidacion){			
-//				// Obtener garantias del pedido
-//				List<Garantia> listaGarantias = garantiaService.obtenerGarantiasPorPedido(String.valueOf(inversion.getPedidoId().intValue()));
-//				if(listaGarantias!=null && listaGarantias.size()>0){
-//					for(Garantia garantia : listaGarantias){
-//						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
-//						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-//							validacionLiquidacion=false;
-//						}
-//					}
-//				}else{
-//					validacionLiquidacion=false;
-//				}
-//				// Verificar si existen garantias
-//				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
-//			}
+			if(validacionLiquidacion){			
+				// Obtener garantias del pedido
+				List<Garantia> listaGarantias = garantiaDao.obtenerGarantiasPorInversion(nroInversion);
+				if(listaGarantias!=null && listaGarantias.size()>0){
+					for(Garantia garantia : listaGarantias){
+						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
+						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+							validacionLiquidacion=false;
+						}
+					}
+				}else{
+					validacionLiquidacion=false;
+				}
+				// Verificar si existen garantias
+				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+			}
 						
 			// Validar el estado de la liquidacion
 			if(validacionLiquidacion){
