@@ -322,12 +322,14 @@ public class Util {
 		
 		if( (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
 				&& !inversion.getServicioConstructora())  
-			&& (nroArmada.equals("3") || nroArmada.equals("4")) ){
+			&& (nroArmada.equals("2") || nroArmada.equals("3")) ){
 			resultado=true;
 		}
 		
 		return resultado;
 	}
+	
+	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Map<String,Object> getResulsetsFromProcedureResult(Map<String,Object> procedureResult, String ... resulsetNames){
