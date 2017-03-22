@@ -19,4 +19,6 @@ public interface LiquidDesembService {
 	public String setGenerarConstanciaInversioPedido(Map<String,Object> params) throws Exception;
 	
 	public void setTokenCaspio(String token);
+	
+	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params)throws Exception;
 }

@@ -681,40 +681,49 @@ public class InversionBusinessImpl implements InversionBusiness{
 			PedidoInversionSAF pedidoInversion = pedidoDao.obtenerPedidoInversionSAF(nroInversion);
 			List<Contrato> contratos =pedidoDao.obtenerContratosxPedidoSAF(pedidoInversion.getNroPedido());
 			if(contratos!=null){
-				List<Contrato> contratosLiquidacion = new ArrayList<Contrato>();
-				for(LiquidacionSAF liquidacionContrato:liquidaciones){
-					for(Contrato contrato:contratos){
-						if(liquidacionContrato.getContratoID().intValue()==contrato.getContratoId().intValue()){
-							contratosLiquidacion.add(contrato);
-							break;
-						}
-					}
-				}
-				
 				Double dblImporteDesembolsoParcial=0.00;
 				List<String> asociadosLiquidacion = new ArrayList<String>();
 				String asociadosDocumento = "";
 				String contratoDocumento = "";
 				List<Asociado> asociados=new ArrayList<>();
 				
-				for(Contrato contrato:contratosLiquidacion){
-					asociados = contratoDao.obtenerAsociadosxContratoSAF(contrato.getNroContrato());
-					
-					for(int i=0; i<asociados.size();i++){
-						Asociado asociado = asociados.get(i);
-						String asociadoImpresion = asociado.getNombreCompleto() + " identificado con " + asociado.getTipoDocumentoIdentidad() +  " N° " + asociado.getNroDocumentoIdentidad() + " con domicilio en " + asociado.getDireccion() + " y ";
-						if(asociadosLiquidacion.indexOf(asociadoImpresion)==-1){
-							asociadosLiquidacion.add(asociadoImpresion);
-							asociadosDocumento+=asociadoImpresion;
-							
-							if(i==asociados.size()-1){
-								contratoDocumento+= contrato.getNroContrato();
-							}else{
-								contratoDocumento+= contrato.getNroContrato() + ", ";
-							}
-							
-						}
+				for(int i=0;i<contratos.size();i++){
+					Contrato contrato = contratos.get(i);
+					if(contratos.size()>0 && i+1<=contratos.size() && i>0){
+						contratoDocumento+= ", ";
 					}
+					contratoDocumento+= contrato.getNroContrato();
+				}
+				
+				asociados = contratoDao.obtenerAsociadosxContratoSAF(contratos
+						.get(0).getNroContrato());
+
+				for (int i = 0; i < asociados.size(); i++) {
+					Asociado asociado = asociados.get(i);
+					String asociadoImpresion = asociado.getNombreCompleto()
+							+ " identificado con "
+							+ asociado.getTipoDocumentoIdentidad() + " N° "
+							+ asociado.getNroDocumentoIdentidad()
+							+ " con domicilio en " + asociado.getDireccion()
+							+ "|";
+					if (asociadosLiquidacion.indexOf(asociadoImpresion) == -1) {
+						asociadosLiquidacion.add(asociadoImpresion);
+						asociadosDocumento += asociadoImpresion;
+
+					}
+				}
+				
+				String arr[] = asociadosDocumento.split("\\|");
+				asociadosDocumento = "";
+				for(int i=0;i<arr.length;i++){
+					if(arr.length>0 && i+1==arr.length && i>0){
+						asociadosDocumento+= " y ";
+					}
+					if(arr.length>0 && i+1<arr.length && i>0){
+						asociadosDocumento+= ", ";
+					}
+					asociadosDocumento += arr[i];
+					
 				}
 								
 				Map<String,Object> parameters = new HashMap<String, Object>();
@@ -727,7 +736,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				String desembolso = "";
 				if(!asociadosLiquidacion.isEmpty()){
 					List<Map<String,Object>> data = (List<Map<String,Object>>)pagoTesoreria.get("#result-set-1");
-//					for(Map<String,Object> current:data){
+
 					for(int i=0;i<data.size();i++){
 						Map<String,Object> current=data.get(i);
 						
@@ -766,13 +775,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 				        	 emailTo = usuario.getEmpleadoCorreo();
 				         }
 				         
-				         String strNroContratos = Util.getContratosFromList(contratosLiquidacion);
+				        
 				         
 				         Inversion pic= inversionService.obtenerInversionCaspioPorNro(nroInversion);
 				         
 				         String speech = DocumentoUtil.getHtmlConstanciaDesembolsoParcial(
 				        		 nroInversion,
-				        		 strNroContratos,
+				        		 contratoDocumento,
 				        		 asociados.get(0).getNombreCompleto(), 
 				        		 StringUtils.isEmpty(pic.getTipoInversion())?"":pic.getTipoInversion(), 
 				        		 StringUtils.isEmpty(pic.getTipoInmuebleNom())?"":pic.getTipoInmuebleNom(), 
@@ -1493,7 +1502,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Override
 	public String generarActaEntrega(String nroInversion, String usuarioSAFId)
 			throws Exception {
@@ -1637,6 +1646,28 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		return "Se generó la carta de desembolso correctamente.";
+	}
+	
+	@Override
+	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params) throws Exception{
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		liquidacionDesembolsoService.setTokenCaspio(tokenCaspio);
+		return liquidacionDesembolsoService.getLiquidacionDesembolso(params);
+	}
+	
+	@Override
+	public Map<String,Object> verificarConfirmacionEntrega(Map<String,Object> params)throws Exception{
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		if(params.get("where")!=null){
+			String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+			liquidacionDesembolsoService.setTokenCaspio(tokenCaspio);
+			if(liquidacionDesembolsoService.getLiquidacionDesembolso(params).size()>0){
+				resultMap.put("estadoRetorno", "0");
+				return resultMap;
+			}
+		}
+		resultMap = liquidacionDao.executeProcedure(params, "USP_FOC_consultarConfirmacionEntregaInmuebles");
+		return resultMap;
 	}
 	
 }

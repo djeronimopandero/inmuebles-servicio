@@ -871,4 +871,46 @@ public class InversionController {
 		}
 		return resultadoBean;
 	}
+	
+	@RequestMapping(value = "/verificarDesembolso", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> verificarDesembolso(@RequestBody Map<String, Object> params) {
+		LOG.info("###eliminarGarantia params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = inversionBusiness.getLiquidacionDesembolso(params);			
+		}catch(Exception e){
+			LOG.error("Error pedido/eliminarGarantia:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/verificarConfirmacionEntrega", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> verificarConfirmacionEntrega(@RequestBody Map<String, Object> params) {
+		LOG.info("###eliminarGarantia params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = inversionBusiness.verificarConfirmacionEntrega(params);			
+		}catch(Exception e){
+			LOG.error("Error pedido/eliminarGarantia:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
 }
