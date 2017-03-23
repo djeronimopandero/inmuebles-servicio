@@ -34,11 +34,13 @@ public class Constantes {
 		public final static String RESULTADO_LIQUIDACION_NO_CONFIRMADA = "Operación cancelada. La liquidación no ha sido confirmada.";
 		public final static String RESULTADO_INVERSION_VB_CONTABLE = "Operacion cancelada. La inversión ya ha sido confirmada por contabilidad.";
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "Operación cancelada. La inversión ya ha sido desembolsada.";
-		public final static String RESULTADO_NO_GARANTIAS = "NO_GARANTIAS";
+		public final static String RESULTADO_NO_GARANTIAS = "Operacion cancelada. No existen garantias registradas.";
+		public final static String RESULTADO_NO_GARANTIA_FICHA_FECHA = "Operacion cancelada. No se ha registrado la fecha y ficha de constitución de la(s) garantia(s).";
+		public final static String RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL = "Operacion cancelada. No se ha completado la etapa de Bloqueo Registral en el checklist.";
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
 		public final static String RESULTADO_PENDIENTE_COBROS = "Operación cancelada. Existen cobros pendientes.";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "Operación cancelada. La inversión no ha sido confirmada.";
-		public final static String RESULTADO_SIN_COMPROBANTES= "Operación cancelada. No se han registrado los comprobantes.";
+		public final static String RESULTADO_SIN_COMPROBANTES= "Operación cancelada. No se han registrado comprobantes.";
 		public final static String RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION= "Operación cancelada. La suma no es igual al importe de la inversión.";
 		public final static String RESULTADO_SIN_ACTUALZ_SALDO_DEUDA= "Operación cancelada. No se ha actualizado el saldo de la deuda.";
 		public final static String RESULTADO_SIN_ENVIO_CARGO_CONTABILIDAD= "Operación cancelada. No se han enviado los documentos a contabilidad.";
@@ -162,6 +164,11 @@ public class Constantes {
 	
 	public class GenLista{
 		public final static String TIPO_ARMADAS_DESEMBOLSO="INMUEBLES_ARMADAS_DESEMBOLSO";
+	}
+	
+	public class Garantia{
+		public final static int CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL = 4;
+		
 	}
 		
 	public static final String FORMATO_DATE_NORMAL = "dd/MM/yyyy";

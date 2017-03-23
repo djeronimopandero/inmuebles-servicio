@@ -1,6 +1,9 @@
 package com.pandero.ws.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -10,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
@@ -114,5 +119,39 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		return null;
 	}
 	
+	private static final class GarantiaMapper implements RowMapper<Garantia>{
+		public Garantia mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			Garantia p = new Garantia();
+			p.setCreditoGarantiaId(rs.getInt("CreditoGarantiaID"));
+			p.setFichaConstitucion(rs.getString("FichaConstitucion"));
+			p.setFechaConstitucion(rs.getString("FechaConstitucion"));
+			p.setConstitucionEtapaID(rs.getInt("ConstitucionEtapaID"));
+			p.setConstitucionGarantiaEstadoID(rs.getInt("ConstitucionGarantiaEstadoID"));
+			return p;		    
+		}
+	}
+
+	@Override
+	public List<Garantia> obtenerGarantiasPorInversion(String nroInversion)
+			throws Exception {
+		List<Garantia> listGarantias = null;
+
+		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
+		call.withCatalogName("dbo");
+		call.withProcedureName("USP_CRE_ObtenerGarantiasInmueblePorInversion");
+		call.withoutProcedureColumnMetaDataAccess();
+		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
+		call.returningResultSet("garantias", new GarantiaMapper());
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+		.addValue("@NumeroInversion", nroInversion);
+		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
+		
+		List resultado = (List) mapResultado.get("garantias");
+		if (resultado != null && resultado.size() > 0) {
+			listGarantias = (List<Garantia>) resultado;
+		}
+
+		return listGarantias;
+	}
 	
 }
