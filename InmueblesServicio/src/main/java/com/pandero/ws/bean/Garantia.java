@@ -17,7 +17,8 @@ public class Garantia implements java.io.Serializable {
 	private String modalidad;
 	private String usoBien;
 	private String nroContrato;
-	
+	private Integer constitucionEtapaID;
+	private Integer constitucionGarantiaEstadoID;
 	
 	public String getNroContrato() {
 		return nroContrato;
@@ -96,6 +97,18 @@ public class Garantia implements java.io.Serializable {
 	}
 	public void setCreditoGarantiaId(Integer creditoGarantiaId) {
 		this.creditoGarantiaId = creditoGarantiaId;
+	}
+	public Integer getConstitucionEtapaID() {
+		return constitucionEtapaID;
+	}
+	public void setConstitucionEtapaID(Integer constitucionEtapaID) {
+		this.constitucionEtapaID = constitucionEtapaID;
+	}
+	public Integer getConstitucionGarantiaEstadoID() {
+		return constitucionGarantiaEstadoID;
+	}
+	public void setConstitucionGarantiaEstadoID(Integer constitucionGarantiaEstadoID) {
+		this.constitucionGarantiaEstadoID = constitucionGarantiaEstadoID;
 	}
 		
 }

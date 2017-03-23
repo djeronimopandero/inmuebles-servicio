@@ -19,7 +19,7 @@ public class PedidoInversionSAF implements java.io.Serializable {
 	private String tipoInmuebleId;
 	private String servicioConstructora;
 	private String montoInversion;
-	
+	private String inmuebleInversionHipotecado;
 	
 	
 	public String getMontoInversion() {
@@ -111,6 +111,12 @@ public class PedidoInversionSAF implements java.io.Serializable {
 	}
 	public void setServicioConstructora(String servicioConstructora) {
 		this.servicioConstructora = servicioConstructora;
+	}
+	public String getInmuebleInversionHipotecado() {
+		return inmuebleInversionHipotecado;
+	}
+	public void setInmuebleInversionHipotecado(String inmuebleInversionHipotecado) {
+		this.inmuebleInversionHipotecado = inmuebleInversionHipotecado;
 	}
 	
 }

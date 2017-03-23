@@ -227,15 +227,25 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(listaGarantias!=null && listaGarantias.size()>0){
 					for(Garantia garantia : listaGarantias){
 						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion());
-						if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-							validacionLiquidacion=false;
-						}
+						if(inversion.getInmuebleInversionHipotecado()){
+							int constitucionGarantiaEtapa = garantia.getConstitucionGarantiaEstadoID()==null?0:garantia.getConstitucionGarantiaEstadoID();
+							if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>constitucionGarantiaEtapa){
+								validacionLiquidacion=false;
+								resultado = Constantes.Service.RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL;
+								break;
+							}
+						}else{
+							if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+								validacionLiquidacion=false;
+								resultado = Constantes.Service.RESULTADO_NO_GARANTIA_FICHA_FECHA;
+								break;
+							}
+						}						
 					}
 				}else{
 					validacionLiquidacion=false;
+					resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
 				}
-				// Verificar si existen garantias
-				if(validacionLiquidacion==false) resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
 			}
 						
 			// Validar el estado de la liquidacion

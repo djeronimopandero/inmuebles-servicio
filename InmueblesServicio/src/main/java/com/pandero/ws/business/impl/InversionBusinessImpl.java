@@ -157,6 +157,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}else{
 					pedidoInversionSAF.setServicioConstructora("");
 				}
+				if(inversion.getInmuebleInversionHipotecado()){
+					pedidoInversionSAF.setInmuebleInversionHipotecado("1");
+				}else
+				{
+					pedidoInversionSAF.setInmuebleInversionHipotecado("0");					
+				}
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
