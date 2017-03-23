@@ -65,6 +65,31 @@ public class PedidoController {
 		return response;
 	}
 	
+	@RequestMapping(value = "/contratoPedidoEnEvaluacionCrediticia", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> contratoPedidoEnEvaluacionCrediticia(@RequestBody Map<String, Object> params) {
+		System.out.println("EN METODO contratoPedidoEnEvaluacionCrediticia");
+		System.out.println("REQUEST: " +  params);		
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			response = pedidoBusiness.contratoPedidoEnEvaluacionCrediticia(params);
+			if(Util.esVacio(result)){
+				result = Constantes.Service.RESULTADO_EXITOSO;
+			}			
+		}catch(Exception e){
+			LOG.error("Error pedido/crearPedido:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
+	
 	
 	@RequestMapping(value = "/eliminarPedido", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody   

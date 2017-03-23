@@ -43,5 +43,6 @@ public interface InversionBusiness {
 	
 	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params) throws Exception;
 	public Map<String,Object> verificarConfirmacionEntrega(Map<String,Object> params)throws Exception;
+	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception;
 }
 	

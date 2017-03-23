@@ -1,7 +1,9 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
@@ -21,17 +23,21 @@ import com.pandero.ws.bean.Parametro;
 import com.pandero.ws.bean.Pedido;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.bean.Usuario;
+import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.business.PedidoBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GenericDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.ContratoService;
+import com.pandero.ws.service.GenericService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 
@@ -63,6 +69,14 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	InversionService inversionService;
 	@Autowired
 	MailService mailService;
+	@Autowired
+	GenericService genericService;
+	
+	@Autowired
+	ContratoBusiness contratoBusiness;
+	
+	@Autowired
+	GenericDao genericDao;
 
 	@Override
 	public ResultadoBean registrarNuevoPedido(String nroContrato, String usuarioSAFId) throws Exception{
@@ -105,6 +119,18 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				// Actualizar estado asociacion del contrato 
 				contratoService.actualizarAsociacionContrato(nroContrato, Constantes.Contrato.ESTADO_ASOCIADO);
 				
+				Map<String,Object> params = new HashMap<String, Object>();
+				params.put("numeroContrato", nroContrato);
+				Map<String,Object> result = contratoDao.obtenerContratosEvaluacionCrediticia(params);
+				List<Map<String,Object>> contratosEvaluacionCrediticia = (List<Map<String,Object>>)result.get("#result-set-1");
+				if(contratosEvaluacionCrediticia!=null && contratosEvaluacionCrediticia.size()>0){
+					contratoBusiness.sincronizarContratosyAsociadosSafACaspio();
+					for(Map<String,Object> contrato:contratosEvaluacionCrediticia){
+						String nroCon = contrato.get("ContratoNumero").toString();
+						agregarContratoPedido(pedidoId, nroCon, usuarioSAFId);
+					}
+					
+				}
 				resultado.setResultado(pedidoId);
 			}
 		}
@@ -379,6 +405,23 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 			sumaDiferenciaPrecio = sumaDiferenciaPrecio + dblDifPrecioSaf;		
 		}
 		return sumaDiferenciaPrecio;
+	}
+	
+	@Override
+	public Map<String,Object> contratoPedidoEnEvaluacionCrediticia(Map<String,Object> params) throws Exception{
+		Map<String,Object> result = new HashMap<String,Object>();
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		genericService.setTokenCaspio(tokenCaspio);
+		List<Map<String,Object>> pedidoContratos = genericService.obtenerTablaCaspio(genericService.tablepedidoContrato, JsonUtil.toJson(params));
+		if(pedidoContratos!=null && pedidoContratos.size()>0){
+			params = new HashMap<String,Object>();
+			params.put("idContrato", pedidoContratos.get(0).get("ContratoId"));
+			params = genericDao.executeProcedure(params, "USP_FOC_VerificarContratoEvaluacionCrediticia");
+			result.put("resultado", params.get("resultado"));
+			return result;
+		}
+		result.put("resultado", "0");
+		return result;
 	}
 	
 }

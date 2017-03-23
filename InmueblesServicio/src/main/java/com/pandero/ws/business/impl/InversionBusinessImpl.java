@@ -1670,4 +1670,20 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return resultMap;
 	}
 	
+	@Override
+	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception{
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		resultMap = inversionService.confirmacionEntrega(params);
+		if("OK".equals(resultMap.get("mensaje"))){
+			resultMap = liquidacionDao.executeProcedure(params, "USP_LOG_entregarInversionInmueble");
+		}	
+		resultMap.put("mensaje", "OK");
+		return resultMap;
+	}
+	
+	
+	
+	
 }

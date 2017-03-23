@@ -913,4 +913,25 @@ public class InversionController {
 		
 		return response;
 	}
+	
+	@RequestMapping(value = "/confirmarEntrega", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody   
+	public Map<String, Object> confirmarEntrega(@RequestBody Map<String, Object> params) {
+		LOG.info("###eliminarGarantia params:"+params);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{			
+			response = inversionBusiness.confirmacionEntrega(params);			
+		}catch(Exception e){
+			LOG.error("Error pedido/eliminarGarantia:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);	
+		
+		return response;
+	}
 }

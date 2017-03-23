@@ -21,6 +21,7 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
 
 @Service
@@ -43,6 +44,9 @@ public class InversionServiceImpl implements InversionService {
 	
 	@Value("${url.service.table.comprobante}")
 	private String tableComprobanteURL;
+	
+	@Value("${url.service.table.pedido}")
+	private String tablePedidoURL;
 	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
@@ -354,6 +358,46 @@ public class InversionServiceImpl implements InversionService {
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarComprobanteRequisitoURL,Object.class,request,serviceWhere);
 		return null;
+	}
+	
+	public void actualizarTablaCaspio(Map<String,Object> body, String tableURL, String where) throws Exception{			
+		tableURL = tableURL+Constantes.Service.URL_WHERE;	
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,tableURL,Object.class,body,where);
+	}
+	
+	public List<Map<String,Object>> obtenerTablaCaspio(String tableURL, String where) throws Exception{			
+		tableURL = tableURL+Constantes.Service.URL_WHERE;	
+		Map<String,Object> mapResult=(Map<String,Object>)ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,tableURL,Object.class,null,where);
+		return (List<Map<String,Object>>)mapResult.get("Result");
+	}
+	
+	@Override
+	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception{
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		
+		//actualizamos la inversion a entregado
+		String serviceWhere = "{\"where\":\"NroInversion='"+params.get("NroInversion")+"'\"}";
+		Map<String,Object> body = new HashMap<String, Object>();
+		body.put("Estado", "ENTREGADO");
+		actualizarTablaCaspio(body,tablePedidoInversionURL,serviceWhere);
+        
+        //obtemos las inversiones por pedido		
+        serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+"\"}";		
+        List<Map<String,Object>> mapInversionesPedido = obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
+        
+		//obtenemos las inversiones entregadas
+		serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+" and Estado='ENTREGADO'\"}";
+		List<Map<String,Object>> mapInversionesPedidoEntregado = obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
+		
+		//verificamos que todas las inversiones esten entregadas
+		if(mapInversionesPedido.size()>0 && mapInversionesPedidoEntregado.size()>0 && mapInversionesPedido.size()==mapInversionesPedidoEntregado.size()){
+			serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+"\"}";			
+			body = new HashMap<String, Object>();
+			body.put("Estado", "CERRADO");
+			actualizarTablaCaspio(body,tablePedidoURL,serviceWhere);			
+		}
+		resultMap.put("mensaje", "OK");
+		return resultMap;
 	}
 	
 	

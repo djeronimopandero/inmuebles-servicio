@@ -26,12 +26,16 @@ import com.pandero.ws.bean.Asociado;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GenericDao;
 
 @Repository
 public class ContratoDaoImpl implements ContratoDao {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ContratoDaoImpl.class);
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	GenericDao genericDao;
 		
 	@Autowired
 	@Qualifier("dataSource")
@@ -63,6 +67,11 @@ public class ContratoDaoImpl implements ContratoDao {
 		}
 
 		return contrato;		
+	}
+	
+	@Override
+	public Map<String,Object> obtenerContratosEvaluacionCrediticia(Map<String,Object> params) throws Exception{
+		return genericDao.executeProcedure(params, "USP_FOC_ObtenerContratoPorNumero");
 	}
 	
 	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
