@@ -36,7 +36,7 @@ public class Constantes {
 		public final static String RESULTADO_INVERSION_DESEMBOLSADA = "Operación cancelada. La inversión ya ha sido desembolsada.";
 		public final static String RESULTADO_NO_GARANTIAS = "Operacion cancelada. No existen garantias registradas.";
 		public final static String RESULTADO_NO_GARANTIA_FICHA_FECHA = "Operacion cancelada. No se ha registrado la fecha y ficha de constitución de la(s) garantia(s).";
-		public final static String RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL = "Operacion cancelada. El checklist de la(s) garantia(s) no se encuentra en etapa de Bloqueo Registral.";
+		public final static String RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL = "Operacion cancelada. No se ha completado la etapa de Bloqueo Registral en el checklist.";
 		public final static String RESULTADO_OPERACION_CANCELADA = "OPERACION_CANCELADA";
 		public final static String RESULTADO_PENDIENTE_COBROS = "Operación cancelada. Existen cobros pendientes.";
 		public final static String RESULTADO_INVERSION_NO_CONFIRMADA = "Operación cancelada. La inversión no ha sido confirmada.";

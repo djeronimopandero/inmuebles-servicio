@@ -229,7 +229,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion()+" - "+garantia.getConstitucionEtapaID());
 						if(inversion.getInmuebleInversionHipotecado()){
 							int constitucionGarantiaEtapa = garantia.getConstitucionEtapaID()==null?0:garantia.getConstitucionEtapaID();
-							if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>constitucionGarantiaEtapa){
+							if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>=constitucionGarantiaEtapa){
 								validacionLiquidacion=false;
 								resultado = Constantes.Service.RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL;
 								break;
