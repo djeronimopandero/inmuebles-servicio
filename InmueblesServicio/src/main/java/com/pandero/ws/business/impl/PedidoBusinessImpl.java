@@ -410,8 +410,6 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 	@Override
 	public Map<String,Object> contratoPedidoEnEvaluacionCrediticia(Map<String,Object> params) throws Exception{
 		Map<String,Object> result = new HashMap<String,Object>();
-		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
-		genericService.setTokenCaspio(tokenCaspio);
 		List<Map<String,Object>> pedidoContratos = genericService.obtenerTablaCaspio(genericService.tablepedidoContrato, JsonUtil.toJson(params));
 		if(pedidoContratos!=null && pedidoContratos.size()>0){
 			params = new HashMap<String,Object>();
