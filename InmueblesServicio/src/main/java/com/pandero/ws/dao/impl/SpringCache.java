@@ -1,7 +1,5 @@
 package com.pandero.ws.dao.impl;
 
-import java.io.IOException;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
