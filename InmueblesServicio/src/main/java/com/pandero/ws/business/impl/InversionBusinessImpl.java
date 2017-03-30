@@ -79,13 +79,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 	LiquidacionDao liquidacionDao;
 	@Autowired
 	LiquidacionBusiness liquidacionBusiness;
-	
 	@Autowired
 	LiquidDesembService liquidacionDesembolsoService;
-	
 	@Autowired
 	GarantiaDao garantiaDAO;
-	
 	@Autowired
 	GarantiaService garantiaService;
 	
@@ -1688,8 +1685,35 @@ public class InversionBusinessImpl implements InversionBusiness{
 		resultMap.put("mensaje", "OK");
 		return resultMap;
 	}
+
+	@Override
+	public ResultadoBean actualizarInmuebleInversionHipotecado(String nroInversion,String check) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		
+		ResultadoBean resultadoBean = new ResultadoBean();
+		
+		Integer result =  inversionService.actualizarInmuebleInversionHipotecado(nroInversion,check);
+		resultadoBean.setEstado(result);
+		
+		return resultadoBean;
+	}
+
+	@Override
+	public ResultadoBean crearCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception {
+		Integer res = garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(nroInversion, usuarioId);
+		ResultadoBean resultadoBean=new ResultadoBean();
+		resultadoBean.setEstado(res);
+		return resultadoBean;
+	}
 	
-	
+	@Override
+	public ResultadoBean eliminarCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception {
+		Integer res = garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(nroInversion, usuarioId);
+		ResultadoBean resultadoBean=new ResultadoBean();
+		resultadoBean.setEstado(res);
+		return resultadoBean;
+	}
 	
 	
 }
