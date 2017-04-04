@@ -934,4 +934,87 @@ public class InversionController {
 		
 		return response;
 	}
+	
+	 /**
+	  * @param inversionId
+	  * @param check
+	  * @return	: ResultadoBean
+	  * @date	: 29 de mar. de 2017
+	  * @time	: 11:14:35 a. m.
+	  * @author	: Arly Fernandez.
+	  * @descripcion : Permite actualizar el check de inmueble como hipoteca de inversion, TRUE o FALSE	
+	 */
+	@RequestMapping(value = "/actualizarInmuebleInversionHipotecado/{inversionId}/{check}", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody ResultadoBean actualizarInmuebleInversionHipotecado(@PathVariable(value="inversionId") String inversionId,
+			@PathVariable(value="check") String check) {	
+		LOG.info("###actualizarInmuebleInversionHipotecado inversionId:"+inversionId+", check:"+check);
+		ResultadoBean resultadoBean=null;
+		try{
+			resultadoBean= inversionBusiness.actualizarInmuebleInversionHipotecado(inversionId,check);
+		}catch(Exception e){
+			LOG.error("Error inversion/actualizarInmuebleInversionHipotecado:: ",e);
+		}	
+		return resultadoBean;
+	}
+	
+	 /**
+	  * @param nroInversion
+	  * @param usuarioID
+	  * @return	: ResultadoBean
+	  * @date	: 30 de mar. de 2017
+	  * @time	: 3:45:20 p. m.
+	  * @author	: Arly Fernandez.
+	  * @descripcion : Crear automaticamente el credito garantia al momento que se checkea en el registro del
+	  * inmueble, inmueble hipotecado.
+	 */
+	@RequestMapping(value = "/crearCreditoGarantia/{nroInversion}/{usuarioID}", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody ResultadoBean crearCreditoGarantia(@PathVariable(value="nroInversion") String nroInversion,
+			@PathVariable(value="usuarioID") String usuarioID) {
+		LOG.info("###actualizarInmuebleInversionHipotecado nroInversion:"+nroInversion+", usuarioID:"+usuarioID);
+		ResultadoBean resultadoBean = new ResultadoBean();
+		try{
+			if(null!=nroInversion && null!=usuarioID){
+				resultadoBean= inversionBusiness.crearCreditoGarantia(nroInversion,Integer.parseInt(usuarioID));
+			}else{
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setMensajeError("Falta especificar el parametro inversionId");
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/crearCreditoGarantia:: ",e);
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+			resultadoBean.setMensajeError("Error al crear el credito garantia");
+		}	
+		return resultadoBean;
+	}
+	
+	 /**
+	  * @param nroInversion
+	  * @param usuarioID
+	  * @return	: ResultadoBean
+	  * @date	: 30 de mar. de 2017
+	  * @time	: 3:44:48 p. m.
+	  * @author	: Arly Fernandez.
+	  * @descripcion : Eliminar el credito garantia creado automaticamente cuando se quita el check del registro
+	  * de inversion, inmueble hipotecado
+	 */
+	@RequestMapping(value = "/eliminarCreditoGarantia", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody ResultadoBean eliminarCreditoGarantia(@PathVariable(value="nroInversion") String nroInversion,
+			@PathVariable(value="usuarioID") String usuarioID) {
+		LOG.info("###actualizarInmuebleInversionHipotecado nroInversion:"+nroInversion+", usuarioID:"+usuarioID);
+		ResultadoBean resultadoBean = new ResultadoBean();
+		try{
+			if(null!=nroInversion && null!=usuarioID){
+				resultadoBean= inversionBusiness.eliminarCreditoGarantia(nroInversion,Integer.parseInt(usuarioID));
+			}else{
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setMensajeError("Falta especificar el parametro inversionId");
+			}
+		}catch(Exception e){
+			LOG.error("Error inversion/crearCreditoGarantia:: ",e);
+			resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+			resultadoBean.setMensajeError("Error al crear el credito garantia");
+		}	
+		return resultadoBean;
+	}
+	
 }

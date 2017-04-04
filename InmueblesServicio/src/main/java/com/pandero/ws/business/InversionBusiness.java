@@ -44,5 +44,9 @@ public interface InversionBusiness {
 	public Map<String,Object> getLiquidacionDesembolso(Map<String,Object> params) throws Exception;
 	public Map<String,Object> verificarConfirmacionEntrega(Map<String,Object> params)throws Exception;
 	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception;
+	
+	public ResultadoBean actualizarInmuebleInversionHipotecado(String nroInversion,String check) throws Exception;
+	public ResultadoBean crearCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception;
+	public ResultadoBean eliminarCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception;
 }
 	
