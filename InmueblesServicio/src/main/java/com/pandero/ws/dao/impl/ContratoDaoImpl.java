@@ -71,7 +71,7 @@ public class ContratoDaoImpl implements ContratoDao {
 	
 	@Override
 	public Map<String,Object> obtenerContratosEvaluacionCrediticia(Map<String,Object> params) throws Exception{
-		return genericDao.executeProcedure(params, "USP_FOC_ObtenerContratoPorNumero");
+		return genericDao.executeProcedure(params, "USP_FOC_ObtenerContratosEvaluacionCrediticia");
 	}
 	
 	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
