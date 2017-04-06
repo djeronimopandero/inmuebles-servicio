@@ -155,13 +155,13 @@ public class GarantiaDaoImpl implements GarantiaDao {
 	}
 
 	@Override
-	public Integer crearCreditoGarantiaEvaluacionCrediticia(String nroInversion,Integer usuarioId) throws Exception {
+	public Integer crearCreditoGarantiaEvaluacionCrediticia(String nroInversion,String usuarioId) throws Exception {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_CRE_CrearCreditoGarantiaFromInversion");
 		call.withoutProcedureColumnMetaDataAccess();	
 				
 		call.addDeclaredParameter(new SqlParameter("@nroInversion", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@usuarioId", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@usuarioId", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@creditoGarantiaID", Types.INTEGER));
 				
 		MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -173,13 +173,13 @@ public class GarantiaDaoImpl implements GarantiaDao {
 	}
 	
 	@Override
-	public Integer eliminarCreditoGarantiaEvaluacionCrediticia(String nroInversion,Integer usuarioId) throws Exception {
+	public Integer eliminarCreditoGarantiaEvaluacionCrediticia(String nroInversion,String usuarioId) throws Exception {
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);
 		call.withProcedureName("dbo.USP_CRE_EliminarCreditoGarantiaFromInversion");
 		call.withoutProcedureColumnMetaDataAccess();	
 		
 		call.addDeclaredParameter(new SqlParameter("@nroInversion", Types.VARCHAR));
-		call.addDeclaredParameter(new SqlParameter("@usuarioId", Types.INTEGER));
+		call.addDeclaredParameter(new SqlParameter("@usuarioId", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@creditoGarantiaID", Types.INTEGER));
 		
 		MapSqlParameterSource parameters = new MapSqlParameterSource()

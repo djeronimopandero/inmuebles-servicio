@@ -12,6 +12,6 @@ public interface GarantiaDao {
 	
 	public List<Garantia> obtenerGarantiasPorInversion(String nroInversion) throws Exception;
 	
-	public Integer crearCreditoGarantiaEvaluacionCrediticia(String nroInversion,Integer usuarioId) throws Exception;
-	public Integer eliminarCreditoGarantiaEvaluacionCrediticia(String nroInversion,Integer usuarioId) throws Exception;
+	public Integer crearCreditoGarantiaEvaluacionCrediticia(String nroInversion,String usuarioId) throws Exception;
+	public Integer eliminarCreditoGarantiaEvaluacionCrediticia(String nroInversion,String usuarioId) throws Exception;
 }
