@@ -173,30 +173,30 @@ public class InversionBusinessImpl implements InversionBusiness{
 				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
 				if(inversion.getInmuebleInversionHipotecado()){					
 					// Obtener datos de la garantia	
-					Garantia garantia = new Garantia();
-					garantia.setPedidoNumero(pedido.getNroPedido());
-					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
-					garantia.setUsoBien("40");
+//					Garantia garantia = new Garantia();
+//					garantia.setPedidoNumero(pedido.getNroPedido());
+//					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
+//					garantia.setUsoBien("40");
 				
 					// Crear garantia en el SAF		
-					String garantiaSAFId = garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
-					if(Util.esVacio(garantiaSAFId)){
-						garantiaSAFId="0";
-					}
+//					String garantiaSAFId = garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
+//					if(Util.esVacio(garantiaSAFId)){
+//						garantiaSAFId="0";
+//					}
 					
 					// Crear garantia en caspio
-					Map<String,String> jsonRequest = new HashMap<String,String>();
-					jsonRequest.put("direccion", inversion.getDireccion());
-					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
-					jsonRequest.put("codigoProvincia", inversion.getProvinciaId());
-					jsonRequest.put("codigoDistrito", inversion.getDistritoId());
-					jsonRequest.put("partidaRegistral", inversion.getPartidaRegistral());
-					jsonRequest.put("categoriaConstruccion", "AQ");
-					jsonRequest.put("rangoPisos", "001");
-					jsonRequest.put("uso", "40");
-					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
-					jsonRequest.put("garantiaSAFId", garantiaSAFId);
-					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
+//					Map<String,String> jsonRequest = new HashMap<String,String>();
+//					jsonRequest.put("direccion", inversion.getDireccion());
+//					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
+//					jsonRequest.put("codigoProvincia", inversion.getProvinciaId());
+//					jsonRequest.put("codigoDistrito", inversion.getDistritoId());
+//					jsonRequest.put("partidaRegistral", inversion.getPartidaRegistral());
+//					jsonRequest.put("categoriaConstruccion", "AQ");
+//					jsonRequest.put("rangoPisos", "001");
+//					jsonRequest.put("uso", "40");
+//					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
+//					jsonRequest.put("garantiaSAFId", garantiaSAFId);
+//					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
 					
 				}
 			}
