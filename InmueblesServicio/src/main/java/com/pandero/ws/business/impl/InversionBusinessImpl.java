@@ -1489,9 +1489,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 			List<LiquidacionSAF> list= liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
 			System.out.println("###Se obtuvo la lista de liquidaciones.");
 			if(null!=list){
-				System.out.println("###Error, La Inversion ya fue liquidada.");
+				System.out.println("###Operación cancelada. La inversión ya ha sido liquidada.");
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
-				resultadoBean.setMensajeError("Error, La Inversión ya fué liquidada.");
+				resultadoBean.setMensajeError("Operación cancelada. La inversión ya ha sido liquidada.");
 			}else{
 				System.out.println("###Por llamar al procedure USP_LOG_ActualizarMontoInversion");
 				liquidacionDao.executeProcedure(params, "USP_LOG_ActualizarMontoInversion");
