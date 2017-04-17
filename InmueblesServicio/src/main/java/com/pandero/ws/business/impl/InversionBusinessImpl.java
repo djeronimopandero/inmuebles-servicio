@@ -852,7 +852,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 					resultado = Constantes.Service.RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION;
 				}
 			}
+		}
 			
+		if(resultado.equals("")){		
 			// Actualizar estado de envio a contabilidad
 			Date date=Util.getFechaActual();
 			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
