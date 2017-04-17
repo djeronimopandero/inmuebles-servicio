@@ -1412,6 +1412,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		
+		dblImporteTotalComprobantes = dblImporteTotalComprobantes + (importeIngresar==null?0:importeIngresar.doubleValue());
+		
 		LOG.info("###dblImporteTotalComprobantes:"+dblImporteTotalComprobantes);
 		LOG.info("###Importe de inversion:"+inversion.getImporteInversion());
 		
