@@ -250,7 +250,7 @@ public class PedidoDaoImpl implements PedidoDao {
 			p.setPedidoId(rs.getInt("PedidoID"));
 			p.setNroPedido(rs.getString("NumeroPedido"));
 			p.setMontoCertificado(rs.getDouble("MontoCertificado"));
-			
+			p.setSituacionContrato(rs.getString("SituacionContratoID"));
 			return p;		    
 		}
 	}
