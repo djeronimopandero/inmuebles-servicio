@@ -134,9 +134,14 @@ public class PedidoController {
 			String pedidoId = String.valueOf(params.get("pedidoId"));
 			String nroContrato = String.valueOf(params.get("nroContrato"));
 			String usuarioId = String.valueOf(params.get("usuarioId"));
+			String idContrato = String.valueOf(params.get("idContrato"));
+			String resultado = pedidoBusiness.agregarContratoPedido(pedidoId, nroContrato, usuarioId,idContrato);
+			if("1".equals(resultado)){
+				result = "Operacion Cancelada. El contrato se encuentra en una evaluacion crediticia.";
+			}else{
+				result = Constantes.Service.RESULTADO_EXITOSO;	
+			}
 			
-			pedidoBusiness.agregarContratoPedido(pedidoId, nroContrato, usuarioId);
-			result = Constantes.Service.RESULTADO_EXITOSO;
 			
 		}catch(Exception e){
 			LOG.error("Error pedido/agregarContratoPedido:: ",e);

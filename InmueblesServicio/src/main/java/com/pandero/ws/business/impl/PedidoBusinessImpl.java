@@ -127,7 +127,7 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 					contratoBusiness.sincronizarContratosyAsociadosSafACaspio();
 					for(Map<String,Object> contrato:contratosEvaluacionCrediticia){
 						String nroCon = contrato.get("ContratoNumero").toString();
-						agregarContratoPedido(pedidoId, nroCon, usuarioSAFId);
+						agregarContratoPedido(pedidoId, nroCon, usuarioSAFId,"");
 					}
 					
 				}
@@ -187,12 +187,24 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 		return resultado;
 	}
 	
-	public String agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId) throws Exception{
+	public String agregarContratoPedido(String pedidoCaspioId, String nroContrato, String usuarioSAFId, String contratoId) throws Exception{
+		String resultado = "";
+		if(!"".equals(contratoId)){
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("idContrato", contratoId);
+			params = genericDao.executeProcedure(params, "USP_FOC_VerificarContratoEvaluacionCrediticia");
+			if("1".equals(params.get("resultado"))){
+				resultado = "1";
+				return resultado;
+			}
+		}
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
-		String resultado = "";
+		
+		
+		
 		// Caspio - obtener datos pedido
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoCaspioId);
 		String nroPedido = pedido.getNroPedido();
