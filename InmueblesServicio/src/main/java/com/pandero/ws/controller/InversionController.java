@@ -974,7 +974,7 @@ public class InversionController {
 		ResultadoBean resultadoBean = new ResultadoBean();
 		try{
 			if(null!=nroInversion && null!=usuarioID){
-				resultadoBean= inversionBusiness.crearCreditoGarantia(nroInversion,Integer.parseInt(usuarioID));
+				resultadoBean= inversionBusiness.crearCreditoGarantia(nroInversion, usuarioID);
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 				resultadoBean.setMensajeError("Falta especificar el parametro inversionId");
@@ -1004,7 +1004,7 @@ public class InversionController {
 		ResultadoBean resultadoBean = new ResultadoBean();
 		try{
 			if(null!=nroInversion && null!=usuarioID){
-				resultadoBean= inversionBusiness.eliminarCreditoGarantia(nroInversion,Integer.parseInt(usuarioID));
+				resultadoBean= inversionBusiness.eliminarCreditoGarantia(nroInversion, usuarioID);
 			}else{
 				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 				resultadoBean.setMensajeError("Falta especificar el parametro inversionId");

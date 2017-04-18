@@ -172,32 +172,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				//verificamos si el inmueble esta hipotecado
 				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
 				if(inversion.getInmuebleInversionHipotecado()){					
-					// Obtener datos de la garantia	
-					Garantia garantia = new Garantia();
-					garantia.setPedidoNumero(pedido.getNroPedido());
-					garantia.setPartidaRegistral(inversion.getPartidaRegistral());		
-					garantia.setUsoBien("40");
-				
-					// Crear garantia en el SAF		
-					String garantiaSAFId = garantiaDAO.crearGarantiaSAF(garantia, usuarioId);	
-					if(Util.esVacio(garantiaSAFId)){
-						garantiaSAFId="0";
-					}
-					
-					// Crear garantia en caspio
-					Map<String,String> jsonRequest = new HashMap<String,String>();
-					jsonRequest.put("direccion", inversion.getDireccion());
-					jsonRequest.put("codigoDepartamento", inversion.getDepartamentoId());
-					jsonRequest.put("codigoProvincia", inversion.getProvinciaId());
-					jsonRequest.put("codigoDistrito", inversion.getDistritoId());
-					jsonRequest.put("partidaRegistral", inversion.getPartidaRegistral());
-					jsonRequest.put("categoriaConstruccion", "AQ");
-					jsonRequest.put("rangoPisos", "001");
-					jsonRequest.put("uso", "40");
-					jsonRequest.put("pedidoId", inversion.getPedidoId().toString());
-					jsonRequest.put("garantiaSAFId", garantiaSAFId);
-					garantiaService.crearGarantiaInversionCaspio(jsonRequest);	
-					
+					garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);					
 				}
 			}
 		}
@@ -218,28 +193,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 			
 			// Eliminar pedido-inversion en SAF
 			if(Util.esVacio(resultado)){
+				// Eliminar la garantia
+				garantiaDAO.eliminarCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);
+				
+				// Eliminar el pedido inversion
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
-				//eliminamos la garantia
-				List<Garantia> garantias = garantiaService.obtenerGarantiasPorPedido(inversion.getPedidoId().toString());
-				if(garantias!=null && garantias.size()>0){
-					for(Garantia garantia : garantias){
-						if(garantia.getPartidaRegistral().equals(inversion.getPartidaRegistral())){
-							
-							String garantiaSAFId = String.valueOf(garantia.getGarantiaSAFId().intValue());
-							
-							//Eliminar seguro CASPIO
-							String serviceWhere = "{\"where\":\"idGarantia="+garantia.getIdGarantia()+"\"}";	
-							garantiaService.eliminarSeguro(serviceWhere);
-							
-							// Eliminar garantia en SAF
-							garantiaDAO.eliminarGarantiaSAF(garantiaSAFId, usuarioId);
-							
-							// Eliminar garantia en Caspio
-							garantiaService.eliminarGarantiaPorId(garantia.getIdGarantia().toString());
-							break;
-						}
-					}
-				}				
 			}
 		}
 		
@@ -894,7 +852,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 					resultado = Constantes.Service.RESULTADO_ERROR_SUMA_COMPROBANTES_EXCEDE_INVERSION;
 				}
 			}
+		}
 			
+		if(resultado.equals("")){		
 			// Actualizar estado de envio a contabilidad
 			Date date=Util.getFechaActual();
 			String strFecha = Util.getDateFormat(date, Constantes.FORMATO_DATE_YMD);
@@ -1452,6 +1412,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		
+		dblImporteTotalComprobantes = dblImporteTotalComprobantes + (importeIngresar==null?0:importeIngresar.doubleValue());
+		
 		LOG.info("###dblImporteTotalComprobantes:"+dblImporteTotalComprobantes);
 		LOG.info("###Importe de inversion:"+inversion.getImporteInversion());
 		
@@ -1700,7 +1662,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public ResultadoBean crearCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception {
+	public ResultadoBean crearCreditoGarantia(String nroInversion, String usuarioId) throws Exception {
 		Integer res = garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(nroInversion, usuarioId);
 		ResultadoBean resultadoBean=new ResultadoBean();
 		resultadoBean.setEstado(res);
@@ -1708,7 +1670,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 	
 	@Override
-	public ResultadoBean eliminarCreditoGarantia(String nroInversion,Integer usuarioId) throws Exception {
+	public ResultadoBean eliminarCreditoGarantia(String nroInversion, String usuarioId) throws Exception {
 		Integer res = garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(nroInversion, usuarioId);
 		ResultadoBean resultadoBean=new ResultadoBean();
 		resultadoBean.setEstado(res);
