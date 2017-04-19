@@ -163,7 +163,11 @@ public class Constantes {
 	}
 	
 	public class GenLista{
-		public final static String TIPO_ARMADAS_DESEMBOLSO="INMUEBLES_ARMADAS_DESEMBOLSO";
+		public final static String TIPO_ARMADAS_DESEMBOLSO = "INMUEBLES_ARMADAS_DESEMBOLSO";
+		public final static int ARMADA_1 = 1;
+		public final static double ARMADA_2 = 0.5;
+		public final static double ARMADA_3 = 0.4;
+		public final static double ARMADA_4 = 0.1;
 	}
 	
 	public class Garantia{

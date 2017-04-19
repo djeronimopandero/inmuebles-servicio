@@ -884,6 +884,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 						}
 						// Obtener monto del desembolso
 						double montoDesembolso = ultimaLiquidacion.getLiquidacionImporte();
+						// Si se va a generar la ultima liquidacion
+						if(nroArmadaActual==3){
+							// Obtener el monto total
+							double montoTotal = montoDesembolso/(Constantes.GenLista.ARMADA_3);
+							montoDesembolso = montoTotal*Constantes.GenLista.ARMADA_2; // Se obtiene el otro 50%
+						}
+						
+						// Obtener monto minimo desembolso
 						double montoMinimoDesembolso = montoDesembolso*Constantes.Liquidacion.PORCENTAJE_MIN_DESEMBOLSO;
 						LOG.info("totalComprobantes:: "+totalComprobantes+ " - montoMinimoDesembolso:: "+montoMinimoDesembolso);
 						if(totalComprobantes>=montoMinimoDesembolso){
