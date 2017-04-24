@@ -187,6 +187,7 @@ public class PedidoDaoImpl implements PedidoDao {
 		call.addDeclaredParameter(new SqlParameter("@PropietarioRazonSocial", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@InmuebleDireccion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@InmuebleUbigeo", Types.VARCHAR));
+		call.addDeclaredParameter(new SqlParameter("@PartidaRegistral", Types.VARCHAR));		
 		call.addDeclaredParameter(new SqlParameter("@UsuarioID", Types.INTEGER));
 				
 		MapSqlParameterSource parameters = new MapSqlParameterSource();	
@@ -199,6 +200,7 @@ public class PedidoDaoImpl implements PedidoDao {
 		parameters.addValue("@PropietarioRazonSocial", inversion.getPropietarioRazonSocial());
 		parameters.addValue("@InmuebleDireccion", inversion.getDireccion());
 		parameters.addValue("@InmuebleUbigeo", inversion.getDistritoId());
+		parameters.addValue("@PartidaRegistral", inversion.getPartidaRegistral());
 		parameters.addValue("@UsuarioID", usuarioID);
 		
 		call.execute(parameters);	

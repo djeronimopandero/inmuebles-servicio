@@ -163,11 +163,11 @@ public class GarantiaDaoImpl implements GarantiaDao {
 		call.addDeclaredParameter(new SqlParameter("@nroInversion", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlParameter("@usuarioId", Types.VARCHAR));
 		call.addDeclaredParameter(new SqlOutParameter("@creditoGarantiaID", Types.INTEGER));
-				
+		
 		MapSqlParameterSource parameters = new MapSqlParameterSource()
 		.addValue("@nroInversion", nroInversion)     
 		.addValue("@usuarioId", usuarioId);     
-				
+		
 		Map resultadoSP = call.execute(parameters);
 		return  resultadoSP.get("@CreditoGarantiaID")!=null?(Integer)resultadoSP.get("@CreditoGarantiaID"):0;
 	}
