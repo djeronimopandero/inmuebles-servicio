@@ -121,13 +121,17 @@ public class PedidoBusinessImpl implements PedidoBusiness{
 				
 				Map<String,Object> params = new HashMap<String, Object>();
 				params.put("numeroContrato", nroContrato);
+				
+				// Obtener todos los contratos de la evaluacion crediticia
 				Map<String,Object> result = contratoDao.obtenerContratosEvaluacionCrediticia(params);
-				List<Map<String,Object>> contratosEvaluacionCrediticia = (List<Map<String,Object>>)result.get("#result-set-1");
+				List<Map<String,Object>> contratosEvaluacionCrediticia = (List<Map<String,Object>>)result.get("#result-set-1");				
 				if(contratosEvaluacionCrediticia!=null && contratosEvaluacionCrediticia.size()>0){
 					contratoBusiness.sincronizarContratosyAsociadosSafACaspio();
 					for(Map<String,Object> contrato:contratosEvaluacionCrediticia){
-						String nroCon = contrato.get("ContratoNumero").toString();
-						agregarContratoPedido(pedidoId, nroCon, usuarioSAFId,"");
+						String numeroContrato = contrato.get("ContratoNumero").toString();
+						if(!numeroContrato.equals(nroContrato)){
+							agregarContratoPedido(pedidoId, numeroContrato, usuarioSAFId,"");
+						}
 					}
 					
 				}

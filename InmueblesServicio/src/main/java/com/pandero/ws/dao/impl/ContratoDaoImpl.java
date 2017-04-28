@@ -74,6 +74,11 @@ public class ContratoDaoImpl implements ContratoDao {
 		return genericDao.executeProcedure(params, "USP_FOC_ObtenerContratosEvaluacionCrediticia");
 	}
 	
+	public Map<String,Object> obtenerGarantiasEvaluacionCrediticia(Map<String,Object> params) throws Exception{
+		return genericDao.executeProcedure(params, "USP_CRE_ConsultarCreditoGarantiasInmueble");
+	}
+	
+	
 	private static final class ContratoMapper implements RowMapper<ContratoSAF>{
 		public ContratoSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
 			ContratoSAF e = new ContratoSAF();	

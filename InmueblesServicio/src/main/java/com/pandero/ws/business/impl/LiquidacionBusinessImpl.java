@@ -243,9 +243,10 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 					if(listaGarantias!=null && listaGarantias.size()>0){
 						for(Garantia garantia : listaGarantias){
 							System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion()+" - "+garantia.getConstitucionEtapaID());
-							if(inversion.getInmuebleInversionHipotecado()){
+							if(!Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+									&& inversion.getInmuebleInversionHipotecado()){
 								int constitucionGarantiaEtapa = garantia.getConstitucionEtapaID()==null?0:garantia.getConstitucionEtapaID();
-								if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>=constitucionGarantiaEtapa){
+								if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>constitucionGarantiaEtapa){
 									validacionLiquidacion=false;
 									resultado = Constantes.Service.RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL;
 									break;
@@ -256,7 +257,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 									resultado = Constantes.Service.RESULTADO_NO_GARANTIA_FICHA_FECHA;
 									break;
 								}
-							}						
+							}				
 						}
 					}else{
 						validacionLiquidacion=false;

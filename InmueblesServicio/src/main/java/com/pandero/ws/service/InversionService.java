@@ -19,7 +19,8 @@ public interface InversionService {
 	public String actualizarEstadoInversionCaspioPorNro(String nroInversion, String estadoInversion) throws Exception;
 	public String actualizarEstadoInversionLiquidadoPorNro(String nroInversion, String nroLiquidacion, String estadoInversion) throws Exception;
 	public String actualizarSituacionConfirmadoInversionCaspio(String inversionId, String situacionConfirmado) throws Exception;
-
+	public String actualizarIndicadorInmuebleHipotecadoInversionCaspio(String inversionId, String indicadorInmuebleHipotecado) throws Exception;
+	
 	public String crearRequisitoInversion(String inversionId, String requisitoId) throws Exception;
 	public List<InversionRequisito> obtenerRequisitosPorInversion(String inversionId) throws Exception;
 	public String actualizarEstadoInversionRequisitoCaspio(String inversionId,String estadoInversionReq) throws Exception;

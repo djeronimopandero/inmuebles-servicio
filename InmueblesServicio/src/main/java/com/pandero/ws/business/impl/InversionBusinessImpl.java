@@ -74,6 +74,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Autowired
 	PedidoDao pedidoDao;
 	@Autowired
+	GarantiaDao garantiaDao;
+	@Autowired
 	MailService mailService;
 	@Autowired
 	LiquidacionDao liquidacionDao;
@@ -105,6 +107,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		garantiaService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
+		boolean cambiaInmuebleInversionHipotecado = false;
 		// Obtener datos de la inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 				
@@ -136,12 +139,67 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 			
 			// Continuar si paso las validaciones
+			String mensajeInmuebleInversionHipotecado="";
 			if(Util.esVacio(resultado)){
 				// Obtener datos del pedido	
 				Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
 				
 				// Obtener proveedor SAF
 				PersonaSAF proveedor = obtenerProveedor(inversion, pedido.getAsociadoId());
+				
+				//verificamos si el inmueble esta hipotecado
+				System.out.println("INMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
+				if(inversion.getInmuebleInversionHipotecado()){					
+					//garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);	
+					
+					// Obtener los contratos del pedido
+					List<Contrato> listaContratos = pedidoDao.obtenerContratosxPedidoSAF(pedido.getNroPedido());
+					String nroContrato = "";
+					if(listaContratos!=null && listaContratos.size()>0){
+						nroContrato = listaContratos.get(0).getNroContrato();				
+					}
+					System.out.println("nroContrato: "+nroContrato);
+					
+					// Obtener la evaluacion crediticia asociada a los contratos
+					Map<String,Object> params = new HashMap<String, Object>();
+					params.put("numeroContrato", nroContrato);
+					Map<String,Object> result = contratoDao.obtenerContratosEvaluacionCrediticia(params);
+					List<Map<String,Object>> contratosEvaluacionCrediticia = (List<Map<String,Object>>)result.get("#result-set-1");	
+					
+					// Si existe una evaluacion crediticia 
+					if(contratosEvaluacionCrediticia!=null && contratosEvaluacionCrediticia.size()>0){
+						System.out.println("si tiene evaluacion crediticia");
+						boolean existePartidaRegistral = false;
+						// Obtener el creditoID
+						String creditoID = "";
+						for(Map<String,Object> evaluacionCrediticia:contratosEvaluacionCrediticia){
+							creditoID = evaluacionCrediticia.get("CreditoID").toString();
+						}
+						System.out.println("CREDITO-ID:: "+creditoID);
+						// Obtener garantias de la evaluacion crediticia
+						Map<String,Object> params2 = new HashMap<String, Object>();
+						params2.put("CreditoID", creditoID);
+						Map<String,Object> result2 = contratoDao.obtenerGarantiasEvaluacionCrediticia(params2);
+						List<Map<String,Object>> garantiasEvaluacionCrediticia = (List<Map<String,Object>>)result2.get("#result-set-1");
+						// Verficar si la partida se encuentra en la evaluacion crediticia
+						if(garantiasEvaluacionCrediticia!=null && garantiasEvaluacionCrediticia.size()>0){
+							System.out.println("si tiene garantias");
+							String partidaRegistral = "";
+							for(Map<String,Object> garantia:garantiasEvaluacionCrediticia){
+								partidaRegistral = garantia.get("PartidaRegistral").toString();
+								System.out.println("partidas: "+inversion.getPartidaRegistral()+"-"+partidaRegistral);
+								if(inversion.getPartidaRegistral().equals(partidaRegistral)){
+									existePartidaRegistral = true;
+								}
+							}
+						}
+						if(!existePartidaRegistral){
+							System.out.println("no existe partida registral");
+							inversion.setInmuebleInversionHipotecado(false);
+							cambiaInmuebleInversionHipotecado = true;
+						}
+					}
+				}
 				
 				// Registrar pedido-inversion SAF
 				PedidoInversionSAF pedidoInversionSAF = new PedidoInversionSAF();
@@ -162,18 +220,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 				}
 				pedidoInversionSAF.setConfirmarID("1");
 				pedidoInversionSAF.setUsuarioIDCreacion(usuarioId);	
-				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmueble())));
+				System.out.println("TIPO INMUEBLE: "+inversion.getTipoInmuebleId());
+				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmuebleId())));
 				pedidoInversionSAF.setMontoInversion(String.valueOf(inversion.getImporteInversion()));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
 				
 				// Sincroniza informacion de inmueble a SAF
 				registrarInmuebleInversion(inversion, usuarioId);
 				
-				//verificamos si el inmueble esta hipotecado
-				System.out.println("INMMUEBLES HIPOTECADO:: "+inversion.getInmuebleInversionHipotecado());
-				if(inversion.getInmuebleInversionHipotecado()){					
-					garantiaDAO.crearCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);					
-				}
 			}
 		}
 		
@@ -194,7 +248,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			// Eliminar pedido-inversion en SAF
 			if(Util.esVacio(resultado)){
 				// Eliminar la garantia
-				garantiaDAO.eliminarCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);
+				//garantiaDAO.eliminarCreditoGarantiaEvaluacionCrediticia(inversion.getNroInversion(), usuarioId);
 				
 				// Eliminar el pedido inversion
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
@@ -208,6 +262,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 				resultado=validarDiferenciaPrecioExcedenteEnInversion(inversionId, String.valueOf(inversion.getPedidoId()));
 			}
 			inversionService.actualizarSituacionConfirmadoInversionCaspio(inversionId, situacionConfirmado);
+
+			// Desactivar indicar inmueble inversion hipotecado
+			if(cambiaInmuebleInversionHipotecado){
+				System.out.println("actualiza indicador inversion inmueble hipotecado");
+				inversionService.actualizarIndicadorInmuebleHipotecadoInversionCaspio(inversionId, "0");
+				resultado+=" "+Constantes.Service.RESULTADO_INMUEBLE_HIPOTECADO_NO;
+			}
 		}
 							
 		return resultado;

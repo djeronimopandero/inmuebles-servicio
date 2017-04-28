@@ -127,6 +127,7 @@ public class GarantiaDaoImpl implements GarantiaDao {
 			p.setFechaConstitucion(rs.getString("FechaConstitucion"));
 			p.setConstitucionEtapaID(rs.getInt("ConstitucionEtapaID"));
 			p.setConstitucionGarantiaEstadoID(rs.getInt("ConstitucionGarantiaEstadoID"));
+			p.setPartidaRegistral(rs.getString("PartidaRegistral"));
 			return p;		    
 		}
 	}
