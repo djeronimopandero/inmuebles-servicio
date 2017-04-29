@@ -13,5 +13,7 @@ public interface ContratoDao {
 	
 	public List<ContratoSAF> getListContratoAlDia()throws Exception;
 	public List<Asociado> obtenerAsociadosxContratoSAF(String nroContrato) throws Exception;
+	
 	public Map<String,Object> obtenerContratosEvaluacionCrediticia(Map<String,Object> params) throws Exception;
+	public Map<String,Object> obtenerGarantiasEvaluacionCrediticia(Map<String,Object> params) throws Exception;
 }

@@ -201,6 +201,7 @@ public class Util {
 		}else if(Constantes.TipoInmueble.OTROS_COD.equals(tipoInmuebleCod)){
 			tipoInversionId = Constantes.TipoInmueble.OTROS_ID;
 		}
+		System.out.println("COMPARACION TIPO INMUEBLE:: "+tipoInmuebleCod+" - "+tipoInversionId);
 		return tipoInversionId;
 	}
 	

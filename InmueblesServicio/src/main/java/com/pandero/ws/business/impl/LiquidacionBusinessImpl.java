@@ -220,33 +220,56 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				}
 			}
 			
-			// Validar garantias
-			if(validacionLiquidacion){			
-				// Obtener garantias del pedido
-				List<Garantia> listaGarantias = garantiaDao.obtenerGarantiasPorInversion(nroInversion);
-				if(listaGarantias!=null && listaGarantias.size()>0){
-					for(Garantia garantia : listaGarantias){
-						System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion()+" - "+garantia.getConstitucionEtapaID());
-						if(inversion.getInmuebleInversionHipotecado()){
-							int constitucionGarantiaEtapa = garantia.getConstitucionEtapaID()==null?0:garantia.getConstitucionEtapaID();
-							if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>=constitucionGarantiaEtapa){
-								validacionLiquidacion=false;
-								resultado = Constantes.Service.RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL;
-								break;
-							}
-						}else{
-							if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
-								validacionLiquidacion=false;
-								resultado = Constantes.Service.RESULTADO_NO_GARANTIA_FICHA_FECHA;
-								break;
-							}
-						}						
-					}
-				}else{
-					validacionLiquidacion=false;
-					resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+			// Verificar si todos los contratos estan cancelados
+			int cantContratosPedido = 0, cantContratosCancelados = 0;
+			cantContratosPedido = listaPedidoContrato.size();
+			for(Contrato contrato : listaPedidoContrato){
+				System.out.println("CONTRATOS: "+contrato.getNroContrato()+" - "+contrato.getSituacionContrato());
+				if(contrato.getSituacionContrato()!=null){
+					System.out.println("situacion: "+contrato.getSituacionContrato().substring(0,2));
+				}
+				if(contrato.getSituacionContrato()!=null && 
+						contrato.getSituacionContrato().substring(0,2).equals("01")){
+					cantContratosCancelados += 1;
 				}
 			}
+			
+			// Validar garantias
+			if(validacionLiquidacion){
+				// Si todos los contratos estan cancelados no se evaluan las garantias
+				if(cantContratosPedido>cantContratosCancelados){				
+					// Obtener garantias del pedido
+					List<Garantia> listaGarantias = garantiaDao.obtenerGarantiasPorInversion(nroInversion);
+					if(listaGarantias!=null && listaGarantias.size()>0){
+						for(Garantia garantia : listaGarantias){
+							System.out.println("garantia: "+garantia.getIdGarantia()+" - "+garantia.getFichaConstitucion()+" - "+garantia.getFechaConstitucion()+" - "+garantia.getConstitucionEtapaID());
+							if(!Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+									&& inversion.getInmuebleInversionHipotecado()){
+								int constitucionGarantiaEtapa = garantia.getConstitucionEtapaID()==null?0:garantia.getConstitucionEtapaID();
+								if(Constantes.Garantia.CONST_GARANTIA_ETAPA_BLOQUEO_REGISTRAL>constitucionGarantiaEtapa){
+									validacionLiquidacion=false;
+									resultado = Constantes.Service.RESULTADO_NO_GARANTIA_BLOQUEO_REGISTRAL;
+									break;
+								}
+							}else{
+								if(Util.esVacio(garantia.getFichaConstitucion()) || Util.esVacio(garantia.getFechaConstitucion())){
+									validacionLiquidacion=false;
+									resultado = Constantes.Service.RESULTADO_NO_GARANTIA_FICHA_FECHA;
+									break;
+								}
+							}				
+						}
+					}else{
+						validacionLiquidacion=false;
+						resultado = Constantes.Service.RESULTADO_NO_GARANTIAS;
+					}				
+				}else{
+					LOG.info("No se evaluan las garantias");
+					System.out.println("No se evaluan las garantias");
+				}
+			}
+			
+			
 						
 			// Validar el estado de la liquidacion
 			if(validacionLiquidacion){
@@ -629,14 +652,16 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		}
 
 		// Obtener cancelacion diferencia precio
-		DetalleDiferenciaPrecio detalleDifPrecio = obtenerMontosDifPrecioInversion(inversion.getNroInversion());
-		if(detalleDifPrecio!=null){
-			double montoSaldoDiferencia = Double.parseDouble(detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
-			double montoPagado = Double.parseDouble(detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
-			double totalPendiente = montoSaldoDiferencia-montoPagado;
-			if (totalPendiente > 0){
-				System.out.println("DiferenciaPrecio no pagada: "+montoPagado+" < "+montoSaldoDiferencia);
-				conceptoNoPagado=true;
+		if(!Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			DetalleDiferenciaPrecio detalleDifPrecio = obtenerMontosDifPrecioInversion(inversion.getNroInversion());
+			if(detalleDifPrecio!=null){
+				double montoSaldoDiferencia = Double.parseDouble(detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
+				double montoPagado = Double.parseDouble(detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
+				double totalPendiente = montoSaldoDiferencia-montoPagado;
+				if (totalPendiente > 0){
+					System.out.println("DiferenciaPrecio no pagada: "+montoPagado+" < "+montoSaldoDiferencia);
+					conceptoNoPagado=true;
+				}
 			}
 		}
 		

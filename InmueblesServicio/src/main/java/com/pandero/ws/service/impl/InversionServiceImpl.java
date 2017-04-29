@@ -156,7 +156,19 @@ public class InversionServiceImpl implements InversionService {
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return null;
 	}
-
+		
+	public String actualizarIndicadorInmuebleHipotecadoInversionCaspio(String inversionId, 
+			String indicadorInmuebleHipotecado) throws Exception{
+		Map<String, String> request = new HashMap<String, String>();
+		request.put("InmuebleInversionHipotecado", indicadorInmuebleHipotecado);		
+		
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "'\"}";	
+		String actualizarPedidoURL = tablePedidoInversionURL+Constantes.Service.URL_WHERE;
+		
+        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
+		return null;
+	}
+	
 	@Override
 	public List<InversionRequisito> obtenerRequisitosPorInversion(String inversionId) throws Exception {
 		List<InversionRequisito> listaRequisitos = null;	

@@ -250,6 +250,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 	@Override
 	public List<ConceptoLiquidacion> obtenerConceptosLiquidacion(
 			String nroInversion) throws Exception {
+		System.out.println("USP_LOG_Inmb_MostratConceptos_ActaEntrega:: "+nroInversion);
 		List<ConceptoLiquidacion> listaConceptos = null;
 		
 		SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate);

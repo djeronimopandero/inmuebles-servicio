@@ -69,10 +69,10 @@ public class DocumentoUtil {
 							for (Parametro param : params) {
 								if (null != param) {
 									
-									LOG.info("text >>"+text+"<<");
+//									LOG.info("text >>"+text+"<<");
 									
 									if (text.contains("$tabla1")) {
-										LOG.info("EN $tabla1");
+//										LOG.info("EN $tabla1");
 										/** Tabla datos asociado y certificados **/
 										text = text.replace("$tabla1", "");
 										r.setText(text, 0);
@@ -126,11 +126,11 @@ public class DocumentoUtil {
 									
 									}else if(text.contains("$tablaInversiones")){
 										
-										LOG.info("EN $tablaInversiones");
+//										LOG.info("EN $tablaInversiones");
 										/** Tabla de inversiones **/
 										text = text.replace("$tablaInversiones", "");
 										r.setText(text, 0);
-										LOG.info("EN TABLA INVERSIONES");
+//										LOG.info("EN TABLA INVERSIONES");
 										
 										XmlCursor cursor = p.getCTP().newCursor();
 										XWPFTable t1 = doc.insertNewTbl(cursor);
@@ -162,11 +162,11 @@ public class DocumentoUtil {
 										}
 										
 									}else if(text.contains("$texto1")){
-										System.out.println("EN $texto1");
+//										System.out.println("EN $texto1");
 										/** Tabla de Anotaciones **/
 										text = text.replace("$texto1", "");
 										r.setText(text, 0);
-										System.out.println("EN ANOTACIONES");										
+//										System.out.println("EN ANOTACIONES");										
 										XmlCursor cursor = p.getCTP().newCursor();
 										XWPFTable t1 = doc.insertNewTbl(cursor);
 										t1.getCTTbl().getTblPr().unsetTblBorders();
@@ -187,11 +187,11 @@ public class DocumentoUtil {
 										}
 										
 									}else if(text.contains("$tablaFirmas")){
-										System.out.println("EN $tablaFirmas");
+//										System.out.println("EN $tablaFirmas");
 										/** Tabla de Firmas **/
 										text = text.replace("$tablaFirmas", "");
 										r.setText(text, 0);
-										System.out.println("EN TABLA FIRMAS");										
+//										System.out.println("EN TABLA FIRMAS");										
 										XmlCursor cursor = p.getCTP().newCursor();
 										XWPFTable t1 = doc.insertNewTbl(cursor);
 										t1.getCTTbl().getTblPr().unsetTblBorders();

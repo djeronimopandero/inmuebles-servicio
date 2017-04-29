@@ -47,7 +47,7 @@ public class Constantes {
 		public final static String RESULTADO_SIN_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. No se han recepcionado los documentos enviados.";
 		public final static String RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. Los documentos se encuentran recepcionados.";
 		public final static String RESULTADO_NO_REQUIERE_COMPROBANTES="Operación cancelada. No se requiere recepcionar documentos.";
-		
+		public final static String RESULTADO_INMUEBLE_HIPOTECADO_NO = " El inmueble no coincide con ninguna garantía real registrada en la evaluación crediticia, se desactivará el check.";
 	}
 	
 	public class Pedido {
@@ -110,8 +110,8 @@ public class Constantes {
 		public final static String SITUACION_CONFIRMADO="SI";
 		public final static String SITUACION_NO_CONFIRMADO="NO";
 		public final static String ESTADO_ANULADO="ANULADO";
-		public final static String DIFERENCIA_PRECIO="DIFERENCIA_PRECIO";
-		public final static String EXCEDENTE_CERTIFICADO="EXCEDENTE_CERTIFICADO";
+		public final static String DIFERENCIA_PRECIO="Existe Diferencia de Precio. Debe informar al Asociado. ";
+		public final static String EXCEDENTE_CERTIFICADO="Existe Excedente de Certificado. Debe informar al Asociado. ";
 		public final static String ESTADO_EN_PROCESO="EN-PROCESO";
 		public final static String ESTADO_LIQUIDADO="LIQUIDADO";
 		public final static String ESTADO_VB_CONTABLE="VB-CONT";
@@ -163,7 +163,11 @@ public class Constantes {
 	}
 	
 	public class GenLista{
-		public final static String TIPO_ARMADAS_DESEMBOLSO="INMUEBLES_ARMADAS_DESEMBOLSO";
+		public final static String TIPO_ARMADAS_DESEMBOLSO = "INMUEBLES_ARMADAS_DESEMBOLSO";
+		public final static int ARMADA_1 = 1;
+		public final static double ARMADA_2 = 0.5;
+		public final static double ARMADA_3 = 0.4;
+		public final static double ARMADA_4 = 0.1;
 	}
 	
 	public class Garantia{
