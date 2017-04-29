@@ -48,6 +48,9 @@ public class InversionServiceImpl implements InversionService {
 	@Value("${url.service.table.pedido}")
 	private String tablePedidoURL;
 	
+	@Value("${url.service.table.liquidacionDesembolso}")
+	private String tableLiquidacionDesembolso;
+	
 	String tokenCaspio = "";
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
@@ -380,6 +383,8 @@ public class InversionServiceImpl implements InversionService {
 		Map<String,Object> body = new HashMap<String, Object>();
 		body.put("Estado", "ENTREGADO");
 		actualizarTablaCaspio(body,tablePedidoInversionURL,serviceWhere);
+		serviceWhere = "{\"where\":\"InversionId='"+params.get("InversionId")+"'\"}";
+		actualizarTablaCaspio(body,tableLiquidacionDesembolso,serviceWhere);
         
         //obtemos las inversiones por pedido		
         serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+"\"}";		
