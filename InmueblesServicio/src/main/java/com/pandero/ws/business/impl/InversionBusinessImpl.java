@@ -269,6 +269,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 				inversionService.actualizarIndicadorInmuebleHipotecadoInversionCaspio(inversionId, "0");
 				resultado+=" "+Constantes.Service.RESULTADO_INMUEBLE_HIPOTECADO_NO;
 			}
+			if(Constantes.Inversion.SITUACION_CONFIRMADO.equals(situacionConfirmado)){
+				List<Inversion> listaInversionesCaspio = pedidoService.obtenerInversionesxPedidoCaspio(String.valueOf(inversion.getPedidoId()));
+				resultado += "|inversionesConfirmadas";
+				 if(listaInversionesCaspio!=null && listaInversionesCaspio.size()>0){
+					 for(Inversion inversionVerificar : listaInversionesCaspio){
+						 if(!Constantes.Inversion.SITUACION_CONFIRMADO.equals(inversionVerificar.getConfirmado())){
+							 resultado = resultado.substring(0, resultado.indexOf("|"));
+							 break;
+						 }
+					 }
+				 }
+			}
 		}
 							
 		return resultado;
