@@ -1,6 +1,10 @@
 package com.pandero.ws.controller;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.websocket.server.PathParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.GeneralBusiness;
+import com.pandero.ws.service.GenericService;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
 
@@ -24,6 +29,10 @@ public class GeneralController {
 	
 	@Autowired
 	GeneralBusiness generalBusiness;
+	
+
+	@Autowired
+	GenericService genericService;
 	
 	@RequestMapping(value = "convertirDolares", method = RequestMethod.POST)
 	public @ResponseBody ResultadoBean convertirDolares(@RequestBody Map<String, Object> params){
@@ -84,6 +93,18 @@ public class GeneralController {
 			resultadoBean.setResultado("Parametros vacios");
 		}
 		return resultadoBean;
+	}
+	
+	@RequestMapping(value = "getCaspio", method = RequestMethod.GET)
+	public @ResponseBody Map<String,Object> getCaspio(@PathParam(value="URL") String URL, @PathParam(value="params") String params) {		
+		try{			
+			Map<String, Object> mapResult = new HashMap<String, Object>();
+			mapResult.put("Result",genericService.obtenerTablaCaspio(URL, params));
+			return 	mapResult;		
+		}catch(Exception e){
+			LOG.error("###Exception:",e);
+		}
+		return null;
 	}
 	
 }
