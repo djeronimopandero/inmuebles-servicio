@@ -30,6 +30,8 @@ public abstract class GenericService {
 	public String tableliquidacionDesembolso;
 	@Value("${url.service.table.seguro}")
 	public String tableseguro;
+	@Value("${url.service.view.tablaPedidoInversion}")
+	public String viewPedidoInversion;
 
 	public abstract void actualizarTablaCaspio(Map<String, Object> body,
 			String tableURL, String where) throws Exception;
