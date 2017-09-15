@@ -44,12 +44,14 @@ import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.dao.UsuarioDao;
 import com.pandero.ws.service.ConstanteService;
 import com.pandero.ws.service.GarantiaService;
+import com.pandero.ws.service.GenericService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.DocumentoUtil;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
@@ -87,6 +89,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	GarantiaDao garantiaDAO;
 	@Autowired
 	GarantiaService garantiaService;
+	@Autowired
+	GenericService genericService;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -1756,6 +1760,24 @@ public class InversionBusinessImpl implements InversionBusiness{
 		ResultadoBean resultadoBean=new ResultadoBean();
 		resultadoBean.setEstado(res);
 		return resultadoBean;
+	}
+	
+	@Override
+	public String validarInversionesRetiroAdjudicacion(String nroPedido) throws Exception{
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("where", "Pedido_NroPedido='" + nroPedido + "'");
+		List<Map<String,Object>> inversiones = genericService.obtenerTablaCaspio(genericService.viewPedidoInversion, JsonUtil.toJson(params));
+		if(inversiones.size()>0){
+			params.put("where", "Pedido_NroPedido='" + nroPedido + "'  and PedidoInversion_Confirmado='NO'");
+			inversiones = genericService.obtenerTablaCaspio(genericService.viewPedidoInversion, JsonUtil.toJson(params));
+			if(inversiones.size()>0){
+				return "INC";
+			}else{
+				return "";
+			}
+		}else{
+			return "NI";
+		}
 	}
 	
 	

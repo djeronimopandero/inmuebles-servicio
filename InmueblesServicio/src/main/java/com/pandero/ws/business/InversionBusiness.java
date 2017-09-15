@@ -48,5 +48,7 @@ public interface InversionBusiness {
 	public ResultadoBean actualizarInmuebleInversionHipotecado(String nroInversion, String check) throws Exception;
 	public ResultadoBean crearCreditoGarantia(String nroInversion, String usuarioId) throws Exception;
 	public ResultadoBean eliminarCreditoGarantia(String nroInversion, String usuarioId) throws Exception;
+	
+	public String validarInversionesRetiroAdjudicacion(String nroPedido) throws Exception;
 }
 	
