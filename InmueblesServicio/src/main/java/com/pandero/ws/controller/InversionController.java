@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
@@ -1016,5 +1017,18 @@ public class InversionController {
 		}	
 		return resultadoBean;
 	}
+	
+	
+	@RequestMapping(value = "validarInversionesRetiroAdjudicacion", method = RequestMethod.GET)
+	public @ResponseBody String validarInversionesRetiroAdjudicacion(@RequestParam(value="nroPedido") String nroPedido) {		
+		try{			
+			Map<String, Object> mapResult = new HashMap<String, Object>();
+			return inversionBusiness.validarInversionesRetiroAdjudicacion(nroPedido);
+		}catch(Exception e){
+			LOG.error("###Exception:",e);
+		}
+		return null;
+	}
+	
 	
 }
