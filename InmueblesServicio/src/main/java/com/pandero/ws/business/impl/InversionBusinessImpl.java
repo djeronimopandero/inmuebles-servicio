@@ -38,6 +38,7 @@ import com.pandero.ws.business.InversionBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.GarantiaDao;
+import com.pandero.ws.dao.GeneralDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
@@ -91,6 +92,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 	GarantiaService garantiaService;
 	@Autowired
 	GenericService genericService;
+	@Autowired
+	GeneralDao generalDao;
+	
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -979,6 +983,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 							LOG.info("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
 							if(resultLiquidacion.equals("")){
 								liquidacionAutomaticaExitosa = true;
+								Map<String,Object> parameters = new HashMap<String, Object>();
+								parameters.put("inversionNumero", inversion.getNroInversion());
+								parameters.put("libreGravamen", inversion.getGravamen());
+								parameters.put("areaTotal", inversion.getAreaTotal().toString());
+								parameters.put("partidaRegistral", inversion.getPartidaRegistral());
+								liquidacionDao.executeProcedure(parameters, "USP_FOC_NotificarAsociadoMorosoLiquidacionAutomatica_Inmuebles");
 							}
 						}					
 					}
