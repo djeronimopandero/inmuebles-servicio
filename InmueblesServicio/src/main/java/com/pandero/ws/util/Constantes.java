@@ -48,6 +48,7 @@ public class Constantes {
 		public final static String RESULTADO_EXISTE_RECEPCION_CARGO_CONTABILIDAD= "Operación cancelada. Los documentos se encuentran recepcionados.";
 		public final static String RESULTADO_NO_REQUIERE_COMPROBANTES="Operación cancelada. No se requiere recepcionar documentos.";
 		public final static String RESULTADO_INMUEBLE_HIPOTECADO_NO = " El inmueble no coincide con ninguna garantía real registrada en la evaluación crediticia, se desactivará el check.";
+		public final static String RESULTADO_ASOCIADO_MOROSO= "Operación cancelada. El Asociado cuenta con cuota(s) vencida(s) pendiente(s) de pago.";
 	}
 	
 	public class Pedido {
