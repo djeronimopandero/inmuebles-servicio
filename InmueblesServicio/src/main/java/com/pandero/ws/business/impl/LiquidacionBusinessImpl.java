@@ -22,6 +22,7 @@ import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.GarantiaDao;
+import com.pandero.ws.dao.GenericDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.service.ConstanteService;
@@ -61,6 +62,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	ContratoBusiness contratoBusiness;
 	@Autowired
 	GarantiaDao garantiaDao;
+	@Autowired
+	GenericDao genericDao;
 	
 	public List<Contrato> obtenerTablaContratosPedidoActualizado(String nroPedido) throws Exception{		
 		// Obtener contratos del pedido
@@ -509,6 +512,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 
 	@Override
 	public String confirmarLiquidacionInversion(String nroInversion, String nroArmada, String usuarioId) throws Exception {
+		Map<String,Object> parameters = new HashMap<String, Object>();
+		parameters.put("inversionNumero", nroInversion);
+		Map<String,Object> out = genericDao.executeProcedure(parameters, "USP_FOC_ValidarAsociadoMoroso_Inmuebles");
+		if(out.get("resultado") != null){
+			return Constantes.Service.RESULTADO_ASOCIADO_MOROSO;
+		}
+		
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		liquidDesembService.setTokenCaspio(tokenCaspio);
