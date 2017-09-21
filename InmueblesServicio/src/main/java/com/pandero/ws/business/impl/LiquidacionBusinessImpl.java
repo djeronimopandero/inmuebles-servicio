@@ -1,7 +1,9 @@
 package com.pandero.ws.business.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,6 +174,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			LOG.info("totalDisponible:: "+totalDisponibleContratos+"+"+montoDifPrecio);
 			
 			if(Constantes.TipoInversion.CONSTRUCCION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
+				
 			}else{
 				if(validacionLiquidacion){				
 					// Verficar si hay monto para liquidar
@@ -216,7 +219,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 								
 			// Validar montos por cobrar
 			if(validacionLiquidacion){
-				boolean validacionConceptos = validacionConceptosLiquidacion(inversion);
+				boolean validacionConceptos = validacionConceptosLiquidacion(inversion, totalDisponible);
 				if(validacionConceptos==false){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_PENDIENTE_COBROS;
@@ -646,7 +649,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	}
 	
 	
-	private boolean validacionConceptosLiquidacion(Inversion inversion) throws Exception{
+	private boolean validacionConceptosLiquidacion(Inversion inversion, double totalDisponibleContratos) throws Exception{
 		boolean resultado = false, conceptoNoPagado=false;
 		
 		// Obtener conceptos de liquidacion
@@ -663,6 +666,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 
 		// Obtener cancelacion diferencia precio
 		if(!Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			if(totalDisponibleContratos<inversion.getImporteInversion() ){
 			DetalleDiferenciaPrecio detalleDifPrecio = obtenerMontosDifPrecioInversion(inversion.getNroInversion());
 			if(detalleDifPrecio!=null){
 				double montoSaldoDiferencia = Double.parseDouble(detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
@@ -673,6 +677,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 					conceptoNoPagado=true;
 				}
 			}
+		}
 		}
 		
 		if(conceptoNoPagado==false){
