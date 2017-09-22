@@ -369,6 +369,8 @@ public class InversionController {
 				response.put("saldoDiferencia",detalleDifPrecio.getSaldoDiferencia()==null?"0.00":detalleDifPrecio.getSaldoDiferencia().replace(",", ""));
 				response.put("montoDifPrecioPagado",detalleDifPrecio.getMontoDifPrecioPagado()==null?"0.00":detalleDifPrecio.getMontoDifPrecioPagado().replace(",", ""));
 				response.put("tipoInversion",detalleDifPrecio.getTipoInversion());
+				response.put("montoDisponible",detalleDifPrecio.getMontoDisponible());
+				response.put("montoInversion",detalleDifPrecio.getMontoInversion());
 			}else{
 				response.put("result","0");
 			}
