@@ -606,6 +606,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		pedidoService.setTokenCaspio(tokenCaspio);
 		contratoService.setTokenCaspio(tokenCaspio);
 		
+		
+		
 		// Obtener datos de inversion
 		Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		
@@ -622,6 +624,17 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			// Obtener monto pagado dif. precio			
 			ddp.setMontoDifPrecioPagado(Util.getMontoFormateado(pedido.getCancelacionDiferenciaPrecioMonto()));
 			ddp.setTipoInversion(inversion.getTipoInversion());
+			
+			List<Contrato> listaPedidoContrato = obtenerTablaContratosPedidoActualizado(pedido.getNroPedido());
+			
+			// Verificar si existe monto disponible para la inversion
+			double totalDisponible=0;
+			double totalDisponibleContratos = obtenerTotalDisponibleEnPedido(listaPedidoContrato);
+			Pedido pedidoDif = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
+			double montoDifPrecio = pedido.getCancelacionDiferenciaPrecioMonto()==null?0.00:pedido.getCancelacionDiferenciaPrecioMonto();
+			// Total disponible
+			totalDisponible=totalDisponibleContratos+montoDifPrecio;
+			ddp.setMontoDisponible(totalDisponible);
 		}else{
 			ddp = null;
 		}
