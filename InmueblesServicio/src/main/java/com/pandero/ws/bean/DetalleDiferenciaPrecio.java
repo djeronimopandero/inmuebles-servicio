@@ -11,6 +11,7 @@ public class DetalleDiferenciaPrecio implements java.io.Serializable {
 	private String montoDifPrecioPagado;
 	private String tipoInversion;
 	private double montoDisponible;
+	private double montoInversion;
 	
 	public Integer getPedidoId() {
 		return pedidoId;
@@ -77,6 +78,12 @@ public class DetalleDiferenciaPrecio implements java.io.Serializable {
 	}
 	public void setMontoDisponible(double montoDisponible) {
 		this.montoDisponible = montoDisponible;
+	}
+	public double getMontoInversion() {
+		return montoInversion;
+	}
+	public void setMontoInversion(double montoInversion) {
+		this.montoInversion = montoInversion;
 	} 
 	
 }
