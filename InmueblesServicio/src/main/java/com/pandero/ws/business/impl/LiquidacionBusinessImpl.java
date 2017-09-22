@@ -635,7 +635,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			// Total disponible
 			totalDisponible=totalDisponibleContratos+montoDifPrecio;
 			ddp.setMontoDisponible(totalDisponible);
-			ddp.setMontoDisponible(inversion.getImporteInversion());
+			ddp.setMontoInversion(inversion.getImporteInversion());
 		}else{
 			ddp = null;
 		}
