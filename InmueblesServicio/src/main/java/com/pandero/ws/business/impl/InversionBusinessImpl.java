@@ -109,6 +109,55 @@ public class InversionBusinessImpl implements InversionBusiness{
 	
 	
 	@Override
+	public void enviarCorreoVerificacion(String inversionId) throws Exception {
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		constanteService.setTokenCaspio(tokenCaspio);
+		garantiaService.setTokenCaspio(tokenCaspio);
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+		
+		String siguienteProceso="";
+		if(ConstanteService.TIPO_INVERSION_ADQUISICION.equals(inversion.getTipoInversion())){
+			if(ConstanteService.TIPO_DOCUMENTO_RUC.equals(inversion.getPropietarioTipoDocId())){
+				//El proveedor es PJ
+				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+			}
+			else{
+				//El proveedor es PN
+				siguienteProceso="Liquidación de fondos disponibles";
+			}
+		}
+		else if(ConstanteService.TIPO_INVERSION_CONSTRUCCION.equals(inversion.getTipoInversion())){
+			if(inversion.getServicioConstructora()){
+				//Con constructora
+				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+			}
+			else{
+				//Sin constructora
+				siguienteProceso="Liquidación de fondos disponibles";
+			}
+		}
+		else if(ConstanteService.TIPO_INVERSION_CANCELACION.equals(inversion.getTipoInversion())){
+			siguienteProceso="Actualización del saldo de la deuda";
+		}
+		
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("NumeroPedido",pedido.getNroPedido());
+		parameters.put("NumeroInversion",inversion.getNroInversion());
+		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
+		parameters.put("LibreGravamen",inversion.getGravamen());
+		parameters.put("AreaTotal",inversion.getAreaTotal());
+		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
+		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		parameters.put("SiguienteProceso",siguienteProceso);
+		parameters.put("ProcesoID","01134");
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");	
+	}
+	
+	@Override
 	public String confirmarInversion(String inversionId, String situacionConfirmado, String usuarioId) throws Exception {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);

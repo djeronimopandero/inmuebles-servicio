@@ -7,6 +7,11 @@ import com.pandero.ws.bean.DocumentoRequisito;
 
 public interface ConstanteService {
 
+	String TIPO_INVERSION_CONSTRUCCION= "CONSTRUCCION";
+	String TIPO_INVERSION_ADQUISICION= "ADQUISICION";
+	String TIPO_INVERSION_CANCELACION= "CANCELACION";
+	String TIPO_DOCUMENTO_RUC="60";
+	
 	public void setTokenCaspio(String token);
 	
 	public List<Constante> obtenerListaDocumentosIdentidad() throws Exception;

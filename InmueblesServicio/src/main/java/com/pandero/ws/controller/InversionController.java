@@ -1031,5 +1031,26 @@ public class InversionController {
 		return null;
 	}
 	
+
+	@RequestMapping(value = "/enviarCorreoConfirmacion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> enviarCorreoConfirmacionInmobiliaria(@PathVariable(value="inversionId") String inversionId) {
+		LOG.info("###enviarCorreoConfirmacionInmobiliaria inversionId:"+inversionId);
+		Map<String, Object> response = new HashMap<String, Object>();
+		String result="", detail="";
+		try{
+			inversionBusiness.enviarCorreoVerificacion(inversionId);
+		}catch(Exception e){
+			LOG.error("Error inversion/enviarCorreoConfirmacion:: ",e);
+			e.printStackTrace();
+			result=Constantes.Service.RESULTADO_ERROR_INESPERADO;
+			detail=e.getMessage();
+		}			
+		response.put("result",result);
+		response.put("detail",detail);
+		System.out.println("RESPONSE: " +  response);			
+		return response;
+	}	
+	
 	
 }

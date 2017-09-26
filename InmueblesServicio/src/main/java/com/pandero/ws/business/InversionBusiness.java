@@ -50,5 +50,7 @@ public interface InversionBusiness {
 	public ResultadoBean eliminarCreditoGarantia(String nroInversion, String usuarioId) throws Exception;
 	
 	public String validarInversionesRetiroAdjudicacion(String nroPedido) throws Exception;
+	
+	public void enviarCorreoVerificacion(String inversionId) throws Exception;
 }
 	
