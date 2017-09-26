@@ -23,7 +23,6 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.EmailBean;
-import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.LiquidacionSAF;
@@ -39,6 +38,7 @@ import com.pandero.ws.business.LiquidacionBusiness;
 import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.dao.GeneralDao;
+import com.pandero.ws.dao.GenericDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
@@ -94,6 +94,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	GenericService genericService;
 	@Autowired
 	GeneralDao generalDao;
+	@Autowired
+	GenericDao genericDao;
 	
 	
 	@Value("${ruta.documentos.templates}")
@@ -232,7 +234,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				pedidoInversionSAF.setTipoInmuebleId(Util.obtenerTipoInmuebleID(String.valueOf(inversion.getTipoInmuebleId())));
 				pedidoInversionSAF.setMontoInversion(String.valueOf(inversion.getImporteInversion()));
 				pedidoDao.agregarPedidoInversionSAF(pedidoInversionSAF);	
-				
+				enviarCorreoConfirmacionInmueble(pedido,inversion);
 				// Sincroniza informacion de inmueble a SAF
 				registrarInmuebleInversion(inversion, usuarioId);
 				
@@ -1790,5 +1792,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 		}
 	}
 	
+
+	private void enviarCorreoConfirmacionInmueble(Pedido pedido, Inversion inversion) throws Exception{
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("NumeroPedido",pedido.getNroPedido());
+		parameters.put("NumeroInversion",inversion.getNroInversion());
+		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
+		parameters.put("LibreGravamen",inversion.getGravamen());
+		parameters.put("AreaTotal",inversion.getAreaTotal());
+		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
+		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		parameters.put("ProcesoID","01134");
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");
+	}
 	
 }
