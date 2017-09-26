@@ -1024,7 +1024,6 @@ public class InversionController {
 	@RequestMapping(value = "validarInversionesRetiroAdjudicacion", method = RequestMethod.GET)
 	public @ResponseBody String validarInversionesRetiroAdjudicacion(@RequestParam(value="nroPedido") String nroPedido) {		
 		try{			
-			Map<String, Object> mapResult = new HashMap<String, Object>();
 			return inversionBusiness.validarInversionesRetiroAdjudicacion(nroPedido);
 		}catch(Exception e){
 			LOG.error("###Exception:",e);
