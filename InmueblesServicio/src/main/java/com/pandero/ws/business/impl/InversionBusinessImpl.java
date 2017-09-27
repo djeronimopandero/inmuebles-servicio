@@ -128,7 +128,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");	
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");	
 	}
 	
 	@Override
@@ -1854,7 +1854,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
 		parameters.put("SiguienteProceso",siguienteProceso);
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");
 	}
 	
 }
