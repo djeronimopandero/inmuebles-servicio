@@ -117,32 +117,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		garantiaService.setTokenCaspio(tokenCaspio);
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
-		
-		String siguienteProceso="";
-		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
-			if(Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
-				//El proveedor es PJ
-				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
-			}
-			else{
-				//El proveedor es PN
-				siguienteProceso="Liquidación de fondos disponibles";
-			}
-		}
-		else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
-			if(inversion.getServicioConstructora()){
-				//Con constructora
-				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
-			}
-			else{
-				//Sin constructora
-				siguienteProceso="Liquidación de fondos disponibles";
-			}
-		}
-		else if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
-			siguienteProceso="Actualización del saldo de la deuda";
-		}
-		
+				
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
@@ -152,9 +127,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("AreaTotal",inversion.getAreaTotal());
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
-		parameters.put("SiguienteProceso",siguienteProceso);
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");	
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");	
 	}
 	
 	@Override
@@ -1843,6 +1817,32 @@ public class InversionBusinessImpl implements InversionBusiness{
 	
 
 	private void enviarCorreoConfirmacionInmueble(Pedido pedido, Inversion inversion) throws Exception{
+
+		String siguienteProceso="";
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+			if(Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
+				//El proveedor es PJ
+				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+			}
+			else{
+				//El proveedor es PN
+				siguienteProceso="Liquidación de fondos disponibles";
+			}
+		}
+		else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			if(inversion.getServicioConstructora()){
+				//Con constructora
+				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+			}
+			else{
+				//Sin constructora
+				siguienteProceso="Liquidación de fondos disponibles";
+			}
+		}
+		else if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
+			siguienteProceso="Actualización del saldo de la deuda";
+		}
+
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
@@ -1852,8 +1852,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("AreaTotal",inversion.getAreaTotal());
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		parameters.put("SiguienteProceso",siguienteProceso);
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");
+		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");
 	}
 	
 }
