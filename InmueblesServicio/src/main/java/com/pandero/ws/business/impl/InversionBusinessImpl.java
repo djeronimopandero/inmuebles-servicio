@@ -119,8 +119,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
 		
 		String siguienteProceso="";
-		if(ConstanteService.TIPO_INVERSION_ADQUISICION.equals(inversion.getTipoInversion())){
-			if(ConstanteService.TIPO_DOCUMENTO_RUC.equals(inversion.getPropietarioTipoDocId())){
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+			if(Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
 				//El proveedor es PJ
 				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
 			}
@@ -129,7 +129,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				siguienteProceso="Liquidación de fondos disponibles";
 			}
 		}
-		else if(ConstanteService.TIPO_INVERSION_CONSTRUCCION.equals(inversion.getTipoInversion())){
+		else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
 			if(inversion.getServicioConstructora()){
 				//Con constructora
 				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
@@ -139,7 +139,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 				siguienteProceso="Liquidación de fondos disponibles";
 			}
 		}
-		else if(ConstanteService.TIPO_INVERSION_CANCELACION.equals(inversion.getTipoInversion())){
+		else if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
 			siguienteProceso="Actualización del saldo de la deuda";
 		}
 		

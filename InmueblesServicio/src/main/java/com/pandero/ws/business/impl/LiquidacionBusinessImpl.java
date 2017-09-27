@@ -324,9 +324,30 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				
 				// Generar liquidacion por monto
 				generarLiquidacionPorMonto(pedidoInversionSAF, montoALiquidar, nroArmada, listaPedidoContrato, usuarioId, inversion);
+				
 							
 				// Actualizar montos de los contratos del pedido
 				actualizarTablaContratosPedido(pedidoInversionSAF.getNroPedido());
+
+				//Aqui agregamos los 3 tipos de correo.
+				if(Constantes.TipoInversion.CANCELACION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
+					//Correo cuando aplica el registro del saldo de la deuda
+					LOG.info("Correo confirmacion de liquidacion: actualizar saldo de deuda");
+					enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles");					
+				}
+				else{
+					List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt(nroArmada));
+					if(listaComprobantes!=null&&listaComprobantes.size()>0){
+						//Correo cuando aplica el registro de comprobante de pago
+						LOG.info("Correo confirmacion de liquidacion: registro de comprobante");
+						enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_ComprobantePago_Inmuebles");						
+					}
+					else{
+						LOG.info("Correo confirmacion de liquidacion: No registro de comprobante");
+						//Correo cuando no aplica el registro de comprobante de pago ni saldo de deuda
+						enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_Liquidacion_Inmuebles");						
+					}
+				}				
 			}			
 		}
 		LOG.info("TERMINO LIQUIDACION");		
@@ -525,6 +546,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		liquidDesembService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
 		
 		String resultado = "";
 						
@@ -595,6 +617,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			Inversion inversion = inversionService.obtenerInversionCaspioPorNro(nroInversion);
 			String inversionId = String.valueOf(inversion.getInversionId().intValue());
 			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_VB_CONTABLE);
+			Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
+			enviarCorreoLiquidacion(pedido, inversion, "USP_EnviaCorreo_VistoBuenoContabilidad_Inmuebles");
 		}
 		
 		return resultado;
@@ -752,6 +776,20 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 		}
 		return montoLiquidacion;
+	}
+	
+	private void enviarCorreoLiquidacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("NumeroPedido",pedido.getNroPedido());
+		parameters.put("NumeroInversion",inversion.getNroInversion());
+		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
+		parameters.put("LibreGravamen",inversion.getGravamen());
+		parameters.put("AreaTotal",inversion.getAreaTotal());
+		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
+		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		parameters.put("ProcesoID","01134");
+		genericDao.executeProcedure(parameters, procedimiento);
 	}
 	
 	
