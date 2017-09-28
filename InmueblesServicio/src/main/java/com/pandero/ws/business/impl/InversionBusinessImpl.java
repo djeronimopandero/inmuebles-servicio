@@ -1822,25 +1822,25 @@ public class InversionBusinessImpl implements InversionBusiness{
 		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
 			if(Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
 				//El proveedor es PJ
-				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+				siguienteProceso="el Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
 			}
 			else{
 				//El proveedor es PN
-				siguienteProceso="Liquidación de fondos disponibles";
+				siguienteProceso="la Liquidación de fondos disponibles";
 			}
 		}
 		else if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
 			if(inversion.getServicioConstructora()){
 				//Con constructora
-				siguienteProceso="Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
+				siguienteProceso="el Registro de comprobante(s) de pago emitidos por el proveedor/vendedor del inmueble";
 			}
 			else{
 				//Sin constructora
-				siguienteProceso="Liquidación de fondos disponibles";
+				siguienteProceso="la Liquidación de fondos disponibles";
 			}
 		}
 		else if(Constantes.TipoInversion.CANCELACION_COD.equals(inversion.getTipoInversion())){
-			siguienteProceso="Actualización del saldo de la deuda";
+			siguienteProceso="la Actualización del saldo de la deuda";
 		}
 
 		Map<String,Object> parameters = new HashMap<String,Object>();
