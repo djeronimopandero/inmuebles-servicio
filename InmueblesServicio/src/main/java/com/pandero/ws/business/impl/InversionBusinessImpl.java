@@ -1,5 +1,8 @@
 package com.pandero.ws.business.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
@@ -52,11 +56,15 @@ import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.DocumentGenerator;
 import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
+
+import fr.opensagres.xdocreport.converter.XDocConverterException;
+import fr.opensagres.xdocreport.core.XDocReportException;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -109,6 +117,162 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Value("${documento.email.to}")
 	private String documentoEmailTo;
 	
+	
+	public void enviarTest(String inversionId) throws Exception {
+		//String procedure = "USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles";
+		//Aqui puedes probar los siguientes procedimientos
+		//USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles
+		//USP_EnviaCorreo_ComprobantePago_Inmuebles
+		//USP_EnviaCorreo_Liquidacion_Inmuebles
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		constanteService.setTokenCaspio(tokenCaspio);
+		garantiaService.setTokenCaspio(tokenCaspio);
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt("1"));
+		if(listaComprobantes==null||listaComprobantes.size()==0){
+			enviarCorreoActualizacionSaldoDeuda(inversion, pedido);
+		}
+		else{
+			enviarCorreoActualizacionSaldoDeuda(inversion, pedido,listaComprobantes);
+		}
+		
+	}
+	
+	private void enviarCorreoActualizacionSaldoDeuda(Inversion inversion, Pedido pedido, List<ComprobanteCaspio> listaComprobantes)
+			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
+
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_ComprobantePago_Inmuebles");
+
+		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/registroComprobantesUnProveedor.odt");
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			if(!inversion.getServicioConstructora()){
+				rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/registroComprobantesMultiProveedor.odt");
+			}
+		}
+				
+		File rutaSalida = File.createTempFile("tmp", ".odt");
+		File rutaSalidaPdf = File.createTempFile("cargo"+System.currentTimeMillis(), ".pdf");
+
+		Map<String, Object> contexto = new HashMap<String, Object>();
+		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
+		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
+		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
+		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
+		
+		List<Constante> listaTipoDocumento = constanteService.obtenerListaTipoComprobante();
+		Map<Integer,String> mapTipoDocumento = new HashMap<Integer,String>();
+		for (Constante constante : listaTipoDocumento) {
+			mapTipoDocumento.put(constante.getConstanteId(), constante.getNombreConstante());
+		}
+				
+		List<String[]> lista = new ArrayList<String[]>();
+		int i = 0;
+		Double montoTotalSoles = 0.00;
+		Double montoTotalDolares = 0.00;
+		
+		for (ComprobanteCaspio comprobanteCaspio : listaComprobantes) {
+			String[] comprobante = new String[6];
+			String simbolo = Constantes.Moneda.DOLAR_SIMBOLO;
+			comprobante[0] = String.valueOf(++i);
+			comprobante[1] = comprobanteCaspio.getProveedor();
+			comprobante[2] = mapTipoDocumento.get(Float.valueOf(comprobanteCaspio.getDocumentoID()).intValue());
+			comprobante[3] = comprobanteCaspio.getSerie()+"-"+comprobanteCaspio.getNumero();
+			comprobante[4] = Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy");
+			if(Float.valueOf(comprobanteCaspio.getTipoMoneda()).intValue() != Integer.parseInt(Constantes.Moneda.DOLAR_CODIGO)){
+				simbolo = Constantes.Moneda.SOLES_SIMBOLO;
+				montoTotalSoles+=comprobanteCaspio.getImporte();
+			}
+			else{
+				montoTotalDolares+=comprobanteCaspio.getImporte();
+			}
+			comprobante[5] = simbolo+" "+Util.getMontoFormateado(comprobanteCaspio.getImporte());
+			lista.add(comprobante);
+			
+		}
+		contexto.put("listaComprobantes", lista);
+		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+		if(montoTotalSoles>0){
+			contexto.put("etiquetaSoles","TOTAL S/.");
+			contexto.put("montoTotalSoles", Util.getMontoFormateado(montoTotalSoles));	
+		}
+		if(montoTotalDolares>0){
+			contexto.put("etiquetaDolares","TOTAL US$");
+			contexto.put("montoTotalDolares", Util.getMontoFormateado(montoTotalDolares));
+		}
+		
+		DocumentGenerator.generateOdtFromOdtTemplate(rutaTemplate, rutaSalida, contexto);
+		DocumentGenerator.generatePdfFromOds(rutaSalida, rutaSalidaPdf);
+
+		
+		EmailBean email = new EmailBean();
+		email.setEmailFrom(documentoEmailTo);
+		email.setTextoEmail((String)outputMap.get("Mensaje"));
+		email.setSubject((String)outputMap.get("Asunto"));
+		email.setFormatHtml(true);
+		email.setEmailTo((String)outputMap.get("DestinatarioCorreo"));
+		email.setEnviarArchivo(true);
+		email.setAttachment(rutaSalidaPdf);
+		mailService.sendMail(email);
+		FileUtils.forceDelete(rutaSalida);
+		FileUtils.forceDelete(rutaSalidaPdf);
+	}
+	
+	private void enviarCorreoActualizacionSaldoDeuda(Inversion inversion, Pedido pedido)
+			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
+
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles");
+
+		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/cancelacionDeuda.odt");
+		File rutaSalida = File.createTempFile("tmp", ".odt");
+		File rutaSalidaPdf = File.createTempFile("cargo"+System.currentTimeMillis(), ".pdf");
+
+		Map<String, Object> contexto = new HashMap<String, Object>();
+		contexto.put("nroCredito", inversion.getNroCredito());
+		contexto.put("importeInicial",  Util.getMontoFormateado(inversion.getImporteInversionInicial()));
+		contexto.put("importeFinal", Util.getMontoFormateado(inversion.getImporteInversion()));		
+		contexto.put("diferencia", Util.getMontoFormateado(inversion.getImporteInversionInicial()-inversion.getImporteInversion()));
+		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
+		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
+		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
+		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
+		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+
+		DocumentGenerator.generateOdtFromOdtTemplate(rutaTemplate, rutaSalida, contexto);
+		DocumentGenerator.generatePdfFromOds(rutaSalida, rutaSalidaPdf);
+
+		
+		EmailBean email = new EmailBean();
+		email.setEmailFrom(documentoEmailTo);
+		email.setTextoEmail((String)outputMap.get("Mensaje"));
+		email.setSubject((String)outputMap.get("Asunto"));
+		email.setFormatHtml(true);
+		email.setEmailTo((String)outputMap.get("DestinatarioCorreo"));
+		email.setEnviarArchivo(true);
+		email.setAttachment(rutaSalidaPdf);
+		mailService.sendMail(email);
+		FileUtils.forceDelete(rutaSalida);
+		FileUtils.forceDelete(rutaSalidaPdf);
+	}
+
+	private Map<String,Object> enviarCorreoLiquidacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("NumeroPedido",pedido.getNroPedido());
+		parameters.put("NumeroInversion",inversion.getNroInversion());
+		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
+		parameters.put("LibreGravamen",inversion.getGravamen());
+		parameters.put("AreaTotal",inversion.getAreaTotal());
+		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
+		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		parameters.put("ProcesoID","01134");
+		return genericDao.executeProcedure(parameters, procedimiento);
+	}
 	
 	@Override
 	public void enviarCorreoVerificacion(String inversionId) throws Exception {
