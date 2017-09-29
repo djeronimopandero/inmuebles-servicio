@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
-import java.time.LocalDate;
-import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,7 +62,6 @@ public class DocumentGenerator {
 
 		IContext context = report.createContext();
 		context.putMap(contexto);
-		putCommonFields(context);
 
 		OutputStream out = new FileOutputStream(pathOutput);
 		report.process(context, out);
@@ -99,7 +96,6 @@ public class DocumentGenerator {
 
 		IContext context = report.createContext();
 		context.putMap(contexto);
-		putCommonFields(context);
 
 		Options options = Options.getTo(ConverterTypeTo.PDF);
 
@@ -132,7 +128,6 @@ public class DocumentGenerator {
 
 		IContext context = report.createContext();
 		context.putMap(contexto);
-		putCommonFields(context);
 
 		OutputStream out = new FileOutputStream(pathOutput);
 		report.process(context, out);
@@ -206,18 +201,6 @@ public class DocumentGenerator {
 		return pathOutput;
 	}
 
-	/**
-	 * Put common fields.
-	 *
-	 * @param context
-	 *            the context
-	 */
-	private static void putCommonFields(IContext context) {
-		LocalDate today = LocalDate.now();
-		context.put("dia", today.getDayOfMonth());
-		context.put("mes", today.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
-		context.put("anio", today.getYear());
-	}
 
 	/**
 	 * Instantiates a new PDF generator.

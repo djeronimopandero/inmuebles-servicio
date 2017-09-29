@@ -23,6 +23,7 @@ import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.ContratoSAF;
 import com.pandero.ws.bean.DocumentoRequisito;
 import com.pandero.ws.bean.EmailBean;
+import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
 import com.pandero.ws.bean.LiquidacionSAF;
@@ -94,6 +95,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	GenericService genericService;
 	@Autowired
 	GeneralDao generalDao;
+	
 	@Autowired
 	GenericDao genericDao;
 	
@@ -266,6 +268,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		// Desconfirmar Inversion
 		if(Constantes.Inversion.SITUACION_NO_CONFIRMADO.equals(situacionConfirmado)){
+			Map<String,Object> inputParams = new HashMap<String,Object>();
+			inputParams.put("nroInversion", inversion.getNroInversion());
+			inputParams = genericDao.executeProcedure(inputParams, "USP_LOG_verificarSolicitudExcedente");
+			if(Integer.parseInt(inputParams.get("resultado").toString())==0){
 			// Validar verificacion de requisitos
 			boolean verificacionRequisitos = true;
 			List<InversionRequisito> listaRequisitos = inversionService.obtenerRequisitosPorInversion(inversionId);
@@ -286,6 +292,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 				// Eliminar el pedido inversion
 				pedidoDao.eliminarPedidoInversionSAF(inversion.getNroInversion(), usuarioId);
 			}
+				
+			}else{
+				resultado="EXCEDENTE";
+			}
+			
 		}
 		
 		// Actualizar situacion confirmacion inversion en Caspio
@@ -1567,6 +1578,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 		resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXITO.getCodigo());
 		
 		if(null!=params){
+			Map<String,Object> inputParams = new HashMap<String,Object>();
+			inputParams.put("nroInversion", params.get("nroInversion").toString());
+			inputParams = genericDao.executeProcedure(inputParams, "USP_LOG_verificarSolicitudExcedente");
+			if(Integer.parseInt(inputParams.get("resultado").toString())==0){
 			String nroInversion = params.get("nroInversion")!=null?params.get("nroInversion").toString():"0";
 			List<LiquidacionSAF> list= liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
 			System.out.println("###Se obtuvo la lista de liquidaciones.");
@@ -1578,6 +1593,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 				System.out.println("###Por llamar al procedure USP_LOG_ActualizarMontoInversion");
 				liquidacionDao.executeProcedure(params, "USP_LOG_ActualizarMontoInversion");
 			}
+		}else{
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
+				resultadoBean.setMensajeError("Operación cancelada. El pedido cuenta con una solicitud de excedente de certificado emitida y/o aplicada.");
+			}
+			
+			
 		}else{
 			System.out.println("###Los parametros son nulos");
 		}
