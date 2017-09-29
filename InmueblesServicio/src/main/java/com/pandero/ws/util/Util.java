@@ -84,6 +84,11 @@ public class Util {
 		return fechaDate;
 	}
 	
+	
+	public static String convertirFechaDate(String fecha, String formatoOriginal, String formatoFinal){
+		return getDateFormat(convertirFechaStrADate(fecha,formatoOriginal), formatoFinal) ;
+	}
+	
 	public static String getDocuIdentidadNombre(List<Constante> listaDocuIdentidad, String docuIdentidadId){
 		String docuIdentidadNombre = "";
 		for(Constante constante : listaDocuIdentidad){

@@ -1,5 +1,9 @@
 package com.pandero.ws.bean;
 
+import java.io.File;
+
+import org.apache.commons.lang.StringUtils;
+
 public class EmailBean implements java.io.Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -11,6 +15,7 @@ public class EmailBean implements java.io.Serializable {
 	private String textoEmail;
 	private boolean isFormatHtml;
 	private boolean enviarArchivo;
+	private File attachment; 
 	
 	public String getEmailFrom() {
 		return emailFrom;
@@ -20,6 +25,9 @@ public class EmailBean implements java.io.Serializable {
 	}
 	public String getEmailTo() {
 		return emailTo;
+	}
+	public String[] getEmailToArray() {
+		return StringUtils.split(emailTo,";");
 	}
 	public void setEmailTo(String emailTo) {
 		this.emailTo = emailTo;
@@ -53,6 +61,12 @@ public class EmailBean implements java.io.Serializable {
 	}
 	public void setEnviarArchivo(boolean enviarArchivo) {
 		this.enviarArchivo = enviarArchivo;
+	}
+	public File getAttachment() {
+		return attachment;
+	}
+	public void setAttachment(File attachment) {
+		this.attachment = attachment;
 	}
 	
 }

@@ -426,4 +426,8 @@ public class Inversion implements java.io.Serializable {
 		RecepContabilidadUsuario = recepContabilidadUsuario;
 	}
 	
+	public String getPropietarioNombreCompleto(){
+		return PropietarioApePaterno+" "+PropietarioApeMaterno+" "+PropietarioNombres; 
+	}
+	
 }

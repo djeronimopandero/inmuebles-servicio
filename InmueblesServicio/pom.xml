@@ -220,6 +220,13 @@
 			<scope>compile</scope>
 		</dependency>
 		
+		<dependency>
+		    <groupId>commons-collections</groupId>
+		    <artifactId>commons-collections</artifactId>
+		    <version>3.0</version>
+		</dependency>
+		
+		
 		<!-- POI -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>

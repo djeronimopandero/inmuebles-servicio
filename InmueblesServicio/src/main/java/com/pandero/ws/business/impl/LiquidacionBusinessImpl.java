@@ -1,13 +1,19 @@
 package com.pandero.ws.business.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.pandero.ws.bean.ComprobanteCaspio;
@@ -15,6 +21,7 @@ import com.pandero.ws.bean.ConceptoLiquidacion;
 import com.pandero.ws.bean.Constante;
 import com.pandero.ws.bean.Contrato;
 import com.pandero.ws.bean.DetalleDiferenciaPrecio;
+import com.pandero.ws.bean.EmailBean;
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
@@ -32,10 +39,15 @@ import com.pandero.ws.service.ContratoService;
 import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.LiquidDesembService;
+import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.DocumentGenerator;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
+
+import fr.opensagres.xdocreport.converter.XDocConverterException;
+import fr.opensagres.xdocreport.core.XDocReportException;
 
 @Component
 public class LiquidacionBusinessImpl implements LiquidacionBusiness{
@@ -66,6 +78,19 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	GarantiaDao garantiaDao;
 	@Autowired
 	GenericDao genericDao;
+	
+	@Autowired
+	MailService mailService;
+	
+	
+	@Value("${ruta.documentos.templates}")
+	private String rutaDocumentosTemplates;
+	@Value("${ruta.documentos.generados}")
+	private String rutaDocumentosGenerados;
+	@Value("${desarrollo.pandero.email}")
+	private String emailDesarrolloPandero;
+	@Value("${documento.email.to}")
+	private String documentoEmailTo;
 	
 	public List<Contrato> obtenerTablaContratosPedidoActualizado(String nroPedido) throws Exception{		
 		// Obtener contratos del pedido
@@ -332,8 +357,9 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				//Aqui agregamos los 3 tipos de correo.
 				if(Constantes.TipoInversion.CANCELACION_ID.equals(pedidoInversionSAF.getPedidoTipoInversionID())){
 					//Correo cuando aplica el registro del saldo de la deuda
-					LOG.info("Correo confirmacion de liquidacion: actualizar saldo de deuda");
-					enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles");					
+					LOG.info("Correo confirmacion de liquidacion: actualizar saldo de deuda");					
+					enviarCorreoActualizacionSaldoDeuda(inversion, pedido);
+					
 				}
 				else{
 					List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(), Integer.parseInt(nroArmada));
@@ -353,6 +379,44 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		LOG.info("TERMINO LIQUIDACION");		
 		
 		return resultado;
+	}
+
+	private void enviarCorreoActualizacionSaldoDeuda(Inversion inversion, Pedido pedido)
+			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
+
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles");
+
+		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/cancelacionDeuda.odt");
+		File rutaSalida = File.createTempFile("tmp", ".odt");
+		File rutaSalidaPdf = File.createTempFile("cargo"+System.currentTimeMillis(), ".pdf");
+
+		Map<String, Object> contexto = new HashMap<String, Object>();
+		contexto.put("nroCredito", inversion.getNroCredito());
+		contexto.put("importeInicial",  Util.getMontoFormateado(inversion.getImporteInversionInicial()));
+		contexto.put("importeFinal", Util.getMontoFormateado(inversion.getImporteInversion()));		
+		contexto.put("diferencia", Util.getMontoFormateado(inversion.getImporteInversionInicial()-inversion.getImporteInversion()));
+		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
+		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
+		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
+		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
+		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+
+		DocumentGenerator.generateOdtFromOdtTemplate(rutaTemplate, rutaSalida, contexto);
+		DocumentGenerator.generatePdfFromOds(rutaSalida, rutaSalidaPdf);
+
+		
+		EmailBean email = new EmailBean();
+		email.setEmailFrom(documentoEmailTo);
+		email.setTextoEmail((String)outputMap.get("Mensaje"));
+		email.setSubject((String)outputMap.get("Asunto"));
+		email.setFormatHtml(true);
+		email.setEmailTo((String)outputMap.get("DestinatarioCorreo"));
+		email.setEnviarArchivo(true);
+		email.setAttachment(rutaSalidaPdf);
+		mailService.sendMail(email);
+		FileUtils.forceDelete(rutaSalida);
+		FileUtils.forceDelete(rutaSalidaPdf);
 	}
 	
 
@@ -778,7 +842,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		return montoLiquidacion;
 	}
 	
-	private void enviarCorreoLiquidacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
+	private Map<String,Object> enviarCorreoLiquidacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
@@ -789,7 +853,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, procedimiento);
+		return genericDao.executeProcedure(parameters, procedimiento);
 	}
 	
 	

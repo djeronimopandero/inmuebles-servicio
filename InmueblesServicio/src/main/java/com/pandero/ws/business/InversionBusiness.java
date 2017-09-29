@@ -52,5 +52,8 @@ public interface InversionBusiness {
 	public String validarInversionesRetiroAdjudicacion(String nroPedido) throws Exception;
 	
 	public void enviarCorreoVerificacion(String inversionId) throws Exception;
+
+	public void enviarTest(String inversionId) throws Exception;
+
 }
 	

@@ -14,4 +14,5 @@ public interface ConstanteService {
 	
 	public List<DocumentoRequisito> obtenerListaDocumentosPorTipoInversion(String tipoInversion) throws Exception;
 	public List<DocumentoRequisito> obtenerListaRequisitosPorTipoInversion(String tipoInversion) throws Exception;
+	public List<Constante> obtenerListaTipoComprobante() throws Exception;
 }

@@ -56,6 +56,12 @@ public class Constantes {
 		public final static String ESTADO_ANULADO = "ANULADO";
 	}
 	
+	public class Moneda {
+		public final static String DOLAR_CODIGO = "87";
+		public final static String DOLAR_SIMBOLO = "US$";
+		public final static String SOLES_SIMBOLO = "S/.";
+	}
+	
 	public class Producto {
 		public final static String PRODUCTO_INMUEBLES = "C5 - INMUEBLES";
 	}
@@ -165,6 +171,7 @@ public class Constantes {
 	
 	public class GenLista{
 		public final static String TIPO_ARMADAS_DESEMBOLSO = "INMUEBLES_ARMADAS_DESEMBOLSO";
+		public final static String TIPO_TIPO_COMPROBANTE = "LISTA_TIPO_DOCUMENTOS_LOGUISTICA";
 		public final static int ARMADA_1 = 1;
 		public final static double ARMADA_2 = 0.5;
 		public final static double ARMADA_3 = 0.4;

@@ -37,18 +37,24 @@ public class MailServiceImpl implements MailService{
 			MimeMessageHelper helper = new MimeMessageHelper(message, true);
 			
 			helper.setFrom(email.getEmailFrom());
-			helper.setTo("ichuyes@pandero.com.pe");
-			helper.setCc(email.getEmailTo());
+			helper.setTo(email.getEmailToArray());
+			helper.setCc("ichuyes@pandero.com.pe");
 			helper.setBcc("djeronimo@pandero.com.pe");
 			helper.setSubject(email.getSubject());
 			helper.setText(email.getTextoEmail(),email.isFormatHtml());
 			
 			LOGGER.info("##email.isEnviarArchivo():"+email.isEnviarArchivo());
 			if(email.isEnviarArchivo()){
-				String rutaDocumento = rutaDocumentosGenerados+"/"+email.getDocumento();
-				LOGGER.info("###rutaDocumento:"+rutaDocumento);
-				FileSystemResource file = new FileSystemResource(rutaDocumento);
-				helper.addAttachment(file.getFilename(), file);
+				if(email.getAttachment()!=null){
+					FileSystemResource file = new FileSystemResource(email.getAttachment());
+					helper.addAttachment(file.getFilename(), file);										
+				}
+				else{
+					String rutaDocumento = rutaDocumentosGenerados+"/"+email.getDocumento();
+					LOGGER.info("###rutaDocumento:"+rutaDocumento);
+					FileSystemResource file = new FileSystemResource(rutaDocumento);
+					helper.addAttachment(file.getFilename(), file);					
+				}
 			}
 		
 	     }catch (MessagingException e) {

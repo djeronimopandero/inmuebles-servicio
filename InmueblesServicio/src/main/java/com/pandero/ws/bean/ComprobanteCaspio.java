@@ -11,6 +11,7 @@ public class ComprobanteCaspio implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String Documento;
+	private String DocumentoID;
 	private String FechaEmision;
 	private String Serie;
 	private String Numero;
@@ -149,6 +150,12 @@ public class ComprobanteCaspio implements java.io.Serializable {
 	}
 	public void setEstadoContabilidad(String estadoContabilidad) {
 		EstadoContabilidad = estadoContabilidad;
+	}
+	public String getDocumentoID() {
+		return DocumentoID;
+	}
+	public void setDocumentoID(String documentoID) {
+		DocumentoID = documentoID;
 	}
 	
 }

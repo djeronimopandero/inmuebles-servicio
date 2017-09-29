@@ -167,4 +167,35 @@ public class ConstanteServiceImpl implements ConstanteService {
 		return listaConstantes;
 	}
 
+	@Override
+	public List<Constante> obtenerListaTipoComprobante() throws Exception {
+		List<Constante> listaConstantes = null;
+		Map<String, String> request = new HashMap<String, String>();
+		String serviceWhere = "{\"where\":\"TipoConstante='" + Constantes.GenLista.TIPO_TIPO_COMPROBANTE + "'\"}";
+		String obtenerConstantesArmadaDesembURL = tableConstantesURL+Constantes.Service.URL_WHERE;
+	
+		Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerConstantesArmadaDesembURL,Object.class,request,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapConstantes = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapConstantes!=null && mapConstantes.size()>0){
+	        			listaConstantes = new ArrayList<Constante>();
+	        			for(Object bean : mapConstantes){
+	        		 		String beanString = JsonUtil.toJson(bean);
+	        				Constante constante =  JsonUtil.fromJson(beanString, Constante.class);
+	        				listaConstantes.add(constante);        				
+	        			}
+	        			System.out.println("listaConstantesArmadaDesemb:: "+listaConstantes.size());
+	        		}        		
+	        	}
+	        }
+	    }	
+	    
+		return listaConstantes;
+	}
+	
 }
