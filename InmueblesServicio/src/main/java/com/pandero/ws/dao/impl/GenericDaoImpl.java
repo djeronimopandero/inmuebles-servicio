@@ -1,5 +1,6 @@
 package com.pandero.ws.dao.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -34,4 +35,17 @@ public class GenericDaoImpl implements GenericDao{
     	Map<String,Object> procedureResult = call.execute(in);
 		return procedureResult;
     }
+
+	@Override
+	public Map<String, Object> queryForMap(String sql) {
+		return jdbcTemplate.queryForMap(sql);
+	}
+
+	@Override
+	public List<Map<String, Object>> queryForList(String sql) {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.queryForList(sql);
+	}
+	
+	
 }

@@ -366,7 +366,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 					if(listaComprobantes!=null&&listaComprobantes.size()>0){
 						//Correo cuando aplica el registro de comprobante de pago
 						LOG.info("Correo confirmacion de liquidacion: registro de comprobante");
-						enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_ComprobantePago_Inmuebles");						
+						enviarCorreoRegistroComprobante(inversion,pedido,listaComprobantes);						
 					}
 					else{
 						LOG.info("Correo confirmacion de liquidacion: No registro de comprobante");
@@ -420,6 +420,88 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	}
 	
 
+	private void enviarCorreoRegistroComprobante(Inversion inversion, Pedido pedido, List<ComprobanteCaspio> listaComprobantes)
+			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
+
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_ComprobantePago_Inmuebles");
+
+		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/registroComprobantesUnProveedor.odt");
+		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
+			if(!inversion.getServicioConstructora()){
+				rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/registroComprobantesMultiProveedor.odt");
+			}
+		}
+				
+		File rutaSalida = File.createTempFile("tmp", ".odt");
+		File rutaSalidaPdf = File.createTempFile("cargo"+System.currentTimeMillis(), ".pdf");
+
+		Map<String, Object> contexto = new HashMap<String, Object>();
+		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
+		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
+		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
+		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
+		
+		List<Constante> listaTipoDocumento = constanteService.obtenerListaTipoComprobante();
+		Map<Integer,String> mapTipoDocumento = new HashMap<Integer,String>();
+		for (Constante constante : listaTipoDocumento) {
+			mapTipoDocumento.put(constante.getConstanteId(), constante.getNombreConstante());
+		}
+				
+		List<String[]> lista = new ArrayList<String[]>();
+		int i = 0;
+		Double montoTotalSoles = 0.00;
+		Double montoTotalDolares = 0.00;
+		
+		for (ComprobanteCaspio comprobanteCaspio : listaComprobantes) {
+			String[] comprobante = new String[6];
+			String simbolo = Constantes.Moneda.DOLAR_SIMBOLO;
+			String sql = "select Proveedor=CASE WHEN TipoDocumentoID=8 THEN PersonaRazonSocial ELSE PersonaNombreCompleto END from PER_Persona where PersonaID=";
+			comprobante[0] = String.valueOf(++i);
+			comprobante[1] = (String)genericDao.queryForMap(sql+comprobanteCaspio.getProveedor()).get("Proveedor") ;
+			comprobante[2] = mapTipoDocumento.get(Float.valueOf(comprobanteCaspio.getDocumentoID()).intValue());
+			comprobante[3] = comprobanteCaspio.getSerie()+"-"+comprobanteCaspio.getNumero();
+			comprobante[4] = Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy");
+			if(Float.valueOf(comprobanteCaspio.getTipoMoneda()).intValue() != Integer.parseInt(Constantes.Moneda.DOLAR_CODIGO)){
+				simbolo = Constantes.Moneda.SOLES_SIMBOLO;
+				montoTotalSoles+=comprobanteCaspio.getImporte();
+			}
+			else{
+				montoTotalDolares+=comprobanteCaspio.getImporte();
+			}
+			comprobante[5] = simbolo+" "+Util.getMontoFormateado(comprobanteCaspio.getImporte());
+			lista.add(comprobante);
+			
+		}
+		contexto.put("listaComprobantes", lista);
+		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+		if(montoTotalSoles>0){
+			contexto.put("etiquetaSoles","TOTAL S/.");
+			contexto.put("montoTotalSoles", Util.getMontoFormateado(montoTotalSoles));	
+		}
+		if(montoTotalDolares>0){
+			contexto.put("etiquetaDolares","TOTAL US$");
+			contexto.put("montoTotalDolares", Util.getMontoFormateado(montoTotalDolares));
+		}
+		
+		DocumentGenerator.generateOdtFromOdtTemplate(rutaTemplate, rutaSalida, contexto);
+		DocumentGenerator.generatePdfFromOds(rutaSalida, rutaSalidaPdf);
+
+		
+		EmailBean email = new EmailBean();
+		email.setEmailFrom(documentoEmailTo);
+		email.setTextoEmail((String)outputMap.get("Mensaje"));
+		email.setSubject((String)outputMap.get("Asunto"));
+		email.setFormatHtml(true);
+		email.setEmailTo((String)outputMap.get("DestinatarioCorreo"));
+		email.setEnviarArchivo(true);
+		email.setAttachment(rutaSalidaPdf);
+		mailService.sendMail(email);
+		FileUtils.forceDelete(rutaSalida);
+		FileUtils.forceDelete(rutaSalidaPdf);
+	}
+
+	
 	
 	private double obtenerTotalDisponibleEnPedido(List<Contrato> listaPedidoContrato){
 		double totalDisponible = 0.00;

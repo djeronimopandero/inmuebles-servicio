@@ -176,10 +176,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Double montoTotalDolares = 0.00;
 		
 		for (ComprobanteCaspio comprobanteCaspio : listaComprobantes) {
+			String sql = "select Proveedor=CASE WHEN TipoDocumentoID=8 THEN PersonaRazonSocial ELSE PersonaNombreCompleto END from PER_Persona where PersonaID=";
 			String[] comprobante = new String[6];
 			String simbolo = Constantes.Moneda.DOLAR_SIMBOLO;
 			comprobante[0] = String.valueOf(++i);
-			comprobante[1] = comprobanteCaspio.getProveedor();
+			comprobante[1] = (String)genericDao.queryForMap(sql+comprobanteCaspio.getProveedor()).get("Proveedor") ;
 			comprobante[2] = mapTipoDocumento.get(Float.valueOf(comprobanteCaspio.getDocumentoID()).intValue());
 			comprobante[3] = comprobanteCaspio.getSerie()+"-"+comprobanteCaspio.getNumero();
 			comprobante[4] = Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy");
