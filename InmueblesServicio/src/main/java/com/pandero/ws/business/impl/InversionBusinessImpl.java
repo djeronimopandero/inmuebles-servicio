@@ -1938,8 +1938,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public void enviarCorreoRegistroDesembolso(String nroInversion) throws Exception {
+	public void enviarCorreoRegistroDesembolso(String nroInversion,String parcial) throws Exception {
 		String procedure = "USP_EnviaCorreo_Tesoreria_Inmuebles";
+		if(parcial.equals("PARCIAL")){
+			procedure = "USP_EnviaCorreo_EmisionConstancia_Inmuebles";
+		}
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
