@@ -396,11 +396,16 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		contexto.put("importeFinal", Util.getMontoFormateado(inversion.getImporteInversion()));		
 		contexto.put("diferencia", Util.getMontoFormateado(inversion.getImporteInversionInicial()-inversion.getImporteInversion()));
 		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
-		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		if(inversion.getEntidadFinancieraNom()!=null&&!"".equals(inversion.getEntidadFinancieraNom())){
+			contexto.put("proveedor", inversion.getEntidadFinancieraNom());			
+		}
+		else{
+			contexto.put("proveedor", inversion.getPropietarioNombreCompleto());
+		}
 		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
 		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
 		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
-		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+		contexto.put("fecha",  Util.convertirFechaDate(inversion.getEnvioContabilidadFecha(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
 
 		DocumentGenerator.generateOdtFromOdtTemplate(rutaTemplate, rutaSalida, contexto);
 		DocumentGenerator.generatePdfFromOds(rutaSalida, rutaSalidaPdf);
@@ -437,7 +442,12 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 
 		Map<String, Object> contexto = new HashMap<String, Object>();
 		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
-		contexto.put("proveedor", inversion.getPropietarioNombreCompleto()+""+inversion.getPropietarioRazonSocial());
+		if(inversion.getEntidadFinancieraNom()!=null&&!"".equals(inversion.getEntidadFinancieraNom())){
+			contexto.put("proveedor", inversion.getEntidadFinancieraNom());			
+		}
+		else{
+			contexto.put("proveedor", inversion.getPropietarioNombreCompleto());
+		}
 		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
 		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
 		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
@@ -474,7 +484,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			
 		}
 		contexto.put("listaComprobantes", lista);
-		contexto.put("fecha", Util.getDateFormat(new Date(System.currentTimeMillis()),"dd/MM/yyyy hh:mm a" ));
+		contexto.put("fecha",  Util.convertirFechaDate(inversion.getEnvioContabilidadFecha(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
 		if(montoTotalSoles>0){
 			contexto.put("etiquetaSoles","TOTAL S/.");
 			contexto.put("montoTotalSoles", Util.getMontoFormateado(montoTotalSoles));	
