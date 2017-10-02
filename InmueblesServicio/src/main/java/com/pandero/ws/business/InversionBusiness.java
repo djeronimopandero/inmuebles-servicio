@@ -54,6 +54,8 @@ public interface InversionBusiness {
 	public void enviarCorreoVerificacion(String inversionId) throws Exception;
 
 	public void enviarTest(String inversionId) throws Exception;
+	
+	public void enviarCorreoDesembolsoExcepcional(String inversionId,String nroArmada,Map<String,Object> params) throws Exception;
 
 }
 	

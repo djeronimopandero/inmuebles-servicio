@@ -1908,5 +1908,49 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("ProcesoID","01134");
 		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");
 	}
+
+	@Override
+	public void enviarCorreoDesembolsoExcepcional(String inversionId, String nroArmada, Map<String, Object> params)
+			throws Exception {
+		String procedimiento = "USP_EnviaCorreo_DesembolsoExcepcional_Inmuebles";
+
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		constanteService.setTokenCaspio(tokenCaspio);
+		garantiaService.setTokenCaspio(tokenCaspio);
+		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+		List<LiquidacionSAF> liquidacionesSAF = liquidacionDao.obtenerLiquidacionPorInversionArmada(inversion.getNroInversion(), nroArmada);
+		if(liquidacionesSAF!=null && liquidacionesSAF.size()>0){
+			LiquidacionSAF liquidacionSAF = new LiquidacionSAF();
+			double liquidacionImporte = 0.00;
+			for(LiquidacionSAF liquidacion : liquidacionesSAF){
+				liquidacionSAF.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+				liquidacionImporte+=liquidacion.getLiquidacionImporte();
+			}
+			liquidacionSAF.setLiquidacionImporte(liquidacionImporte);
+			
+			params.put("importeDesembolso", liquidacionSAF.getLiquidacionImporte());
+			params.put("importeComprobante", getComprobanteResumen(inversion.getNroInversion(),Integer.parseInt(nroArmada)).get("importe"));
+		}
+		enviarCorreoDesembolsoExcepcional(pedido,inversion,params,procedimiento);
+	}
+
+	private Map<String,Object> enviarCorreoDesembolsoExcepcional(Pedido pedido, Inversion inversion,Map<String,Object> params, String procedimiento) throws Exception{
+		
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("NumeroPedido",pedido.getNroPedido());
+		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
+		parameters.put("NumeroSolicitud", (String)params.get("solicitudId"));
+		parameters.put("Observacion", (String)params.get("observacion"));
+		parameters.put("UsuarioId", Integer.parseInt(params.get("usuarioId").toString()));
+		parameters.put("ImporteDesembolso", params.get("importeDesembolso"));
+		parameters.put("ImporteComprobante", params.get("importeComprobante"));		
+		parameters.put("Estado", params.get("estado"));		
+		parameters.put("ProcesoID","01134");
+		return genericDao.executeProcedure(parameters, procedimiento);
+	}
 	
 }
