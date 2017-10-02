@@ -1,6 +1,8 @@
 package com.pandero.ws.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,6 @@ import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
-import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
 
 @Service
@@ -389,12 +390,15 @@ public class InversionServiceImpl implements InversionService {
 	@Override
 	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception{
 		Map<String,Object> resultMap = new HashMap<String,Object>();
-		
+		SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATE_NORMAL);
+		Date today = new Date();
 		//actualizamos la inversion a entregado
 		String serviceWhere = "{\"where\":\"NroInversion='"+params.get("NroInversion")+"'\"}";
 		Map<String,Object> body = new HashMap<String, Object>();
 		body.put("Estado", "ENTREGADO");
+		body.put("FechaEntrega", sdf.format(today));
 		actualizarTablaCaspio(body,tablePedidoInversionURL,serviceWhere);
+		body.remove("FechaEntrega");
 		serviceWhere = "{\"where\":\"InversionId='"+params.get("InversionId")+"'\"}";
 		actualizarTablaCaspio(body,tableLiquidacionDesembolso,serviceWhere);
         

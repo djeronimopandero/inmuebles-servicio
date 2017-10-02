@@ -2,6 +2,7 @@ package com.pandero.ws.business.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,11 +79,18 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 	public Map<String, Object> generarSeguro(Map<String, Object> params)
 			throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		Map<String,Object> out = new HashMap<String, Object>();
 		if(params.get("fechaInicioVigencia")!=null){
 			params.put("fechaInicioVigencia", sdf.parse(params.get("fechaInicioVigencia").toString()));
 			params.put("fechaFinVigencia", sdf.parse(params.get("fechaFinVigencia").toString()));
 		}		
-		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_generarSeguro");		
+		if ("".equals(String.valueOf(params.get("seguroIdProcedencia")))
+				|| params.get("seguroIdProcedencia") == null) {
+			out = liquidacionDao.executeProcedure(params, "USP_CRE_generarSeguro");
+		}else{
+			out = liquidacionDao.executeProcedure(params, "USP_CRE_generarSeguro_procedencia");
+		}
+				
 		return out;
 	}
 	

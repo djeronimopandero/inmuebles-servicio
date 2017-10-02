@@ -14,6 +14,15 @@ public class ConceptoLiquidacion {
 	private Integer PedidoID;
 	private Integer PedidoInversionID;
 	
+	private  String fechaPago;
+	
+	public String getFechaPago() {
+		return fechaPago;
+	}
+	public void setFechaPago(String fechaPago) {
+		this.fechaPago = fechaPago;
+	}
+	
 	public String getConceptoID() {
 		return ConceptoID;
 	}
