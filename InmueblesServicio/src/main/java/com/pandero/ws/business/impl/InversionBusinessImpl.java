@@ -123,11 +123,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
 
-		enviarCorreoLiquidacion(pedido,inversion,procedure);
+		enviarCorreoConfirmacion(pedido,inversion,procedure);
 		
 	}
 		
-	private Map<String,Object> enviarCorreoLiquidacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
+	private Map<String,Object> enviarCorreoConfirmacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
@@ -1937,6 +1937,17 @@ public class InversionBusinessImpl implements InversionBusiness{
 		enviarCorreoDesembolsoExcepcional(pedido,inversion,params,procedimiento);
 	}
 
+	@Override
+	public void enviarCorreoRegistroDesembolso(String nroInversion) throws Exception {
+		String procedure = "USP_EnviaCorreo_Tesoreria_Inmuebles";
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+        Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
+		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
+		enviarCorreoConfirmacion(pedido,inversion,procedure);
+	}
+
 	private Map<String,Object> enviarCorreoDesembolsoExcepcional(Pedido pedido, Inversion inversion,Map<String,Object> params, String procedimiento) throws Exception{
 		
 		Map<String,Object> parameters = new HashMap<String,Object>();
@@ -1952,5 +1963,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("ProcesoID","01134");
 		return genericDao.executeProcedure(parameters, procedimiento);
 	}
+
 	
 }
