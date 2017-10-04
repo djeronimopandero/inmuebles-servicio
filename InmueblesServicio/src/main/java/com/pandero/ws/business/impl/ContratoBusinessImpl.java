@@ -2,7 +2,9 @@ package com.pandero.ws.business.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,14 +24,17 @@ import com.pandero.ws.bean.PersonaSAF;
 import com.pandero.ws.bean.ResultadoBean;
 import com.pandero.ws.business.ContratoBusiness;
 import com.pandero.ws.dao.ContratoDao;
+import com.pandero.ws.dao.GenericDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
 import com.pandero.ws.service.ContratoService;
+import com.pandero.ws.service.GenericService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.service.PersonaService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
@@ -55,6 +60,10 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 	LiquidacionDao liquidacionDAO;
 	@Autowired
 	PedidoDao pedidoDao;
+	@Autowired
+	GenericService genericService;	
+	@Autowired
+	GenericDao genericDao;
 	
 	@Override
 	public ResultadoBean sincronizarContratosyAsociadosSafACaspio() throws Exception {
@@ -348,6 +357,43 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 			sumaDiferenciaPrecio = sumaDiferenciaPrecio + dblDifPrecioSaf;		
 		}
 		return sumaDiferenciaPrecio;
+	}
+	
+	@Override
+	public void aplicarExcedenteContratoCaspio(String nroInversion)
+			throws Exception {
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("nroInversion", nroInversion);
+		params = genericDao.executeProcedure(params,
+				"USP_FOC_obtenerSolicitudExcedenteAplicado");
+
+		if (Integer.parseInt(String.valueOf(params.get("idContrato"))) != 0) {
+			double excedenteImporte = Double.parseDouble(String.valueOf(params
+					.get("montoExcedente")));
+			int contratoId = Integer.parseInt(String.valueOf(params
+					.get("idContrato")));
+			params = new HashMap<String, Object>();
+			params.put("where", "ContratoId=" + contratoId
+					+ " and AplicoExcedente='false'");
+			List<Map<String, Object>> resultado = genericService
+					.obtenerTablaCaspio(genericService.tablecontrato,
+							JsonUtil.toJson(params));
+			if (resultado != null && resultado.size() > 0) {
+				Map<String, Object> contrato = resultado.get(0);
+				Map<String, Object> request = new HashMap<String, Object>();
+				request.put("AplicoExcedente", true);
+				request.put(
+						"MontoDisponible",
+						Double.parseDouble(String.valueOf(contrato
+								.get("MontoDisponible"))) - excedenteImporte);
+
+				genericService.actualizarTablaCaspio(request,
+						genericService.tablecontrato, JsonUtil.toJson(params));
+			}
+
+		}
+
 	}
 
 }

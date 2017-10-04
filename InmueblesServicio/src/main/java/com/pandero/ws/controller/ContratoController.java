@@ -74,4 +74,22 @@ public class ContratoController {
 		return resultadoBean;
 	}
 	
+	
+	@RequestMapping(value = "aplicarExcedenteContratoCaspio/{inversionNro}", method = RequestMethod.GET)
+	public @ResponseBody ResultadoBean aplicarExcedenteContratoCaspio(@PathVariable(value="inversionNro") String inversionNro){
+		LOG.info("###ContratoController.aplicarExcedenteContratoCaspio inversionNro:"+inversionNro);
+		ResultadoBean resultadoBean = null;
+		if(null!=inversionNro){
+			try {
+				contratoBusiness.aplicarExcedenteContratoCaspio(inversionNro);
+			} catch (Exception e) {
+				resultadoBean = new ResultadoBean();
+				resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.EXCEPTION.getCodigo());
+				resultadoBean.setResultado("Ocurrio un error al obtener el detalle de la diferencia de precio");
+				LOG.error("###getDiferenciaPrecioPorContrato:",e);
+			}
+		}
+		return resultadoBean;
+	}
+	
 }

@@ -13,4 +13,5 @@ public interface ContratoBusiness {
 	
 	public DetalleDiferenciaPrecio obtenerMontoDiferenciaPrecio(Integer pedidoId) throws Exception;
 	
+	public void aplicarExcedenteContratoCaspio(String nroInversion) throws Exception;
 }

@@ -19,6 +19,7 @@ import com.pandero.ws.bean.ComprobanteCaspio;
 import com.pandero.ws.bean.Garantia;
 import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.InversionRequisito;
+import com.pandero.ws.service.GenericService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.util.Constantes;
 import com.pandero.ws.util.JsonUtil;
@@ -56,6 +57,9 @@ public class InversionServiceImpl implements InversionService {
 	public void setTokenCaspio(String token){
 		tokenCaspio = token;
 	}
+
+	 @Autowired
+	 GenericService genericService;
 
 	public Inversion obtenerInversionCaspioPorId(String inversionId) throws Exception {
 		Inversion inversion = null;
@@ -376,46 +380,38 @@ public class InversionServiceImpl implements InversionService {
 		return null;
 	}
 	
-	public void actualizarTablaCaspio(Map<String,Object> body, String tableURL, String where) throws Exception{			
-		tableURL = tableURL+Constantes.Service.URL_WHERE;	
-        ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,tableURL,Object.class,body,where);
-	}
 	
-	public List<Map<String,Object>> obtenerTablaCaspio(String tableURL, String where) throws Exception{			
-		tableURL = tableURL+Constantes.Service.URL_WHERE;	
-		Map<String,Object> mapResult=(Map<String,Object>)ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,tableURL,Object.class,null,where);
-		return (List<Map<String,Object>>)mapResult.get("Result");
-	}
+	
 	
 	@Override
 	public Map<String,Object> confirmacionEntrega(Map<String,Object> params)throws Exception{
 		Map<String,Object> resultMap = new HashMap<String,Object>();
-		SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATE_NORMAL);
+		SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATE_CASPIO);
 		Date today = new Date();
 		//actualizamos la inversion a entregado
 		String serviceWhere = "{\"where\":\"NroInversion='"+params.get("NroInversion")+"'\"}";
 		Map<String,Object> body = new HashMap<String, Object>();
 		body.put("Estado", "ENTREGADO");
 		body.put("FechaEntrega", sdf.format(today));
-		actualizarTablaCaspio(body,tablePedidoInversionURL,serviceWhere);
+		genericService.actualizarTablaCaspio(body,tablePedidoInversionURL,serviceWhere);
 		body.remove("FechaEntrega");
 		serviceWhere = "{\"where\":\"InversionId='"+params.get("InversionId")+"'\"}";
-		actualizarTablaCaspio(body,tableLiquidacionDesembolso,serviceWhere);
+		genericService.actualizarTablaCaspio(body,tableLiquidacionDesembolso,serviceWhere);
         
         //obtemos las inversiones por pedido		
         serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+"\"}";		
-        List<Map<String,Object>> mapInversionesPedido = obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
+        List<Map<String,Object>> mapInversionesPedido = genericService.obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
         
 		//obtenemos las inversiones entregadas
 		serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+" and Estado='ENTREGADO'\"}";
-		List<Map<String,Object>> mapInversionesPedidoEntregado = obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
+		List<Map<String,Object>> mapInversionesPedidoEntregado = genericService.obtenerTablaCaspio(tablePedidoInversionURL,serviceWhere);
 		
 		//verificamos que todas las inversiones esten entregadas
 		if(mapInversionesPedido.size()>0 && mapInversionesPedidoEntregado.size()>0 && mapInversionesPedido.size()==mapInversionesPedidoEntregado.size()){
 			serviceWhere = "{\"where\":\"PedidoId="+params.get("pedidoId")+"\"}";			
 			body = new HashMap<String, Object>();
 			body.put("Estado", "CERRADO");
-			actualizarTablaCaspio(body,tablePedidoURL,serviceWhere);			
+			genericService.actualizarTablaCaspio(body,tablePedidoURL,serviceWhere);			
 		}
 		resultMap.put("mensaje", "OK");
 		return resultMap;
