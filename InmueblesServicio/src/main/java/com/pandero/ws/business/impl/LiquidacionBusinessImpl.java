@@ -441,13 +441,6 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		File rutaSalidaPdf = File.createTempFile("cargo"+System.currentTimeMillis(), ".pdf");
 
 		Map<String, Object> contexto = new HashMap<String, Object>();
-		contexto.put("emisor",inversion.getEnvioContabilidadUsuario());
-		if(inversion.getEntidadFinancieraNom()!=null&&!"".equals(inversion.getEntidadFinancieraNom())){
-			contexto.put("proveedor", inversion.getEntidadFinancieraNom());			
-		}
-		else{
-			contexto.put("proveedor", inversion.getPropietarioNombreCompleto());
-		}
 		contexto.put("asociados", outputMap.get("AsociadoNombreCompleto"));
 		contexto.put("funcionario", outputMap.get("FuncionarioNombreCompleto"));
 		contexto.put("contratos", outputMap.get("ContratoNumeroDetalle"));
@@ -481,7 +474,8 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			}
 			comprobante[5] = simbolo+" "+Util.getMontoFormateado(comprobanteCaspio.getImporte());
 			lista.add(comprobante);
-			
+			contexto.put("proveedor", comprobante[1]);
+			contexto.put("emisor",comprobanteCaspio.getEnvioContabilidadUsuario());
 		}
 		contexto.put("listaComprobantes", lista);
 		contexto.put("fecha",  Util.convertirFechaDate(inversion.getEnvioContabilidadFecha(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
