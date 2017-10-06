@@ -123,11 +123,11 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Inversion inversion = inversionService.obtenerInversionCaspioPorId(inversionId);
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
 
-		enviarCorreoConfirmacion(pedido,inversion,procedure);
+		enviarCorreoConfirmacion(pedido,inversion,null,procedure);
 		
 	}
 		
-	private Map<String,Object> enviarCorreoConfirmacion(Pedido pedido, Inversion inversion, String procedimiento) throws Exception{
+	private Map<String,Object> enviarCorreoConfirmacion(Pedido pedido, Inversion inversion, Map<String,Object> params,String procedimiento) throws Exception{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
@@ -137,6 +137,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("AreaTotal",inversion.getAreaTotal());
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
+		if(params!=null&&!params.isEmpty()){
+			parameters.putAll(params);
+		}
 		parameters.put("ProcesoID","01134");
 		return genericDao.executeProcedure(parameters, procedimiento);
 	}
@@ -1938,17 +1941,30 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public void enviarCorreoRegistroDesembolso(String nroInversion,String parcial) throws Exception {
+	public void enviarCorreoRegistroDesembolso(String nroInversion,String nroArmada,String parcial) throws Exception {
 		String procedure = "USP_EnviaCorreo_Tesoreria_Inmuebles";
-		if(parcial.equals("PARCIAL")){
-			procedure = "USP_EnviaCorreo_EmisionConstancia_Inmuebles";
-		}
+		Map<String,Object> params = new HashMap<String,Object>();
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
         Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
-		enviarCorreoConfirmacion(pedido,inversion,procedure);
+		if(parcial.equals("PARCIAL")){
+			procedure = "USP_EnviaCorreo_EmisionConstancia_Inmuebles";
+			List<LiquidacionSAF> liquidacionesSAF = liquidacionDao.obtenerLiquidacionPorInversionArmada(inversion.getNroInversion(), nroArmada);
+			if(liquidacionesSAF!=null && liquidacionesSAF.size()>0){
+				LiquidacionSAF liquidacionSAF = new LiquidacionSAF();
+				double liquidacionImporte = 0.00;
+				for(LiquidacionSAF liquidacion : liquidacionesSAF){
+					liquidacionSAF.setLiquidacionFecha(liquidacion.getLiquidacionFecha());
+					liquidacionImporte+=liquidacion.getLiquidacionImporte();
+				}
+				liquidacionSAF.setLiquidacionImporte(liquidacionImporte);				
+				params.put("importeDesembolso", liquidacionSAF.getLiquidacionImporte());
+			}
+		}
+		
+		enviarCorreoConfirmacion(pedido,inversion,params,procedure);
 	}
 
 	private Map<String,Object> enviarCorreoDesembolsoExcepcional(Pedido pedido, Inversion inversion,Map<String,Object> params, String procedimiento) throws Exception{

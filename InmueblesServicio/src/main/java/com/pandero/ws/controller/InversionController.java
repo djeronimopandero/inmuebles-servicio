@@ -1095,14 +1095,14 @@ public class InversionController {
 	}
 	
 
-	@RequestMapping(value = "/enviarCorreoRegistroDesembolso/{nroInversion}/{parcial}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/enviarCorreoRegistroDesembolso/{nroInversion}/{nroArmada}/{parcial}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public Map<String,Object> enviarCorreoRegistroDesembolso(@PathVariable(value="nroInversion") String nroInversion,@PathVariable(value="parcial") String parcial){
+	public Map<String,Object> enviarCorreoRegistroDesembolso(@PathVariable(value="nroInversion") String nroInversion,@PathVariable(value="nroArmada") String nroArmada,@PathVariable(value="parcial") String parcial){
 		LOG.info("###enviarCorreoRegistroDesembolso nroInversion:"+nroInversion);
 		Map<String, Object> response = new HashMap<String, Object>();
 		String result="", detail="";
 		try{
-			inversionBusiness.enviarCorreoRegistroDesembolso(nroInversion,parcial);
+			inversionBusiness.enviarCorreoRegistroDesembolso(nroInversion,nroArmada,parcial);
 		}catch(Exception e){
 			LOG.error("Error enviarCorreoDesembolsoExcepcional:: ",e);
 			e.printStackTrace();
