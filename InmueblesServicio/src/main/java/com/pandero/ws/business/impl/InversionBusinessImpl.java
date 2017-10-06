@@ -131,7 +131,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
-		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInversion",Constantes.TABLA_TIPO_INVERSION.get(inversion.getTipoInversion()));
 		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
 		parameters.put("LibreGravamen",inversion.getGravamen());
 		parameters.put("AreaTotal",inversion.getAreaTotal());
@@ -154,7 +154,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
-		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInversion",Constantes.TABLA_TIPO_INVERSION.get(inversion.getTipoInversion()));
 		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
 		parameters.put("LibreGravamen",inversion.getGravamen());
 		parameters.put("AreaTotal",inversion.getAreaTotal());
@@ -1898,7 +1898,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
-		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInversion",Constantes.TABLA_TIPO_INVERSION.get(inversion.getTipoInversion()));
 		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
 		parameters.put("LibreGravamen",inversion.getGravamen());
 		parameters.put("AreaTotal",inversion.getAreaTotal());
@@ -1955,7 +1955,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
-		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInversion",Constantes.TABLA_TIPO_INVERSION.get(inversion.getTipoInversion()));
 		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
 		parameters.put("NumeroSolicitud", (String)params.get("solicitudId"));
 		parameters.put("Observacion", (String)params.get("observacion"));

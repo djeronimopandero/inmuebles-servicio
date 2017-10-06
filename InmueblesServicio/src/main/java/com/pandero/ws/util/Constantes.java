@@ -15,6 +15,16 @@ public class Constantes {
         map.put(4, "tercera armada por el 10%");
         ARMADAS_DOC_DESEMBOLSO = Collections.unmodifiableMap(map);
     }
+	
+	public static final Map<String,String> TABLA_TIPO_INVERSION = new HashMap<String,String>(){
+		private static final long serialVersionUID = -6447903308522347760L;
+		{
+	        put("ADQUISICION", "ADQUISICIÓN DE UN INMUEBLE");
+	        put("CANCELACION", "CANCELACIÓN DE CRÉDITO HIPOTECARIO");
+	        put("CONSTRUCCION", "CONSTRUCCIÓN, AMPLIACIÓN Y/O REFACCIÓN DE UN BIEN INMUEBLE");
+			
+		}
+	};
 
 	public class Service {
 		public final static String URL_WHERE = "?q={serviceWhere}";

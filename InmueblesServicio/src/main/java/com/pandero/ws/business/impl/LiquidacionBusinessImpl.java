@@ -476,9 +476,9 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			lista.add(comprobante);
 			contexto.put("proveedor", comprobante[1]);
 			contexto.put("emisor",comprobanteCaspio.getEnvioContabilidadUsuario());
+			contexto.put("fecha",  comprobante[4]);
 		}
 		contexto.put("listaComprobantes", lista);
-		contexto.put("fecha",  Util.convertirFechaDate(inversion.getEnvioContabilidadFecha(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
 		if(montoTotalSoles>0){
 			contexto.put("etiquetaSoles","TOTAL S/.");
 			contexto.put("montoTotalSoles", Util.getMontoFormateado(montoTotalSoles));	
@@ -932,7 +932,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		parameters.put("NumeroPedido",pedido.getNroPedido());
 		parameters.put("NumeroInversion",inversion.getNroInversion());
-		parameters.put("TipoInversion",inversion.getTipoInversion());
+		parameters.put("TipoInversion",Constantes.TABLA_TIPO_INVERSION.get(inversion.getTipoInversion()));
 		parameters.put("TipoInmueble",inversion.getTipoInmuebleNom());
 		parameters.put("LibreGravamen",inversion.getGravamen());
 		parameters.put("AreaTotal",inversion.getAreaTotal());
