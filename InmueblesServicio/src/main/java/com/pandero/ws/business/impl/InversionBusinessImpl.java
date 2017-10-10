@@ -259,11 +259,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 							System.out.println("si tiene garantias");
 							String partidaRegistral = "";
 							for(Map<String,Object> garantia:garantiasEvaluacionCrediticia){
+								if("2".equals(garantia.get("TipoGarantiaID").toString())){
 								partidaRegistral = garantia.get("PartidaRegistral").toString();
 								System.out.println("partidas: "+inversion.getPartidaRegistral()+"-"+partidaRegistral);
 								if(inversion.getPartidaRegistral().equals(partidaRegistral)){
 									existePartidaRegistral = true;
 								}
+								}
+								
 							}
 						}
 						if(!existePartidaRegistral){
