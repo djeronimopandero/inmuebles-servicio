@@ -7,5 +7,5 @@ public interface GenericDao {
 	public Map<String,Object> executeProcedure(Map<String,Object> parameters, String procedureName);
 	public Map<String,Object> queryForMap(String sql);
 	public List<Map<String,Object>> queryForList(String sql);
-	
+	public int update(String sql);
 }

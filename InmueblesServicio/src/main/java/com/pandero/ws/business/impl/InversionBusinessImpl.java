@@ -1948,6 +1948,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 			params.put("importeDesembolso", liquidacionSAF.getLiquidacionImporte());
 			params.put("importeComprobante", getComprobanteResumen(inversion.getNroInversion(),Integer.parseInt(nroArmada)).get("importe"));
 		}
+		if(params.get("solicitudInformacionGeneral")!=null){
+			genericDao.update("update GEN_Solicitud set SolicitudInformacionGeneral='"+(String)params.get("solicitudInformacionGeneral")+"' where SolicitudID="+(String)params.get("solicitudId"));
+		}
 		enviarCorreoDesembolsoExcepcional(pedido,inversion,params,procedimiento);
 	}
 

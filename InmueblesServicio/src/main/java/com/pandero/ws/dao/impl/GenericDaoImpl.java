@@ -46,6 +46,11 @@ public class GenericDaoImpl implements GenericDao{
 		// TODO Auto-generated method stub
 		return jdbcTemplate.queryForList(sql);
 	}
+
+	@Override
+	public int update(String sql){
+		return jdbcTemplate.update(sql);
+	}
 	
 	
 }
