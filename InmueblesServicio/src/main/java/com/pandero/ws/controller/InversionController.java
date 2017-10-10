@@ -1,14 +1,22 @@
 package com.pandero.ws.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +52,8 @@ public class InversionController {
 	InversionService inversionService;
 	@Autowired
 	LiquidacionDao liquidacionDao;
+	@Value("${ruta.documentos.generados}")
+	private String rutaDocumentosGenerados;
 	
 	@RequestMapping(value = "obtenerInversion/{inversionId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody   
@@ -339,17 +349,18 @@ public class InversionController {
 		return resultadoBean;
 	}
 	
-	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}/{nroArmada}/{usuarioId}", method = RequestMethod.GET)
-	public @ResponseBody String solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero,
+	@RequestMapping(value = "solicitudDesembolso/{inversionNumero}/{nroArmada}/{usuarioId}", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody Map<String,Object> solicitudDesembolso(@PathVariable(value="inversionNumero") String inversionNumero,
 			@PathVariable(value="nroArmada") String nroArmada, @PathVariable(value="usuarioId") String usuarioId){
 		LOG.info("###ContratoController.solicitudDesembolso inversionNumero:"+inversionNumero);
-		String resultadoBean = null;
+		Map<String,Object> resultadoBean = new HashMap<String,Object>();
 		if(null!=inversionNumero ){
 			try {
 				resultadoBean=inversionBusiness.generarDocumentoDesembolso(inversionNumero,nroArmada,usuarioId);
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
-				return "Ocurrió un error al generar la solicitud de desembolso";
+				resultadoBean.put("result","0");
+				resultadoBean.put("detail",e.getMessage());
 			}
 		}
 		return resultadoBean;
@@ -1113,6 +1124,17 @@ public class InversionController {
 		response.put("detail",detail);
 		System.out.println("RESPONSE: " +  response);			
 		return response;		
+	}
+	
+	
+	@RequestMapping(value = "/descargarArchivo/{nombreArchivo}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public void descargar(HttpServletRequest request,HttpServletResponse response,@PathVariable(value="nombreArchivo")String nombreArchivo) throws Exception {
+		File file = new File(rutaDocumentosGenerados+File.separator+ nombreArchivo+".pdf");
+	    
+	      InputStream is = new FileInputStream(file);
+	      org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+	      response.flushBuffer();
+
 	}
 	
 }

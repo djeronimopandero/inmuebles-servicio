@@ -1,5 +1,6 @@
 package com.pandero.ws.business.impl;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
@@ -51,11 +53,13 @@ import com.pandero.ws.service.LiquidDesembService;
 import com.pandero.ws.service.MailService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.Constantes;
+import com.pandero.ws.util.DocumentGenerator;
 import com.pandero.ws.util.DocumentoUtil;
 import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
+import com.thoughtworks.xstream.core.util.Base64Encoder;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -774,8 +778,9 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId)
+	public Map<String,Object> generarDocumentoDesembolso(String nroInversion, String nroArmada, String usuarioSAFId)
 			throws Exception {
+		Map<String,Object> response = new HashMap<String,Object>();
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
 		liquidacionDesembolsoService.setTokenCaspio(tokenCaspio);
@@ -785,7 +790,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		
 		if(liquidaciones==null || !"3".equals(liquidaciones.get(0).getLiquidacionEstado())){
 			LOG.info("### liquidaciones es null o el estado de sul ultima liquidacion no es 3 DESEMBOLSADO");
-			return "Ocurrió un error. La liquidación no se encuentra desembolsada";
+			throw new Exception("Ocurrió un error. La liquidación no se encuentra desembolsada");
 		}else{
 			LOG.info("### Se procede a generar el doc de desembolso");
 			LiquidacionSAF liquidacion = liquidaciones.get(0);
@@ -873,9 +878,10 @@ public class InversionBusinessImpl implements InversionBusiness{
 					parametros.add(new Parametro("$armada", armada));
 					DocumentoUtil.replaceParamsDocumentoDesembolso(doc, parametros,asociados);
 					StringBuilder sb=new StringBuilder();
-					String docGenerado = sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".docx").toString();
+					String docGenerado = sb.append(rutaDocumentosGenerados).append("/").append("Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".doc").toString();
 					documentoUtil.saveDocument(doc, docGenerado);
-
+					File newPdf = new File(rutaDocumentosGenerados, "Declaracion-Jurada-conformidad-desembolso-generado-"+nroInversion+".pdf");
+					DocumentGenerator.generatePdfFromOds(new File(docGenerado),newPdf);
 						/*Enviar por correo*/
 					 	Usuario usuario = usuarioDao.obtenerCorreoUsuarioCelula(usuarioSAFId);
 				        LOG.info("getCelulaCorreo:: "+usuario.getCelulaCorreo()+" - getEmpleadoCorreo: "+usuario.getEmpleadoCorreo());
@@ -915,16 +921,18 @@ public class InversionBusinessImpl implements InversionBusiness{
 				         emailBean.setTextoEmail(speech);
 				         emailBean.setFormatHtml(true);
 				         emailBean.setEnviarArchivo(true);
-				         mailService.sendMail(emailBean);
+				         //mailService.sendMail(emailBean);
 				         Map<String,Object> params = new HashMap<String,Object>();
 				         params.put("InversionId", pic.getInversionId());
 				         params.put("NroArmada", nroArmada);
 				         params.put("ConstanciaGenerada", "1");
 				         liquidacionDesembolsoService.setGenerarConstanciaInversioPedido(params);
+							response.put("result", 1);
+							response.put("detail", newPdf.getName()); 
 				}
 			}
 		}
-		return "Se generó la carta de desembolso correctamente.";
+		return response;
 	}
 
 	@Override
