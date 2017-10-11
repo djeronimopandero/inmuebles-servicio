@@ -189,6 +189,9 @@ public class GarantiaServiceImpl implements GarantiaService{
 		map.remove("idSeguro");
 		map.remove("FechaCreacion");
 		map.remove("FechaActualizacion");
+		if(!String.valueOf(map.get("nroPoliza")).equals(String.valueOf(params.get("nroPoliza")))){
+			map.put("nroPoliza", 0);
+		}
         ServiceRestTemplate.postForObject(restTemplate,tokenCaspio,tableSeguroURL,Object.class,map,null);	
 		return null;
 	}
