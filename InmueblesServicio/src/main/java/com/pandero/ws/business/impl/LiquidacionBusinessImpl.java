@@ -371,7 +371,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 					else{
 						LOG.info("Correo confirmacion de liquidacion: No registro de comprobante");
 						//Correo cuando no aplica el registro de comprobante de pago ni saldo de deuda
-						enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_Liquidacion_Inmuebles");						
+						enviarCorreoLiquidacion(pedido,inversion,"USP_LOG_EnviarCorreo_Liquidacion_Inmuebles");						
 					}
 				}				
 			}			
@@ -384,7 +384,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	private void enviarCorreoActualizacionSaldoDeuda(Inversion inversion, Pedido pedido)
 			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
 
-		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles");
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_LOG_EnviarCorreo_RegistroSaldoDeuda_Inmuebles");
 
 		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/cancelacionDeuda.odt");
 		File rutaSalida = File.createTempFile("tmp", ".odt");
@@ -428,7 +428,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 	private void enviarCorreoRegistroComprobante(Inversion inversion, Pedido pedido, List<ComprobanteCaspio> listaComprobantes)
 			throws IOException, XDocReportException, XDocConverterException, ConnectException, Exception {
 
-		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_EnviaCorreo_ComprobantePago_Inmuebles");
+		Map<String,Object> outputMap = enviarCorreoLiquidacion(pedido,inversion,"USP_LOG_EnviarCorreo_ComprobantePago_Inmuebles");
 
 		File rutaTemplate = new File(rutaDocumentosTemplates+"/liquidacion/registroComprobantesUnProveedor.odt");
 		if(Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())){
@@ -768,7 +768,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 			String inversionId = String.valueOf(inversion.getInversionId().intValue());
 			liquidDesembService.actualizarEstadoLiquDesembInversion(inversionId, nroArmada, Constantes.Inversion.ESTADO_VB_CONTABLE);
 			Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId().intValue()));
-			enviarCorreoLiquidacion(pedido, inversion, "USP_EnviaCorreo_VistoBuenoContabilidad_Inmuebles");
+			enviarCorreoLiquidacion(pedido, inversion, "USP_LOG_EnviarCorreo_VistoBuenoContabilidad_Inmuebles");
 		}
 		
 		return resultado;

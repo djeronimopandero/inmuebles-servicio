@@ -114,7 +114,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	
 	
 	public void enviarTest(String inversionId) throws Exception {
-		String procedure = "USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles";
+		String procedure = "USP_LOG_EnviarCorreo_RegistroSaldoDeuda_Inmuebles";
 		//Aqui puedes probar los siguientes procedimientos
 		//USP_EnviaCorreo_RegistroSaldoDeuda_Inmuebles
 		//USP_EnviaCorreo_ComprobantePago_Inmuebles
@@ -168,7 +168,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("PartidaRegistral",inversion.getPartidaRegistral());
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Verificacion_Inmuebles");	
+		genericDao.executeProcedure(parameters, "USP_LOG_EnviarCorreo_Verificacion_Inmuebles");	
 	}
 	
 	@Override
@@ -1920,13 +1920,13 @@ public class InversionBusinessImpl implements InversionBusiness{
 		parameters.put("ImporteInversion",inversion.getImporteInversion());
 		parameters.put("SiguienteProceso",siguienteProceso);
 		parameters.put("ProcesoID","01134");
-		genericDao.executeProcedure(parameters, "USP_EnviaCorreo_Confirmacion_Inmuebles");
+		genericDao.executeProcedure(parameters, "USP_LOG_EnviarCorreo_Confirmacion_Inmuebles");
 	}
 
 	@Override
 	public void enviarCorreoDesembolsoExcepcional(String inversionId, String nroArmada, Map<String, Object> params)
 			throws Exception {
-		String procedimiento = "USP_EnviaCorreo_DesembolsoExcepcional_Inmuebles";
+		String procedimiento = "USP_LOG_EnviarCorreo_DesembolsoExcepcional_Inmuebles";
 
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
@@ -1956,7 +1956,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@Override
 	public void enviarCorreoRegistroDesembolso(String nroInversion,String nroArmada,String parcial) throws Exception {
-		String procedure = "USP_EnviaCorreo_Tesoreria_Inmuebles";
+		String procedure = "USP_LOG_EnviarCorreo_Tesoreria_Inmuebles";
 		Map<String,Object> params = new HashMap<String,Object>();
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		inversionService.setTokenCaspio(tokenCaspio);
@@ -1964,7 +1964,7 @@ public class InversionBusinessImpl implements InversionBusiness{
         Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(String.valueOf(inversion.getPedidoId()));
 		if(parcial.equals("PARCIAL")){
-			procedure = "USP_EnviaCorreo_EmisionConstancia_Inmuebles";
+			procedure = "USP_LOG_EnviarCorreo_EmisionConstancia_Inmuebles";
 			List<LiquidacionSAF> liquidacionesSAF = liquidacionDao.obtenerLiquidacionPorInversionArmada(inversion.getNroInversion(), nroArmada);
 			if(liquidacionesSAF!=null && liquidacionesSAF.size()>0){
 				LiquidacionSAF liquidacionSAF = new LiquidacionSAF();
