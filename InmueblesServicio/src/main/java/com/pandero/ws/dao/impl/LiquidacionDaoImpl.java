@@ -107,6 +107,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 	private static final class LiquidacionMapper implements RowMapper<LiquidacionSAF>{
 		public LiquidacionSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
 			LiquidacionSAF e = new LiquidacionSAF();	
+			e.setPedidoID(rs.getInt("PedidoID"));
 			e.setPedidoInversionID(rs.getInt("PedidoInversionID"));
 			e.setLiquidacionNumero(rs.getString("LiquidacionNumero"));
 			e.setLiquidacionTipo(rs.getString("LiquidacionTipo"));

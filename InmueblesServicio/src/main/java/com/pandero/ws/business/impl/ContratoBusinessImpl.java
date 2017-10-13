@@ -3,8 +3,10 @@ package com.pandero.ws.business.impl;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -275,7 +277,7 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 				ddp.setImporteFinanciado(Util.getMontoFormateado(Double.parseDouble(ddp.getImporteFinanciado())));
 				ddp.setSaldoDiferencia(Util.getMontoFormateado(Double.parseDouble(ddp.getSaldoDiferencia())));
 				resultadoBean.setResultado(ddp);
-				if(verificarExisteLiquidacion(String.valueOf(pedidoId))){
+				if(verificarExisteLiquidacionCompleta(String.valueOf(pedidoId))){
 					resultadoBean.setEstado(UtilEnum.ESTADO_OPERACION.ERROR.getCodigo());
 					resultadoBean.setMensajeError("Operacion Cancelada. Ya existe una liquidación generada, por lo tanto no se podrá registrar la cancelación");
 				}
@@ -288,11 +290,23 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		return resultadoBean;
 	}
 	
-	private boolean verificarExisteLiquidacion(String pedidoId) throws Exception{
+	private boolean verificarExisteLiquidacionCompleta(String pedidoId) throws Exception{
 		Pedido pedido = pedidoService.obtenerPedidoCaspioPorId(pedidoId);
+		Set<String> conjuntoInversionesLiquidadas = new HashSet<String>();
 		List<LiquidacionSAF> liquidaciones = liquidacionDAO.obtenerLiquidacionPorPedidoSAF(pedido.getNroPedido());
 		if(liquidaciones!= null && liquidaciones.size()>0){
-			return true;
+			for(LiquidacionSAF liquidacionSAF : liquidaciones) {
+				//Obtenemos un conjunto único de pedido inversiones sin repeticiones
+				conjuntoInversionesLiquidadas.add(String.valueOf(liquidacionSAF.getPedidoInversionID()));				
+			}
+			List<Inversion> listaInversion = inversionService.listarPedidoInversionPorPedidoId(pedidoId);
+			if(conjuntoInversionesLiquidadas.size() == listaInversion.size()){
+				//Si el número de inversiones es el mismo que el número de liquidaciones por inversión entonces la liquidación ha sido completa
+				return true;				
+			}
+			else{
+				return false;
+			}
 		}
 		return false;
 	}
