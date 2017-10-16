@@ -1136,5 +1136,11 @@ public class InversionController {
 	      response.flushBuffer();
 
 	}
+
+	@RequestMapping(value = "/listaInversionPedido/{nroPedido}", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public List<Map<String,Object>> getListaInversionPedidoPorNroPedido(@PathVariable(value="nroPedido")String nroPedido) throws Exception{
+		return inversionBusiness.getListaInversionPorNroPedido(nroPedido);
+	}
 	
 }

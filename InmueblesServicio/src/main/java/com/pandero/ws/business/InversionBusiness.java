@@ -1,8 +1,10 @@
 package com.pandero.ws.business;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.pandero.ws.bean.Inversion;
 import com.pandero.ws.bean.LiquidacionSAF;
 import com.pandero.ws.bean.ResultadoBean;
 
@@ -58,6 +60,8 @@ public interface InversionBusiness {
 	public void enviarCorreoDesembolsoExcepcional(String inversionId,String nroArmada,Map<String,Object> params) throws Exception;
 	
 	public void enviarCorreoRegistroDesembolso(String nroInversion, String nroArmada ,String parcial) throws Exception;
+	
+	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception;
 
 }
 	

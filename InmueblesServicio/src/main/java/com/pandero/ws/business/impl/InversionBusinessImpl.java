@@ -1997,5 +1997,15 @@ public class InversionBusinessImpl implements InversionBusiness{
 		return genericDao.executeProcedure(parameters, procedimiento);
 	}
 
+	@Override
+	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception {
+		// TODO Auto-generated method stub
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("where", "Pedido_NroPedido='" + nroPedido + "'");
+		return genericService.obtenerTablaCaspio(genericService.viewPedidoInversion, JsonUtil.toJson(params));
+		
+	}
+	
+	
 	
 }
