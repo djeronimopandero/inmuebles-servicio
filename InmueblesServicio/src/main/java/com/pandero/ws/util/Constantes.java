@@ -165,6 +165,7 @@ public class Constantes {
 	public class Liquidacion{
 		public final static String LIQUI_TIPO_COMPRAS="1";
 		public final static String TIPO_DOCU_CONTRATO="1";
+		public final static String TIPO_DOCU_EXCEDENTE="7";
 		public final static String TIPO_DOCU_DIF_PRECIO="2";
 		public final static String MONEDA_DORALES_ID="2";
 		public final static String LIQUI_ORIGEN_SISTEMA="S"; // DE CONTRATO

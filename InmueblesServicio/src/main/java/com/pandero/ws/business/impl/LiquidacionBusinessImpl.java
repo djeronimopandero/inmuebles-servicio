@@ -129,7 +129,7 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				for(Contrato contrato : listaContratosPedidoSAF){
 					System.out.println("liquidacion.getContratoID():: "+liquidacion.getContratoID()+" - contrato.getContratoId():: "+contrato.getContratoId());
 					if(liquidacion.getContratoID().intValue()==contrato.getContratoId().intValue()){
-						if(Constantes.Liquidacion.TIPO_DOCU_CONTRATO.equals(liquidacion.getLiquidacionTipoDocumento())){
+						if(Constantes.Liquidacion.TIPO_DOCU_CONTRATO.equals(liquidacion.getLiquidacionTipoDocumento()) || Constantes.Liquidacion.TIPO_DOCU_EXCEDENTE.equals(liquidacion.getLiquidacionTipoDocumento())){
 							contrato.setMontoLiquidacionContrato(contrato.getMontoLiquidacionContrato().doubleValue()+liquidacion.getLiquidacionImporte());
 						}
 						if(Constantes.Liquidacion.TIPO_DOCU_DIF_PRECIO.equals(liquidacion.getLiquidacionTipoDocumento())){
