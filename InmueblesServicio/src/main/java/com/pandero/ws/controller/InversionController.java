@@ -1139,8 +1139,11 @@ public class InversionController {
 
 	@RequestMapping(value = "/listaInversionPedido/{nroPedido}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public List<Map<String,Object>> getListaInversionPedidoPorNroPedido(@PathVariable(value="nroPedido")String nroPedido) throws Exception{
-		return inversionBusiness.getListaInversionPorNroPedido(nroPedido);
+	public Map<String,Object> getListaInversionPedidoPorNroPedido(@PathVariable(value="nroPedido")String nroPedido) throws Exception{
+		
+		Map<String,Object> result = new HashMap<String,Object>();
+		result.put("result", inversionBusiness.getListaInversionPorNroPedido(nroPedido));
+		return result;
 	}
 	
 }
