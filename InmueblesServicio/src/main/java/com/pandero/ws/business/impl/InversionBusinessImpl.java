@@ -1064,13 +1064,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 							LOG.info("RESULTADO LIQU AUTOMATICA: "+resultLiquidacion);
 							if(resultLiquidacion.equals("")){
 								liquidacionAutomaticaExitosa = true;
-							}else if(Constantes.Service.RESULTADO_PENDIENTE_COBROS.equals(resultLiquidacion)){
-								Map<String,Object> parameters = new HashMap<String, Object>();
-								parameters.put("inversionNumero", inversion.getNroInversion());
-								parameters.put("libreGravamen", inversion.getGravamen());
-								parameters.put("areaTotal", inversion.getAreaTotal().toString());
-								parameters.put("partidaRegistral", inversion.getPartidaRegistral());
-								liquidacionDao.executeProcedure(parameters, "USP_FOC_NotificarAsociadoMorosoLiquidacionAutomatica_Inmuebles");
 							}
 						}					
 					}

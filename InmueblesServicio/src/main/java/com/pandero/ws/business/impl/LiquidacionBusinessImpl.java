@@ -248,6 +248,13 @@ public class LiquidacionBusinessImpl implements LiquidacionBusiness{
 				if(validacionConceptos==false){
 					validacionLiquidacion = false;
 					resultado = Constantes.Service.RESULTADO_PENDIENTE_COBROS;
+					Map<String,Object> parameters = new HashMap<String, Object>();
+					parameters.put("inversionNumero", inversion.getNroInversion());
+					parameters.put("libreGravamen", inversion.getGravamen());
+					parameters.put("areaTotal", inversion.getAreaTotal().toString());
+					parameters.put("partidaRegistral", inversion.getPartidaRegistral());
+					liquidacionDao.executeProcedure(parameters, "USP_FOC_NotificarAsociadoMorosoLiquidacionAutomatica_Inmuebles");
+					
 				}
 			}
 			
