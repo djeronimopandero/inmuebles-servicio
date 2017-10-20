@@ -2023,7 +2023,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoFacturaProveedor);
 			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoLiquidacion);
 			
-			if(((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
+			if(!((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
 				listaEventosSAF.remove(listaEventosSAF.size()-1);
 			}
 			
@@ -2036,7 +2036,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
 		Map<String,Object> mapEventoLiquidacion = new HashMap<String,Object>();
 		mapEventoLiquidacion.put("indice", "4");
-		mapEventoLiquidacion.put("Instancia", "FACTURA DEL PROVEEDOR");
+		mapEventoLiquidacion.put("Instancia", "LIQUIDACIÓN DE INMUEBLE");
 		mapEventoLiquidacion.put("EstadoSolicitud", "PENDIENTE");
 		mapEventoLiquidacion.put("FechaModificacion", "");
 		mapEventoLiquidacion.put("UsuarioNombre", "");
