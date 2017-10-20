@@ -2050,7 +2050,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 			else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
 				mapEventoLiquidacion.put("EstadoSolicitud", "DESEMBOLSADO");
-				mapEventoLiquidacion.put("Referencia", "DESEMBOLSO AYUDA!!!!");
+				mapEventoLiquidacion.put("Referencia", "DESEMBOLSO");
 			}
 			mapEventoLiquidacion.put("FechaModificacion", liquidacionSAF.getLiquidacionFecha());
 			mapEventoLiquidacion.put("UsuarioNombre", liquidacionSAF.getUsuarioLogin());
