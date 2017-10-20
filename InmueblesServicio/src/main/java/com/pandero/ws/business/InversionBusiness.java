@@ -63,5 +63,6 @@ public interface InversionBusiness {
 	
 	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception;
 
+	public List<Map<String,Object>> consultaEventoInversion(String nroInversion) throws Exception;
 }
 	

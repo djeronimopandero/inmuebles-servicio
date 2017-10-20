@@ -20,6 +20,8 @@ public class LiquidacionSAF implements java.io.Serializable {
 	private String LiquidacionEstado;
 	private String LiquidacionFechaEstado;
 	private int NroArmada;
+	private Integer usuarioIdCreacion;	
+	private String usuarioLogin;
 	
 	public Integer getPedidoID() {
 		return PedidoID;
@@ -116,6 +118,18 @@ public class LiquidacionSAF implements java.io.Serializable {
 	}
 	public void setNroArmada(int nroArmada) {
 		NroArmada = nroArmada;
+	}
+	public Integer getUsuarioIdCreacion() {
+		return usuarioIdCreacion;
+	}
+	public void setUsuarioIdCreacion(Integer usuarioIdCreacion) {
+		this.usuarioIdCreacion = usuarioIdCreacion;
+	}
+	public String getUsuarioLogin() {
+		return usuarioLogin;
+	}
+	public void setUsuarioLogin(String usuarioLogin) {
+		this.usuarioLogin = usuarioLogin;
 	}
 		
 }

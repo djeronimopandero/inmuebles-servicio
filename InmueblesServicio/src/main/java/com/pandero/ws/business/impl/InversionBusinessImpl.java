@@ -41,6 +41,7 @@ import com.pandero.ws.dao.ContratoDao;
 import com.pandero.ws.dao.GarantiaDao;
 import com.pandero.ws.dao.GeneralDao;
 import com.pandero.ws.dao.GenericDao;
+import com.pandero.ws.dao.InversionDao;
 import com.pandero.ws.dao.LiquidacionDao;
 import com.pandero.ws.dao.PedidoDao;
 import com.pandero.ws.dao.PersonaDao;
@@ -102,6 +103,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 	@Autowired
 	GenericDao genericDao;
 	
+	@Autowired
+	InversionDao inversionDao;
 	
 	@Value("${ruta.documentos.templates}")
 	private String rutaDocumentosTemplates;
@@ -1993,11 +1996,96 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 	@Override
 	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception {
-		// TODO Auto-generated method stub
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("where", "Pedido_NroPedido='" + nroPedido + "'");
 		return genericService.obtenerTablaCaspio(genericService.viewPedidoInversion, JsonUtil.toJson(params));
 		
+	}
+
+	@Override
+	public List<Map<String, Object>> consultaEventoInversion(String nroInversion) throws Exception{
+		final int EVENTO_CONFIRMACION = 1;
+		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
+		inversionService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		
+        Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId());
+
+		List<Map<String,Object>> listaEventosSAF = inversionDao.getListaEventoInversionPorNumeroInversion(nroInversion);
+		
+		Map<String,Object> mapEventoConfirmacion = listaEventosSAF.get(EVENTO_CONFIRMACION);//Estado confirmacion Inmueble
+		String estadoConfirmacion = (String)mapEventoConfirmacion.get("EstadoSolicitud");
+		if("CONFIRMADO".equalsIgnoreCase(estadoConfirmacion)){
+			Map<String, Object> mapEventoFacturaProveedor = getEventoFacturaProveedor(inversion, listaComprobantes);
+			Map<String, Object> mapEventoLiquidacion = getEventoLiquidacion(nroInversion);
+			
+			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoFacturaProveedor);
+			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoLiquidacion);
+			
+			if(((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
+				listaEventosSAF.remove(listaEventosSAF.size()-1);
+			}
+			
+		}
+		
+		return listaEventosSAF;
+	}
+
+	private Map<String, Object> getEventoLiquidacion(String nroInversion) throws Exception {
+		List<LiquidacionSAF> liquidacionInversion = liquidacionDao.obtenerLiquidacionesPorInversionSAF(nroInversion);
+		Map<String,Object> mapEventoLiquidacion = new HashMap<String,Object>();
+		mapEventoLiquidacion.put("indice", "4");
+		mapEventoLiquidacion.put("Instancia", "FACTURA DEL PROVEEDOR");
+		mapEventoLiquidacion.put("EstadoSolicitud", "PENDIENTE");
+		mapEventoLiquidacion.put("FechaModificacion", "");
+		mapEventoLiquidacion.put("UsuarioNombre", "");
+		mapEventoLiquidacion.put("Referencia", "");
+		for (LiquidacionSAF liquidacionSAF : liquidacionInversion) {
+			if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
+				mapEventoLiquidacion.put("EstadoSolicitud", "LIQUIDADO");
+			}
+			else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
+				mapEventoLiquidacion.put("EstadoSolicitud", "V°B° CONTABLE");
+			}
+			else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
+				mapEventoLiquidacion.put("EstadoSolicitud", "DESEMBOLSADO");
+				mapEventoLiquidacion.put("Referencia", "DESEMBOLSO AYUDA!!!!");
+			}
+			mapEventoLiquidacion.put("FechaModificacion", liquidacionSAF.getLiquidacionFecha());
+			mapEventoLiquidacion.put("UsuarioNombre", liquidacionSAF.getUsuarioLogin());
+		}
+		return mapEventoLiquidacion;
+	}
+
+	private Map<String, Object> getEventoFacturaProveedor(Inversion inversion,
+			List<ComprobanteCaspio> listaComprobantes) {
+		Map<String,Object> mapEventoFacturaProveedor = new HashMap<String,Object>();
+		mapEventoFacturaProveedor.put("indice", "3");
+		mapEventoFacturaProveedor.put("Instancia", "FACTURA DEL PROVEEDOR");
+		mapEventoFacturaProveedor.put("EstadoSolicitud", "PENDIENTE");
+		mapEventoFacturaProveedor.put("FechaModificacion", "");
+		mapEventoFacturaProveedor.put("UsuarioNombre", "");
+		mapEventoFacturaProveedor.put("Referencia", "");
+		
+		if(listaComprobantes!=null&&listaComprobantes.size()>0){
+			mapEventoFacturaProveedor.put("EstadoSolicitud", "REGISTRADA");
+			String[] listaNroComprobantes = new String[listaComprobantes.size()];
+			int i = 0;
+			for(ComprobanteCaspio comprobanteCaspio: listaComprobantes){
+				mapEventoFacturaProveedor.put("FechaModificacion", Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
+				mapEventoFacturaProveedor.put("UsuarioNombre",comprobanteCaspio.getEnvioContabilidadUsuario());
+				listaNroComprobantes[i] =  comprobanteCaspio.getSerie()+"-"+comprobanteCaspio.getNumero();
+				i++;
+			}
+			mapEventoFacturaProveedor.put("Referencia", StringUtils.join(listaNroComprobantes,","));
+		}
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+			if(!Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
+				mapEventoFacturaProveedor.put("EstadoSolicitud", "NO APLICA");
+			}
+		}
+		return mapEventoFacturaProveedor;
 	}
 	
 	

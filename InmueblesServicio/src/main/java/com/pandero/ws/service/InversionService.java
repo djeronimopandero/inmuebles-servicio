@@ -40,4 +40,6 @@ public interface InversionService {
 	
 	public Integer actualizarInmuebleInversionHipotecado(String nroInversion,String check) throws Exception;
 	
+	public List<ComprobanteCaspio> getComprobantes(Integer inversionId) throws Exception;
+	
 }

@@ -290,6 +290,36 @@ public class InversionServiceImpl implements InversionService {
         
 		return listaComprobantes;
 	}
+
+	@Override
+	public List<ComprobanteCaspio> getComprobantes(Integer inversionId) throws Exception {
+		List<ComprobanteCaspio> listaComprobantes = null;	
+		String serviceWhere = "{\"where\":\"InversionId='" + inversionId + "' \" , \"order by\" : \"FechaCreacion\"}";	
+		String obtenerRequisitosxInversionURL = tableComprobanteURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerRequisitosxInversionURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapRequisitos = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapRequisitos!=null && mapRequisitos.size()>0){
+	        			listaComprobantes = new ArrayList<ComprobanteCaspio>();
+	        			for(Object bean : mapRequisitos){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				ComprobanteCaspio comprobante =  JsonUtil.fromJson(beanString, ComprobanteCaspio.class);
+	        				listaComprobantes.add(comprobante);
+	        			}
+	        			System.out.println("listaComprobantes:: "+listaComprobantes.size());
+	        		}        		
+	        	}
+	        }
+        }
+        
+		return listaComprobantes;
+	}
 	
 	@Override
 	public String actualizarComprobanteEnvioCartaContabilidad(String inversionId,String nroArmada,String fechaEnvio,String usuarioEnvio, String estado) throws Exception {
