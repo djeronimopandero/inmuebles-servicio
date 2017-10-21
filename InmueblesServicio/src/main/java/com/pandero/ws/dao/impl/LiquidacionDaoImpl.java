@@ -124,6 +124,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			e.setLiquidacionFecha(rs.getString("Fecha"));
 			e.setUsuarioIdCreacion(rs.getInt("UsuarioIDCreacion"));
 			e.setUsuarioLogin(rs.getString("UsuarioNombre"));
+			e.setNroReferenciaLiquidacionTesoreria(rs.getString("PagoTesoreriaNumeroReferencia"));
 			return e;		    
 			}
 		}
