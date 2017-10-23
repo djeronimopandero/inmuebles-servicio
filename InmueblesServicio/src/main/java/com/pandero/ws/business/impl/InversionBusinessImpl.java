@@ -2014,14 +2014,19 @@ public class InversionBusinessImpl implements InversionBusiness{
 
 		List<Map<String,Object>> listaEventosSAF = inversionDao.getListaEventoInversionPorNumeroInversion(nroInversion);
 		//Aqui sacamos los eventos 1,2 y 5
+		//1. EVALUACIÓN CREDITICIA
+		//2. REGISTRO DE INVERSIÓN INMOBILIARIA
+		//5. ENTREGA DE INVERSIÓN
 		Map<String,Object> mapEventoConfirmacion = listaEventosSAF.get(EVENTO_CONFIRMACION);//Estado confirmacion Inmueble
 		String estadoConfirmacion = (String)mapEventoConfirmacion.get("EstadoSolicitud");
 		if("CONFIRMADO".equalsIgnoreCase(estadoConfirmacion)){
 			Map<String, Object> mapEventoFacturaProveedor = getEventoFacturaProveedor(inversion, listaComprobantes);
 			Map<String, Object> mapEventoLiquidacion = getEventoLiquidacion(nroInversion);
 			//Añadimos el evento 3 antes del evento 5
+			//3. FACTURA DEL PROVEEDOR
 			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoFacturaProveedor);
 			//Añadimos el evento 4 antes del evento 5
+			//4. LIQUIDACIÓN DE INMUEBLE
 			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoLiquidacion);
 			
 			if(!((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
