@@ -2079,8 +2079,8 @@ public class InversionBusinessImpl implements InversionBusiness{
 			String[] listaNroComprobantes = new String[listaComprobantes.size()];
 			int i = 0;
 			for(ComprobanteCaspio comprobanteCaspio: listaComprobantes){
-				mapEventoFacturaProveedor.put("FechaModificacion", Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));
-				mapEventoFacturaProveedor.put("UsuarioNombre",comprobanteCaspio.getEnvioContabilidadUsuario());
+				mapEventoFacturaProveedor.put("FechaModificacion", Util.convertirFechaDate(comprobanteCaspio.getFechaEmision(),"yyyy-MM-dd'T'HH:mm:ss","dd/MM/yyyy"));				
+				mapEventoFacturaProveedor.put("UsuarioNombre",getUsuarioPorNombre(comprobanteCaspio));
 				listaNroComprobantes[i] =  comprobanteCaspio.getSerie()+"-"+comprobanteCaspio.getNumero();
 				i++;
 			}
@@ -2092,6 +2092,20 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 		}
 		return mapEventoFacturaProveedor;
+	}
+
+	private String getUsuarioPorNombre(ComprobanteCaspio comprobanteCaspio) {
+		try{
+			
+			Map<String,Object> mapUsuarioNombre = genericDao.queryForMap("select UsuarioNombre=seg.UsuarioNombre from per_persona per join seg_usuario seg on seg.PersonaID = per.PersonaID where personaNombreCompleto = '"+comprobanteCaspio.getEnvioContabilidadUsuario()+"'");
+			String usuarioNombre = (String)mapUsuarioNombre.get("UsuarioNombre");
+			if(usuarioNombre==null||usuarioNombre.equals(""))
+				return comprobanteCaspio.getEnvioContabilidadUsuario();
+			return usuarioNombre;
+		}
+		catch (Exception e) {
+			return comprobanteCaspio.getEnvioContabilidadUsuario();
+		}
 	}
 	
 	
