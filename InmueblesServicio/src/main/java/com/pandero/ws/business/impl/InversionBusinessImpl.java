@@ -2097,7 +2097,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 	private String getUsuarioPorNombre(ComprobanteCaspio comprobanteCaspio) {
 		try{
 			
-			Map<String,Object> mapUsuarioNombre = genericDao.queryForMap("select UsuarioNombre=seg.UsuarioNombre from per_persona per join seg_usuario seg on seg.PersonaID = per.PersonaID where personaNombreCompleto = '"+comprobanteCaspio.getEnvioContabilidadUsuario()+"'");
+			Map<String,Object> mapUsuarioNombre = genericDao.queryForMap("select top 1 UsuarioNombre=seg.UsuarioNombre from per_persona per join seg_usuario seg on seg.PersonaID = per.PersonaID where personaNombreCompleto = '"+comprobanteCaspio.getEnvioContabilidadUsuario()+"'");
 			String usuarioNombre = (String)mapUsuarioNombre.get("UsuarioNombre");
 			if(usuarioNombre==null||usuarioNombre.equals(""))
 				return comprobanteCaspio.getEnvioContabilidadUsuario();
