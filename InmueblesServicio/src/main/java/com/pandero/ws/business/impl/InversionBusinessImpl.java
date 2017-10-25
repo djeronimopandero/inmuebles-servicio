@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
@@ -60,7 +59,6 @@ import com.pandero.ws.util.JsonUtil;
 import com.pandero.ws.util.ServiceRestTemplate;
 import com.pandero.ws.util.Util;
 import com.pandero.ws.util.UtilEnum;
-import com.thoughtworks.xstream.core.util.Base64Encoder;
 
 @Component
 public class InversionBusinessImpl implements InversionBusiness{
@@ -2010,24 +2008,46 @@ public class InversionBusinessImpl implements InversionBusiness{
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
         Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
-		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId());
+        List<Contrato> listaContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(inversion.getPedidoId()));
+        String[] arrayContratos = new String[listaContrato.size()];
+        int i = 0;
+        for (Contrato contrato : listaContrato) {
+        	arrayContratos[i] = contrato.getNroContrato();
+			i++;
+		}
+		String nroArmada = "1";
+		if (Constantes.TipoInversion.CONSTRUCCION_COD.equals(inversion.getTipoInversion())
+				&& inversion.getServicioConstructora().booleanValue() == false) {
+			if (nroArmada.equals("1")) {
+				nroArmada = "2";
+			}
+		}
+		List<ComprobanteCaspio> listaComprobantes = inversionService.getComprobantes(inversion.getInversionId(),Integer.parseInt(nroArmada));
 
-		List<Map<String,Object>> listaEventosSAF = inversionDao.getListaEventoInversionPorNumeroInversion(nroInversion);
+		List<Map<String,Object>> listaEventosSAF = inversionDao.getListaEventoInversionPorNumeroInversion(nroInversion,arrayContratos);
 		//Aqui sacamos los eventos 1,2 y 5
 		//1. EVALUACIÓN CREDITICIA
 		//2. REGISTRO DE INVERSIÓN INMOBILIARIA
+		//El evento 5 puede no existir
 		//5. ENTREGA DE INVERSIÓN
 		Map<String,Object> mapEventoConfirmacion = listaEventosSAF.get(EVENTO_CONFIRMACION);//Estado confirmacion Inmueble
 		String estadoConfirmacion = (String)mapEventoConfirmacion.get("EstadoSolicitud");
 		if("CONFIRMADO".equalsIgnoreCase(estadoConfirmacion)){
 			Map<String, Object> mapEventoFacturaProveedor = getEventoFacturaProveedor(inversion, listaComprobantes);
 			Map<String, Object> mapEventoLiquidacion = getEventoLiquidacion(nroInversion);
-			//Añadimos el evento 3 antes del evento 5
-			//3. FACTURA DEL PROVEEDOR
-			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoFacturaProveedor);
-			//Añadimos el evento 4 antes del evento 5
-			//4. LIQUIDACIÓN DE INMUEBLE
-			listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoLiquidacion);
+			if(listaEventosSAF.size()==3){
+				//Si existen los 3 eventos: 1, 2 y 5
+				//Añadimos el evento 3 antes del evento 5
+				//3. FACTURA DEL PROVEEDOR
+				listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoFacturaProveedor);
+				//Añadimos el evento 4 antes del evento 5
+				//4. LIQUIDACIÓN DE INMUEBLE
+				listaEventosSAF.add(listaEventosSAF.size()-1,mapEventoLiquidacion);				
+			}
+			else{
+				listaEventosSAF.add(mapEventoFacturaProveedor);
+				listaEventosSAF.add(mapEventoLiquidacion);								
+			}
 			
 			if(!((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
 				listaEventosSAF.remove(listaEventosSAF.size()-1);
@@ -2047,19 +2067,21 @@ public class InversionBusinessImpl implements InversionBusiness{
 		mapEventoLiquidacion.put("FechaModificacion", "");
 		mapEventoLiquidacion.put("UsuarioNombre", "");
 		mapEventoLiquidacion.put("Referencia", "");
-		for (LiquidacionSAF liquidacionSAF : liquidacionInversion) {
-			if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
-				mapEventoLiquidacion.put("EstadoSolicitud", "LIQUIDADO");
-			}
-			else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
-				mapEventoLiquidacion.put("EstadoSolicitud", "V°B° CONTABLE");
-			}
-			else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
-				mapEventoLiquidacion.put("EstadoSolicitud", "DESEMBOLSADO");
-				mapEventoLiquidacion.put("Referencia", liquidacionSAF.getNroReferenciaLiquidacionTesoreria());
-			}
-			mapEventoLiquidacion.put("FechaModificacion", liquidacionSAF.getLiquidacionFecha());
-			mapEventoLiquidacion.put("UsuarioNombre", liquidacionSAF.getUsuarioLogin());
+		if(liquidacionInversion!=null){
+			for (LiquidacionSAF liquidacionSAF : liquidacionInversion) {
+				if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_CREADO)){
+					mapEventoLiquidacion.put("EstadoSolicitud", "LIQUIDADO");
+				}
+				else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_VB_CONTB)){
+					mapEventoLiquidacion.put("EstadoSolicitud", "V°B° CONTABLE");
+				}
+				else if(liquidacionSAF.getLiquidacionEstado().equals(Constantes.Liquidacion.LIQUI_ESTADO_DESEMBOLSADO)){
+					mapEventoLiquidacion.put("EstadoSolicitud", "DESEMBOLSADO");
+					mapEventoLiquidacion.put("Referencia", liquidacionSAF.getNroReferenciaLiquidacionTesoreria());
+				}
+				mapEventoLiquidacion.put("FechaModificacion", liquidacionSAF.getLiquidacionFecha());
+				mapEventoLiquidacion.put("UsuarioNombre", liquidacionSAF.getUsuarioLogin());
+			}			
 		}
 		return mapEventoLiquidacion;
 	}

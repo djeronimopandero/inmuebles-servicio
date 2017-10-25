@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class InversionDaoImpl implements InversionDao{
 	}
 
 	@Override
-	public List<Map<String, Object>> getListaEventoInversionPorNumeroInversion(String nroInversion) throws Exception {
+	public List<Map<String, Object>> getListaEventoInversionPorNumeroInversion(String nroInversion,String[] arrayContratos) throws Exception {
 		String sql = "SELECT *  "+
 				"FROM   (SELECT TOP 1 1  "+
 				"                             AS  "+
@@ -42,47 +43,37 @@ public class InversionDaoImpl implements InversionDao{
 				"                       ELSE 'EN EVALUACIÓN'  "+
 				"                     END  "+
 				"                             AS EstadoSolicitud,  "+
-				"        CONVERT(VARCHAR(10), CONVERT(DATE, cre.creditofechacreacion, 106), 103)  "+
-				"                     AS  "+
-				"        FechaModificacion,  "+
-				"        usu.usuarionombre  "+
-				"                     AS  "+
-				"                             UsuarioNombre,  "+
-				"        ''  "+
-				"                     AS  "+
-				"                             Referencia  "+
-				"        FROM   cre_creditoevento cre_ev  "+
-				"               JOIN gen_evento ev  "+
+				"                     CONVERT(VARCHAR(10),  "+
+				"                     CONVERT(DATE, cre.creditofechacreacion, 106),  "+
+				"                             103) AS  "+
+				"                     FechaModificacion,  "+
+				"                     usu.usuarionombre  "+
+				"                             AS UsuarioNombre,  "+
+				"                     ''  "+
+				"                             AS Referencia  "+
+				"        FROM  cre_credito cre  "+
+				"                LEFT JOIN cre_creditoevento cre_ev  "+
+				"                 ON cre_ev.CreditoID = cre.CreditoID "+
+				"                LEFT JOIN gen_evento ev  "+
 				"                 ON cre_ev.eventoid = ev.eventoid  "+
-				"               JOIN cre_credito cre  "+
-				"                 ON cre.creditoid = cre_ev.creditoid  "+
-				"               JOIN seg_usuario usu  "+
+				"                LEFT JOIN seg_usuario usu  "+
 				"                 ON usu.usuarioid = cre_ev.usuarioidevaluacion  "+
-				"        WHERE  cre_ev.creditoid IN (SELECT creditoid  "+
-				"                                    FROM   cre_creditocontrato  "+
-				"                                    WHERE  "+
-				"               contratoid IN (SELECT contratoid  "+
-				"                              FROM   log_pedidocontrato  "+
-				"                              WHERE  "+
-				"               pedidoid IN (SELECT pedidoid  "+
-				"                            FROM   log_pedidoinversion  "+
-				"                            WHERE  pedidoinversionnumero =  "+
-				"                                   '"+nroInversion+"')))  "+
+				"                JOIN CRE_CreditoContrato creCon  "+
+				"                 ON creCon.CreditoID = cre.CreditoID  "+
+				"                JOIN foc_contrato foc  "+
+				"                 ON foc.contratoid = creCon.contratoid  "+
+				"        WHERE  foc.contratoNumero IN ("+StringUtils.join(arrayContratos,",")+")  "+
 				"        ORDER  BY cre_ev.creditoeventoid DESC  "+
 				"        UNION  "+
-				"        SELECT 2  "+
-				"               AS Indice,  "+
-				"               'REGISTRO DE INVERSIÓN INMOBILIARIA'  "+
-				"               AS Instancia,  "+
-				"               'CONFIRMADO'  "+
-				"               AS EstadoSolicitud,  "+
+				"        SELECT 2                                     AS Indice,  "+
+				"               'REGISTRO DE INVERSIÓN INMOBILIARIA' AS Instancia,  "+
+				"               'CONFIRMADO'                          AS EstadoSolicitud,  "+
 				"               CONVERT(VARCHAR(10),  "+
-				"               CONVERT(DATE, pi.pedidoinversionfechaconfirmacion, 106), 103) AS  "+
-				"               FechaModificacion,  "+
-				"               usu.usuarionombre  "+
-				"               AS UsuarioNombre,  "+
-				"               ''  "+
-				"               AS Referencia  "+
+				"               CONVERT(DATE, pi.pedidoinversionfechaconfirmacion,  "+
+				"               106),  "+
+				"               103)                                  AS FechaModificacion,  "+
+				"               usu.usuarionombre                     AS UsuarioNombre,  "+
+				"               ''                                    AS Referencia  "+
 				"        FROM   log_pedidoinversion pi  "+
 				"               JOIN seg_usuario usu  "+
 				"                 ON pi.usuarioidcreacion = usu.usuarioid  "+
@@ -106,9 +97,9 @@ public class InversionDaoImpl implements InversionDao{
 				"                 ELSE 'PENDIENTE'  "+
 				"               END                     AS EstadoSolicitud,  "+
 				"               CASE  "+
-				"                 WHEN pedidoinversionestado = 2 THEN  "+
-				"               CONVERT(VARCHAR(10),  "+
-				"               CONVERT(DATE, pi.pedidoinversionfechamodificacion, 106), 103)  "+
+				"                 WHEN pedidoinversionestado = 2 THEN CONVERT(VARCHAR(10),  "+
+				"                 CONVERT(DATE, pi.pedidoinversionfechamodificacion, 106),  "+
+				"                 103)  "+
 				"                 ELSE ''  "+
 				"               END                     AS FechaModificacion,  "+
 				"               CASE  "+
