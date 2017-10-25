@@ -2095,7 +2095,12 @@ public class InversionBusinessImpl implements InversionBusiness{
 		mapEventoFacturaProveedor.put("FechaModificacion", "");
 		mapEventoFacturaProveedor.put("UsuarioNombre", "");
 		mapEventoFacturaProveedor.put("Referencia", "");
-		
+		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
+			if(!Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
+				mapEventoFacturaProveedor.put("EstadoSolicitud", "NO APLICA");
+				return mapEventoFacturaProveedor;
+			}
+		}		
 		if(listaComprobantes!=null&&listaComprobantes.size()>0){
 			mapEventoFacturaProveedor.put("EstadoSolicitud", "REGISTRADA");
 			String[] listaNroComprobantes = new String[listaComprobantes.size()];
@@ -2108,11 +2113,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 			}
 			mapEventoFacturaProveedor.put("Referencia", StringUtils.join(listaNroComprobantes,","));
 		}
-		if(Constantes.TipoInversion.ADQUISICION_COD.equals(inversion.getTipoInversion())){
-			if(!Constantes.Persona.TIPO_DOCUMENTO_RUC_ID.equals(inversion.getPropietarioTipoDocId())){
-				mapEventoFacturaProveedor.put("EstadoSolicitud", "NO APLICA");
-			}
-		}
+
 		return mapEventoFacturaProveedor;
 	}
 
