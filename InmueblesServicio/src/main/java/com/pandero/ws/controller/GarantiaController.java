@@ -221,8 +221,8 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 	}
 	
 	private static final int BUFFER_SIZE = 4096;
-	@RequestMapping(value = "descargaDatosSeguro/{seguroId}", method = RequestMethod.GET)
-	public @ResponseBody void descargaDatosSeguro(@PathVariable(value="seguroId") String seguroId, HttpServletRequest request,
+	@RequestMapping(value = "descargaDatosSeguro/{seguroId}/{fechaIni}/{fechaFin}", method = RequestMethod.GET)
+	public @ResponseBody void descargaDatosSeguro(@PathVariable(value="seguroId") String seguroId,@PathVariable(value="fechaIni") String fechaIni,@PathVariable(value="fechaFin") String fechaFin, HttpServletRequest request,
             HttpServletResponse response){
 		LOG.info("###.descargaDatosSeguro seguroId:"+seguroId);
 		List<Map<String,Object>> result = null;
@@ -231,7 +231,9 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 				Map<String,Object> params = new HashMap<String,Object>();
 				params.put("seguroId", seguroId);
 				result = garantiaBusiness.obtenerDatosDescargaSeguro(params);
-				File downloadFile = UtilExcel.createExcelFile(result, "seguros", "seguros.xlsx");
+				params.put("fechaIni", fechaIni);
+				params.put("fechaFin", fechaFin);
+				File downloadFile = garantiaBusiness.obtenerArchivoDescargaSeguro(result, params);
 				FileInputStream inputStream = new FileInputStream(downloadFile);
 		         
 		        // get MIME type of the file
@@ -262,6 +264,7 @@ private static final Logger LOG = LoggerFactory.getLogger(GarantiaController.cla
 		        inputStream.close();
 		        outStream.close();
 			} catch (Exception e) {
+				LOG.error(e.getMessage());
 			}
 		}
 	}

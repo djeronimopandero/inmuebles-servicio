@@ -1,7 +1,11 @@
 package com.pandero.ws.business.impl;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import com.pandero.ws.service.GarantiaService;
 import com.pandero.ws.service.InversionService;
 import com.pandero.ws.service.PedidoService;
 import com.pandero.ws.util.ServiceRestTemplate;
+import com.pandero.ws.util.UtilExcel;
 
 @Service
 public class GarantiaBusinessImpl implements GarantiaBusiness{
@@ -192,8 +197,41 @@ public class GarantiaBusinessImpl implements GarantiaBusiness{
 		List<Map<String,Object>> resultado = new ArrayList<Map<String,Object>>();
 		Map<String,Object> out = liquidacionDao.executeProcedure(params, "USP_CRE_obtenerDatosDescargaSeguroInmuebles");
 		List lout = (List)out.get("#result-set-1");
+		if(!lout.isEmpty()){
 		resultado.add((Map<String,Object>)lout.get(0));
+		}		
 		return resultado;
+	}
+	
+	public File obtenerArchivoDescargaSeguro(List<Map<String,Object>> result, Map<String,Object> params) throws Exception{
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+		String nombreArchivo = "";
+		String fechaIni = String.valueOf(params.get("fechaIni"));
+		String fechaFin = String.valueOf(params.get("fechaFin"));
+		if(!result.isEmpty()){
+			Map<String,Object> seguro = result.get(0);
+			nombreArchivo = "Trama_alta_" + seguro.get("NOMBRE") + "_" + seguro.get("NUMEROCONTRATO");
+			seguro.remove("NUMEROCONTRATO");
+			if("".equals(seguro.get("FECINIVIG"))){
+				seguro.put("FECINIVIG", fechaIni.replaceAll("-", "/"));
+				seguro.put("FECFINVIG", fechaFin.replaceAll("-", "/"));
+				seguro.put("PRIMAANUAL", Double.parseDouble(String.valueOf(seguro.get("PRIMAANUAL"))) * getMonthsDifference(sdf.parse(fechaIni),sdf.parse(fechaFin)));
+			}
+		}
+		
+		return UtilExcel.createExcelFile(result, nombreArchivo, nombreArchivo + ".xlsx");
+	}
+	
+	public static final int getMonthsDifference(Date dateFrom, Date dateTo) {
+		Calendar calendarFrom = new GregorianCalendar();
+		calendarFrom.setTime(dateFrom);
+		
+		Calendar calendarTo = new GregorianCalendar();
+		calendarTo.setTime(dateTo);
+		
+	    int m1 = calendarFrom.get(Calendar.YEAR) * 12 + calendarFrom.get(Calendar.MONTH);
+	    int m2 = calendarTo.get(Calendar.YEAR) * 12 + calendarTo.get(Calendar.MONTH);
+	    return m2 - m1 + 1;
 	}
 	
 }

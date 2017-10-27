@@ -1,5 +1,6 @@
 package com.pandero.ws.business;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -19,5 +20,7 @@ public interface GarantiaBusiness {
 	public Map<String, Object> renovarSeguro(Map<String, Object> params)
 			throws Exception;
 	public List<Map<String,Object>> obtenerDatosDescargaSeguro(Map<String,Object> params)throws Exception;
+	
+	public File obtenerArchivoDescargaSeguro(List<Map<String,Object>> result, Map<String,Object> params) throws Exception;
 	
 }
