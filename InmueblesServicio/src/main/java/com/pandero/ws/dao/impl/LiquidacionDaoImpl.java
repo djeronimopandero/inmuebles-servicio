@@ -49,7 +49,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 		call.withProcedureName("USP_LOG_Inmb_ObtenerLiquidacionInversion"); // EN .net USP_LOG_Inmb_ObtenerLiquidacionInversionDetalle
 		call.withoutProcedureColumnMetaDataAccess();
 		call.addDeclaredParameter(new SqlParameter("@NumeroInversion", Types.VARCHAR));
-		call.returningResultSet("liquidacion", new LiquidacionMapper());
+		call.returningResultSet("liquidacion", new LiquidacionPorInversionMapper());
 		SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
 		.addValue("@NumeroInversion", nroInversion);
 		Map<String, Object> mapResultado = call.execute(sqlParameterSource);
@@ -120,6 +120,26 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			e.setLiquidacionDestino(rs.getString("LiquidacionDestino"));
 			e.setLiquidacionEstado(rs.getString("LiquidacionEstado"));
 			e.setNroArmada(rs.getInt("NroArmada"));
+			return e;		    
+			}
+		}
+
+	private static final class LiquidacionPorInversionMapper implements RowMapper<LiquidacionSAF>{
+		public LiquidacionSAF mapRow(ResultSet rs, int rowNum) throws SQLException {			
+			LiquidacionSAF e = new LiquidacionSAF();	
+			e.setPedidoID(rs.getInt("PedidoID"));
+			e.setPedidoInversionID(rs.getInt("PedidoInversionID"));
+			e.setLiquidacionNumero(rs.getString("LiquidacionNumero"));
+			e.setLiquidacionTipo(rs.getString("LiquidacionTipo"));
+			e.setProveedorID(rs.getInt("ProveedorID"));
+			e.setLiquidacionTipoDocumento(rs.getString("LiquidacionTipoDocumento"));
+			e.setContratoID(rs.getInt("ContratoID"));
+			e.setMonedaID(rs.getString("MonedaID"));
+			e.setLiquidacionImporte(rs.getDouble("LiquidacionImporte"));
+			e.setLiquidacionOrigen(rs.getString("LiquidacionOrigen"));
+			e.setLiquidacionDestino(rs.getString("LiquidacionDestino"));
+			e.setLiquidacionEstado(rs.getString("LiquidacionEstado"));
+			e.setNroArmada(rs.getInt("NroArmada"));
 			e.setLiquidacionPagoTesoreria(rs.getString("LiquidacionPagoTesoreria"));
 			e.setLiquidacionFecha(rs.getString("Fecha"));
 			e.setUsuarioIdCreacion(rs.getInt("UsuarioIDCreacion"));
@@ -129,6 +149,7 @@ public class LiquidacionDaoImpl implements LiquidacionDao {
 			}
 		}
 
+	
 	@Override
 	public String obtenerCorrelativoLiquidacionSAF(String pedidoId) throws Exception{
 		String nroCorrelativo = null;
