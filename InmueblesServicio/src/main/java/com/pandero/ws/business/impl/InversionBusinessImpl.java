@@ -2049,10 +2049,6 @@ public class InversionBusinessImpl implements InversionBusiness{
 				listaEventosSAF.add(mapEventoLiquidacion);								
 			}
 			
-			if(!((String)mapEventoLiquidacion.get("EstadoSolicitud")).equals("DESEMBOLSADO")){
-				listaEventosSAF.remove(listaEventosSAF.size()-1);
-			}
-			
 		}
 		
 		return listaEventosSAF;
