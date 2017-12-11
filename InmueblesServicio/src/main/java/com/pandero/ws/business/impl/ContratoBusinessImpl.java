@@ -74,6 +74,8 @@ public class ContratoBusinessImpl implements ContratoBusiness {
 		String tokenCaspio = ServiceRestTemplate.obtenerTokenCaspio();
 		contratoService.setTokenCaspio(tokenCaspio);
 		personaService.setTokenCaspio(tokenCaspio);
+		pedidoService.setTokenCaspio(tokenCaspio);
+		inversionService.setTokenCaspio(tokenCaspio);
 		
 		ResultadoBean resultadoBean = null;
 		try {
