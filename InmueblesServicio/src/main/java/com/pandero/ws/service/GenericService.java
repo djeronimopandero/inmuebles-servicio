@@ -32,6 +32,8 @@ public abstract class GenericService {
 	public String tableseguro;
 	@Value("${url.service.view.tablaPedidoInversion}")
 	public String viewPedidoInversion;
+	@Value("${url.service.view.tablaPedidoInversionCP}")
+	public String viewPedidoInversionCP;
 
 	public abstract void actualizarTablaCaspio(Map<String, Object> body,
 			String tableURL, String where) throws Exception;

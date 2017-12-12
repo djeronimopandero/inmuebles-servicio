@@ -42,4 +42,5 @@ public interface InversionService {
 	
 	public List<ComprobanteCaspio> getComprobantes(Integer inversionId) throws Exception;
 	
+	public Inversion obtenerInversionCaspioPorNroConsultaPedido(String nroInversion) throws Exception;
 }
