@@ -41,6 +41,9 @@ public class InversionServiceImpl implements InversionService {
 	@Value("${url.service.view.tablaDetalleInversion}")
 	private String viewTablaDetalleInversionURL;
 	
+	@Value("${url.service.view.tablaDetalleInversionCP}")
+	private String viewTablaDetalleInversionCPURL;
+	
 	@Value("${url.service.table.inversionRequisito}")
 	private String tableInversionRequisitoURL;
 	
@@ -456,6 +459,32 @@ public class InversionServiceImpl implements InversionService {
 		
         ServiceRestTemplate.putForObject(restTemplate,tokenCaspio,actualizarPedidoURL,Object.class,request,serviceWhere);	
 		return UtilEnum.ESTADO_OPERACION.EXITO.getCodigo();
+	}
+	
+	public Inversion obtenerInversionCaspioPorNroConsultaPedido(String nroInversion) throws Exception {
+		Inversion inversion = null;
+		String serviceWhere = "{\"where\":\"NroInversion='" + nroInversion + "'\"}";		
+		String obtenerInversionesxPedidoURL = viewTablaDetalleInversionCPURL+Constantes.Service.URL_WHERE;
+		
+        Object jsonResult=ServiceRestTemplate.getForObject(restTemplate,tokenCaspio,obtenerInversionesxPedidoURL,Object.class,null,serviceWhere);
+     	String response = JsonUtil.toJson(jsonResult);	     	
+        if(response!=null && !response.isEmpty()){
+	        Map<String, Object> responseMap = JsonUtil.jsonToMap(response);
+	        if(responseMap!=null){
+	        	Object jsonResponse = responseMap.get("Result");
+	        	if(jsonResponse!=null){        		
+	        		List mapInversiones = JsonUtil.fromJson(JsonUtil.toJson(jsonResponse), ArrayList.class);
+	        		if(mapInversiones!=null && mapInversiones.size()>0){
+	        			for(Object bean : mapInversiones){
+	        				String beanString = JsonUtil.toJson(bean);
+	        				inversion =  JsonUtil.fromJson(beanString, Inversion.class);			
+	        			}
+	        		}        		
+	        	}
+	        }
+	    }
+
+		return inversion;
 	}
 	
 }
