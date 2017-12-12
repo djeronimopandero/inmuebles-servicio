@@ -1993,10 +1993,14 @@ public class InversionBusinessImpl implements InversionBusiness{
 	}
 
 	@Override
-	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception {
+	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido, boolean esConsultaPedido) throws Exception {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("where", "Pedido_NroPedido='" + nroPedido + "'");
-		return genericService.obtenerTablaCaspio(genericService.viewPedidoInversion, JsonUtil.toJson(params));
+		String fuente = genericService.viewPedidoInversion;
+		if(esConsultaPedido){
+			fuente = genericService.viewPedidoInversionCP;
+		}
+		return genericService.obtenerTablaCaspio(fuente, JsonUtil.toJson(params));
 		
 	}
 
@@ -2007,7 +2011,7 @@ public class InversionBusinessImpl implements InversionBusiness{
 		inversionService.setTokenCaspio(tokenCaspio);
 		pedidoService.setTokenCaspio(tokenCaspio);
 		
-        Inversion inversion= inversionService.obtenerInversionCaspioPorNro(nroInversion);
+        Inversion inversion= inversionService.obtenerInversionCaspioPorNroConsultaPedido(nroInversion);
         List<Contrato> listaContrato = pedidoService.obtenerContratosxPedidoCaspio(String.valueOf(inversion.getPedidoId()));
         String[] arrayContratos = new String[listaContrato.size()];
         int i = 0;
