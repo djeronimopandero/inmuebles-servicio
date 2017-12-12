@@ -61,7 +61,7 @@ public interface InversionBusiness {
 	
 	public void enviarCorreoRegistroDesembolso(String nroInversion, String nroArmada ,String parcial) throws Exception;
 	
-	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido) throws Exception;
+	public List<Map<String,Object>> getListaInversionPorNroPedido(String nroPedido, boolean esConsultaPedido) throws Exception;
 
 	public List<Map<String,Object>> consultaEventoInversion(String nroInversion) throws Exception;
 }
